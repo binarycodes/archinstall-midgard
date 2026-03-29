@@ -109,6 +109,8 @@ wayland:
     - wl-clipboard
     - foot
     - xdg-desktop-portal-wlr
+    - greetd
+    - greetd-tuigreet
 
 pacman_keys:
     - key: B929081F184DE398E1487552FF8D24F0A3FC59A6
@@ -126,3 +128,4 @@ services_to_enable:
     - docker
     - iptables
     - rtkit-daemon
+    - greetd
