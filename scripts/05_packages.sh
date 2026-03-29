@@ -111,4 +111,8 @@ install_aur_packages "aur_packages"
 import_pacman_keys
 install_url_packages
 
+# restore configs that may have been overwritten by package installs
+CONFIG_DIR="$(dirname "$0")/../config"
+sudo rsync -av "$CONFIG_DIR"/ /
+
 enable_services
