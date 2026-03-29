@@ -120,7 +120,6 @@ url_packages:
 aur_packages:
     - ttf-monaco
     - ttf-ms-fonts
-    - ttf-qurancomplex-fonts
 
 services_to_enable:
     - bluetooth
