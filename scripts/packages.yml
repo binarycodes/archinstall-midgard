@@ -1,4 +1,23 @@
 ---
+pacstrap:
+    - base
+    - base-devel
+    - linux
+    - linux-firmware
+    - linux-headers
+    - intel-ucode
+    - btrfs-progs
+
+post_chroot:
+    - efibootmgr
+    - iwd
+    - linux-lts
+    - linux-lts-headers
+    - openssh
+    - sudo
+    - yq
+    - zsh
+
 package_dependencies:
     - iptables # for docker port forwarding
     - go # for yay
