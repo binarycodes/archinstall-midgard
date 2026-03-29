@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PACKAGES_FILE="$(dirname "$0")/packages.yml"
-PACKAGES=$(sed -n '/^pacstrap:/,/^[^ ]/p' "$PACKAGES_FILE" | grep '^\s*-' | sed 's/\s*-\s*//')
+PACKAGES=$(yq -r '.pacstrap[]' "$PACKAGES_FILE")
 
 mkdir -p /mnt/etc/
 echo "KEYMAP=us" >> /mnt/etc/vconsole.conf
