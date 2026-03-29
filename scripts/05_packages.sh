@@ -113,6 +113,6 @@ install_url_packages
 
 # restore configs that may have been overwritten by package installs
 CONFIG_DIR="$(dirname "$0")/../config"
-sudo rsync -av "$CONFIG_DIR"/ /
+sudo rsync -av --no-owner --no-group "$CONFIG_DIR"/ /
 
 enable_services

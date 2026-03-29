@@ -50,7 +50,7 @@ create_user() {
 copy_configs() {
     local config_dir
     config_dir="$(dirname "$0")/../config"
-    rsync -av "$config_dir"/ /
+    rsync -av --no-owner --no-group "$config_dir"/ /
 }
 
 copy_configs
