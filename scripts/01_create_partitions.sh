@@ -17,7 +17,7 @@ sgdisk -n 3:0:0 -t 3:"$LINUX_PARTITION_TYPE" "$DISK"
 
 mkfs.fat -F32 "$EFI"
 mkswap "$SWAP"
-mkfs.btrfs "$ROOT"
+mkfs.btrfs -f "$ROOT"
 
 mount "$ROOT" /mnt
 mount --mkdir "$EFI" /mnt/boot
