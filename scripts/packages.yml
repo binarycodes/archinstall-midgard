@@ -1,0 +1,92 @@
+---
+package_dependencies:
+    - iptables # for docker port forwarding
+    - go # for yay
+
+basic_packages:
+    - emacs
+    - gnu-netcat
+    - man-db
+    - man-pages
+    - openssh
+    - pacman-contrib
+    - pkgfile
+    - rsync
+    - stow
+    - texinfo
+    - unzip
+    - vim
+    - zsh
+    - zsh-autosuggestions
+
+essential_drivers:
+    - bluez
+    - bluez-utils
+    - inxi
+    - pavucontrol
+    - pipewire
+    - pipewire-alsa
+    - pipewire-jack
+    - pipewire-pulse
+    - rtkit
+    - sof-firmware
+    - solaar
+
+dev_packages:
+    - ansible
+    - dbeaver
+    - direnv
+    - docker
+    - docker-compose
+    - git
+    - intellij-idea-community-edition
+    - jdk21-openjdk
+    - maven
+    - packer
+    - terraform
+
+fonts:
+    - freetype2
+    - noto-fonts
+    - otf-libertinus
+    - otf-overpass
+    - tex-gyre-fonts
+    - ttf-bitstream-vera
+    - ttf-caladea
+    - ttf-carlito
+    - ttf-dejavu
+    - ttf-freefont
+    - ttf-inconsolata
+    - ttf-jetbrains-mono
+    - ttf-jetbrains-mono-nerd
+    - ttf-liberation
+    - ttf-libertinus
+    - ttf-opensans
+    - ttf-roboto
+    - ttf-ubuntu-font-family
+
+applications:
+    - btop
+    - cyme
+    - fastfetch
+    - firefox
+    - usbutils
+
+window_managers:
+    - kde-applications-meta
+    - plasma-meta
+
+url_packages:
+    - https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
+
+aur_packages:
+    - ttf-monaco
+    - ttf-ms-fonts
+    - ttf-qurancomplex-fonts
+
+services_to_enable:
+    - bluetooth
+    - docker
+    - iptables
+    - rtkit-daemon
+    - sddm
