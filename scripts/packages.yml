@@ -7,6 +7,8 @@ pacstrap:
     - linux-headers
     - intel-ucode
     - btrfs-progs
+    - rsync
+    - yq
 
 post_chroot:
     - efibootmgr
@@ -15,7 +17,6 @@ post_chroot:
     - linux-lts-headers
     - openssh
     - sudo
-    - yq
     - zsh
 
 package_dependencies:

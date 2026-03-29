@@ -20,12 +20,14 @@ configure_locale() {
 
 configure_system() {
     echo "$SYSTEM_HOSTNAME" > /etc/hostname
-    echo "export SUDO_EDITOR=/usr/bin/vim" > /etc/profile.d/sudo_editor.sh
 }
 
 install_packages() {
-    pacman --noconfirm -S efibootmgr openssh iwd sudo zsh ansible yq
-    pacman --noconfirm -S linux-lts linux-lts-headers
+    local packages_file
+    packages_file="$(dirname "$0")/packages.yml"
+    local packages
+    packages=$(yq -r '.post_chroot[]' "$packages_file")
+    pacman --noconfirm -S $packages
     mkinitcpio -P
 }
 
@@ -43,48 +45,20 @@ create_user() {
     useradd -m -G wheel -s /usr/bin/zsh "$USERNAME"
     echo "set password for - $USERNAME"
     passwd "$USERNAME"
-
-    echo "%wheel         ALL = (root) NOPASSWD: ALL" > /etc/sudoers.d/01_nopasswd_wheel
 }
 
-configure_networking() {
-    cat << EOF > /etc/iwd/main.conf
-[General]
-EnableNetworkConfiguration=false
-
-[Network]
-NameResolvingService=systemd
-EOF
-
-    cat << EOF > /etc/systemd/network/20-wired.network
-[Match]
-Name=en*
-
-[Network]
-DHCP=yes
-
-[DHCPv4]
-RouteMetric=100
-EOF
-
-    cat << EOF > /etc/systemd/network/25-wireless.network
-[Match]
-Name=wlan*
-
-[Network]
-DHCP=yes
-
-[DHCPv4]
-RouteMetric=600
-EOF
+copy_configs() {
+    local config_dir
+    config_dir="$(dirname "$0")/../config"
+    rsync -av "$config_dir"/ /
 }
 
+copy_configs
 configure_time
 configure_locale
 configure_system
 install_packages
 enable_services
 create_user
-configure_networking
 
 echo "remember to create efi boot entries"
