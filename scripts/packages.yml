@@ -110,6 +110,10 @@ wayland:
     - foot
     - xdg-desktop-portal-wlr
 
+pacman_keys:
+    - key: B929081F184DE398E1487552FF8D24F0A3FC59A6
+      server: keyserver.ubuntu.com
+
 url_packages:
     - https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
 

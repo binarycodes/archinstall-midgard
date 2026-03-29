@@ -26,6 +26,24 @@ install_packages() {
     sudo pacman --noconfirm --needed -S $packages
 }
 
+import_pacman_keys() {
+    local count
+    count=$(yq '.pacman_keys | length' "$VARS_FILE")
+
+    if [ "$count" -eq 0 ]; then
+        return
+    fi
+
+    for i in $(seq 0 $((count - 1))); do
+        local key server
+        key=$(yq -r ".pacman_keys[$i].key" "$VARS_FILE")
+        server=$(yq -r ".pacman_keys[$i].server" "$VARS_FILE")
+        echo "Importing key: $key from $server"
+        sudo pacman-key --keyserver "$server" --recv-keys "$key"
+        sudo pacman-key --lsign-key "$key"
+    done
+}
+
 install_url_packages() {
     local urls
     urls=$(parse_packages "url_packages")
@@ -90,6 +108,7 @@ install_packages "wayland"
 
 install_yay
 install_aur_packages "aur_packages"
+import_pacman_keys
 install_url_packages
 
 enable_services
