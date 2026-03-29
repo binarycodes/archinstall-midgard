@@ -92,9 +92,21 @@ applications:
     - firefox
     - usbutils
 
-window_managers:
-    - kde-applications-meta
-    - plasma-meta
+wayland:
+    - wayland
+    - xorg-xwayland
+    - sway
+    - swaybg
+    - swayidle
+    - swaylock
+    - waybar
+    - wofi
+    - mako
+    - grim
+    - slurp
+    - wl-clipboard
+    - foot
+    - xdg-desktop-portal-wlr
 
 url_packages:
     - https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
@@ -109,4 +121,3 @@ services_to_enable:
     - docker
     - iptables
     - rtkit-daemon
-    - sddm

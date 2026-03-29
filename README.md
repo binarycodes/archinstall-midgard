@@ -1,6 +1,6 @@
 # archinstall-midgard
 
-Custom Arch Linux installation scripts for a ThinkPad setup. Uses EFISTUB (no bootloader), btrfs, systemd-networkd with iwd for wifi, and KDE Plasma.
+Custom Arch Linux installation scripts for a ThinkPad setup. Uses EFISTUB (no bootloader), btrfs, and systemd-networkd with iwd for wifi.
 
 ## Structure
 

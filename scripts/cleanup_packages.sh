@@ -11,7 +11,7 @@ PACKAGE_SECTIONS=(
     "dev_packages"
     "fonts"
     "applications"
-    "window_managers"
+    "wayland"
     "aur_packages"
 )
 

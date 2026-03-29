@@ -86,7 +86,7 @@ install_packages "essential_drivers"
 install_packages "dev_packages"
 install_packages "fonts"
 install_packages "applications"
-install_packages "window_managers"
+install_packages "wayland"
 
 install_yay
 install_aur_packages "aur_packages"
