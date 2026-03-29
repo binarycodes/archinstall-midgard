@@ -2,11 +2,13 @@
 pacstrap:
     - base
     - base-devel
+    - btrfs-progs
+    - git
+    - intel-ucode
+    - less
     - linux
     - linux-firmware
     - linux-headers
-    - intel-ucode
-    - btrfs-progs
     - rsync
     - yq
 
