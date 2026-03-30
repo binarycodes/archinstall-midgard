@@ -5,7 +5,6 @@ VARS_FILE="$(dirname "$0")/packages.yml"
 PACKAGE_SECTIONS=(
     "pacstrap"
     "post_chroot"
-    "package_dependencies"
     "basic_packages"
     "essential_drivers"
     "dev_packages"

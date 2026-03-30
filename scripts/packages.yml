@@ -39,6 +39,7 @@ basic_packages:
     - rsync
     - stow
     - texinfo
+    - tree
     - unzip
     - vim
     - zsh
