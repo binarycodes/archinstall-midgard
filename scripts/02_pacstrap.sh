@@ -9,4 +9,3 @@ echo "KEYMAP=us" >> /mnt/etc/vconsole.conf
 pacstrap -K /mnt $PACKAGES
 
 genfstab -U /mnt >> /mnt/etc/fstab
-cp -R /root/archinstall-midgard /mnt/root/
