@@ -4,6 +4,11 @@ DISK=/dev/nvme0n1
 ROOT="${DISK}p3"
 ROOT_UUID=$(blkid "$ROOT" -s UUID -o value)
 
+# delete existing Arch Linux boot entries
+while read -r bootnum; do
+	efibootmgr --delete-bootnum --bootnum "$bootnum"
+done < <(efibootmgr | grep "Arch Linux" | sed 's/Boot\([0-9A-F]*\).*/\1/')
+
 efibootmgr --create \
 	--disk "$DISK" --part 1 \
 	--label "Arch Linux" \
