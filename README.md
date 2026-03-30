@@ -4,6 +4,8 @@ Custom Arch Linux installation scripts for a ThinkPad setup. Uses EFISTUB (no bo
 
 ## Structure
 
+- `scripts/config.sh` -- system configuration variables (disk, username, locale, etc.)
+- `scripts/install.sh` -- main installer that runs all steps in order
 - `scripts/` -- installation and maintenance scripts, numbered by execution order
 - `scripts/packages.yml` -- single source of truth for all packages
 - `config/` -- system config files mirroring the filesystem layout (copied to `/` during install)
@@ -18,24 +20,13 @@ git clone https://github.com/binarycodes/archinstall-midgard.git /root/archinsta
 cd /root/archinstall-midgard
 ```
 
-Then run the scripts in order:
+Edit `scripts/config.sh` to match your system, then run the installer:
 
 ```bash
-# 1. Partition, format, and mount the disk
-bash scripts/01_create_partitions.sh
-
-# 2. Install base system via pacstrap
-bash scripts/02_pacstrap.sh
-
-# 3. Chroot and configure the system
-arch-chroot /mnt bash /root/archinstall-midgard/scripts/03_post_chroot.sh
-
-# 4. Create UEFI boot entries (still in chroot)
-arch-chroot /mnt bash /root/archinstall-midgard/scripts/04_create_boot_entries.sh
-
-# 5. Reboot, log in as your user, then install packages and enable services
-bash /root/archinstall-midgard/scripts/05_packages.sh
+bash scripts/install.sh
 ```
+
+This will partition the disk, install the base system, chroot to configure and create boot entries, and install all packages. You will be prompted to set passwords for root and your user during the process.
 
 ## Maintenance
 
@@ -49,4 +40,4 @@ bash /root/archinstall-midgard/scripts/cleanup_packages.sh
 
 ## Configuration
 
-Edit the variables at the top of each script and `scripts/packages.yml` to match your system before running. System config files live in `config/` and are copied to `/` during install and after package installs.
+Edit `scripts/config.sh` and `scripts/packages.yml` to match your system before running. System config files live in `config/` and are copied to `/` during install and after package installs.

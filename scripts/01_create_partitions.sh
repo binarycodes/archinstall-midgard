@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
 EFI_PARTITION_TYPE=ef00

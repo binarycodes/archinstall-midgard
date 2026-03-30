@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
 ROOT_UUID=$(blkid "$ROOT" -s UUID -o value)

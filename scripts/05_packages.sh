@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 if [ "$EUID" -eq 0 ]; then
     echo "Error: Do not run this script as root."
@@ -80,9 +81,7 @@ install_yay() {
     local tmpdir
     tmpdir=$(mktemp -d)
     git clone https://aur.archlinux.org/yay-bin.git "$tmpdir/yay-bin"
-    cd "$tmpdir/yay-bin"
-    makepkg -si --noconfirm
-    cd -
+    (cd "$tmpdir/yay-bin" && makepkg -si --noconfirm)
     rm -rf "$tmpdir"
 }
 

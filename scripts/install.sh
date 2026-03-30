@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="/root/archinstall-midgard/scripts"
 source "$SCRIPT_DIR/config.sh"

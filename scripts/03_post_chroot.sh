@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
 configure_time() {
@@ -55,5 +56,3 @@ configure_system
 install_packages
 enable_services
 create_user
-
-echo "remember to create efi boot entries"
