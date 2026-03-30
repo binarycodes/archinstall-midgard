@@ -10,29 +10,32 @@ pacstrap:
     - linux-firmware
     - linux-headers
     - rsync
+    - vim
     - yq
 
 post_chroot:
     - efibootmgr
     - iwd
+    - iptables-nft
+    - mkinitcpio
     - linux-lts
     - linux-lts-headers
     - openssh
     - sudo
     - zsh
 
-package_dependencies:
-    - iptables # for docker port forwarding
-    - go # for yay
-
 basic_packages:
     - emacs
-    - gnu-netcat
+    - iperf3
+    - ipmitool
     - man-db
     - man-pages
+    - nfs-utils
+    - openbsd-netcat
     - openssh
     - pacman-contrib
     - pkgfile
+    - ripgrep
     - rsync
     - stow
     - texinfo
@@ -55,17 +58,26 @@ essential_drivers:
     - solaar
 
 dev_packages:
+    - age
     - ansible
+    - ansible-lint
     - dbeaver
+    - delve #go debugger
     - direnv
     - docker
     - docker-compose
     - git
+    - go
+    - golangci-lint
     - intellij-idea-community-edition
     - jdk21-openjdk
+    - jq
     - maven
+    - opentofu
     - packer
     - terraform
+    - tflint
+    - yq
 
 fonts:
     - freetype2
@@ -78,7 +90,6 @@ fonts:
     - ttf-carlito
     - ttf-dejavu
     - ttf-freefont
-    - ttf-inconsolata
     - ttf-jetbrains-mono
     - ttf-jetbrains-mono-nerd
     - ttf-liberation
@@ -88,29 +99,33 @@ fonts:
     - ttf-ubuntu-font-family
 
 applications:
+    - bitwarden
     - btop
+    - cups
+    - cups-pdf
     - cyme
     - fastfetch
-    - firefox
+    - qutebrowser
     - usbutils
 
 wayland:
-    - wayland
-    - xorg-xwayland
+    - foot
+    - greetd
+    - greetd-tuigreet
+    - grim
+    - mako
+    - slurp
     - sway
     - swaybg
     - swayidle
     - swaylock
     - waybar
-    - wofi
-    - mako
-    - grim
-    - slurp
+    - wayland
+    - wev
     - wl-clipboard
-    - foot
+    - wofi
     - xdg-desktop-portal-wlr
-    - greetd
-    - greetd-tuigreet
+    - xorg-xwayland
 
 pacman_keys:
     - key: B929081F184DE398E1487552FF8D24F0A3FC59A6
@@ -120,12 +135,19 @@ url_packages:
     - https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
 
 aur_packages:
+    - brother-mfc-l2860dwe
+    - google-chrome
+    - infisical-bin
+    - terraform-ls-bin
     - ttf-monaco
     - ttf-ms-fonts
+    - winbox
+    - zen-browser-bin
 
 services_to_enable:
     - bluetooth
     - docker
-    - iptables
-    - rtkit-daemon
     - greetd
+    - iptables
+    - iwd
+    - rtkit-daemon

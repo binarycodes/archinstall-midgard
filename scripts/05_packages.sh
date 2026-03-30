@@ -98,7 +98,6 @@ enable_services() {
 
 sudo pacman -Syu --noconfirm
 
-install_packages "package_dependencies"
 install_packages "basic_packages"
 install_packages "essential_drivers"
 install_packages "dev_packages"
