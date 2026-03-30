@@ -1,10 +1,5 @@
 #!/bin/bash
-
-USERNAME="sujoy"
-SYSTEM_HOSTNAME="midgard"
-TIMEZONE="Europe/Helsinki"
-LOCALE="en_US.UTF-8"
-KEYMAP="us"
+source "$(dirname "$0")/config.sh"
 
 configure_time() {
     ln -sf /usr/share/zoneinfo/"$TIMEZONE" /etc/localtime

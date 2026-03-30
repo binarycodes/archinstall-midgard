@@ -1,7 +1,6 @@
 #!/bin/bash
+source "$(dirname "$0")/config.sh"
 
-DISK=/dev/nvme0n1
-ROOT="${DISK}p3"
 ROOT_UUID=$(blkid "$ROOT" -s UUID -o value)
 
 # delete existing Arch Linux boot entries

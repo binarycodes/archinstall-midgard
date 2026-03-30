@@ -1,9 +1,5 @@
 #!/bin/bash
-
-DISK=/dev/nvme0n1
-EFI="${DISK}p1"
-SWAP="${DISK}p2"
-ROOT="${DISK}p3"
+source "$(dirname "$0")/config.sh"
 
 EFI_PARTITION_TYPE=ef00
 SWAP_PARTITION_TYPE=8200
