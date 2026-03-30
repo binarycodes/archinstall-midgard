@@ -5,10 +5,12 @@ pacstrap:
     - btrfs-progs
     - git
     - intel-ucode
+    - iptables-nft
     - less
     - linux
     - linux-firmware
     - linux-headers
+    - mkinitcpio
     - rsync
     - vim
     - yq
@@ -16,8 +18,6 @@ pacstrap:
 post_chroot:
     - efibootmgr
     - iwd
-    - iptables-nft
-    - mkinitcpio
     - linux-lts
     - linux-lts-headers
     - openssh
