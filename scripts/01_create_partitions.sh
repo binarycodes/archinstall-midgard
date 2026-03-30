@@ -2,6 +2,10 @@
 set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
+# unmount any existing mounts from a previous attempt
+swapoff "$SWAP" 2>/dev/null || true
+umount -R /mnt 2>/dev/null || true
+
 EFI_PARTITION_TYPE=ef00
 SWAP_PARTITION_TYPE=8200
 LINUX_PARTITION_TYPE=8300
