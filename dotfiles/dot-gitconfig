@@ -1,0 +1,21 @@
+[user]
+	email = me@binarycodes.io
+	name = Sujoy Das
+	signingkey = /home/sujoy/.ssh/id_github_binarycodes.pub
+[core]
+	sshCommand = ssh -i ~/.ssh/id_github_binarycodes
+	editor = vim
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true
+[rerere]
+	enabled = true
+[pull]
+	rebase = true
+[gpg]
+	format = ssh
+[init]
+	defaultBranch = main
+[alias]
+	llog = log --abbrev-commit --pretty=format:\"%C(magenta)%h %C(red)% G? %Cgreen%ad (%>(15,trunc)%cr)  %Cblue%<(15,trunc)%an %Creset%s %Cred% gD% D\" --date=\"format-local:%Y-%m-%d %H:%M:%S\" --no-merges --author-date-order
