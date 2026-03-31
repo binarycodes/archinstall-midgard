@@ -2,7 +2,7 @@
 set $mod Mod4
 
 # terminal and launcher
-set $term foot
+set $term $TERMINAL
 set $menu wofi --show drun
 
 # appearance
@@ -19,7 +19,7 @@ client.unfocused        #282A36 #282A36 #BFBFBF #282A36   #282A36
 client.urgent           #FF5555 #FF5555 #F8F8F2 #FF5555   #FF5555
 
 # wallpaper
-output * bg #282A36 solid_color
+output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 
 # input
 input type:touchpad {
