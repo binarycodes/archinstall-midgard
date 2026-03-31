@@ -103,7 +103,7 @@ enable_services() {
 
     for service in $services; do
         echo "Enabling $service..."
-        "${cmd[@]}" enable --now "$service"
+        "${cmd[@]}" enable "$service"
     done
 }
 
