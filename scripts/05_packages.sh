@@ -86,12 +86,21 @@ install_yay() {
 }
 
 enable_services() {
+    local section="$1"
+    local system_service="$2"
     local services
-    services=$(parse_packages "services_to_enable")
+    services=$(parse_packages "$section")
+
+    local cmd=(systemctl)
+    if [ "$system_service" = "true" ]; then
+        cmd=(sudo systemctl)
+    else
+        cmd=(systemctl --user)
+    fi
 
     for service in $services; do
         echo "Enabling $service..."
-        sudo systemctl enable --now "$service"
+        "${cmd[@]}" enable --now "$service"
     done
 }
 
@@ -113,4 +122,5 @@ install_url_packages
 CONFIG_DIR="$(dirname "$0")/../config"
 sudo rsync -av --no-owner --no-group "$CONFIG_DIR"/ /
 
-enable_services
+enable_services "system_services" "true"
+enable_services "user_services" "false"
