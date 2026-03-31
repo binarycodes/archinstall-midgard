@@ -24,6 +24,9 @@ arch-chroot /mnt /opt/archinstall-midgard/scripts/04_create_boot_entries.sh
 echo "==> Installing packages..."
 arch-chroot /mnt runuser -u "$USERNAME" -- /opt/archinstall-midgard/scripts/05_packages.sh
 
+echo "==> Setting up user projects..."
+arch-chroot /mnt runuser -u "$USERNAME" -- /opt/archinstall-midgard/scripts/06_setup_user_projects.sh
+
 # clean up
 rm -rf /mnt/opt/archinstall-midgard
 
