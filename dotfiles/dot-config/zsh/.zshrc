@@ -42,7 +42,7 @@ bindkey "^K" history-search-backward
 
 # set up prompt
 NEWLINE=$'\n'
-PROMPT="${NEWLINE}%K{#2E3440}%F{#E5E9F0}$(date +%0H:%M) %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ %f%k ❯ " # nord theme
+PROMPT="%K{#2E3440}%F{#E5E9F0}$(date +%0H:%M) %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ %f%k ❯ " # nord theme
 # PROMPT="${NEWLINE}%K{#32302f}%F{#d5c4a1} $0 %K{#3c3836}%F{#d5c4a1} %n %K{#504945} %~ %f%k ❯ " # warmer theme
 # PROMPT="${NEWLINE}%K{$COL0}%F{$COL1}$(date +%_I:%M%P) %K{$COL0}%F{$COL2} %n %K{$COL3} %~ %f%k ❯ " # pywal colors, from postrun script
 
