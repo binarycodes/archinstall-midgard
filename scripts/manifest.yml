@@ -110,6 +110,7 @@ applications:
     - usbutils
 
 wayland:
+    - brightnessctl
     - foot
     - greetd
     - greetd-tuigreet
