@@ -1,9 +1,10 @@
 # load modules
 zmodload zsh/complist
-autoload -U compinit && compinit
+autoload -U compinit && compinit -d ${XDG_CACHE_HOME}/zcompdump
 autoload -U colors && colors
 
 # cmp opts
+zstyle ':completion::complete:*' cache-path ${XDG_CACHE_HOME}/zcompcache
 zstyle ':completion:*' menu select # tab opens cmp menu
 zstyle ':completion:*' special-dirs true # force . and .. to show in cmp menu
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} ma=0\;33 # colorize cmp menu
@@ -34,7 +35,6 @@ bindkey "^a" beginning-of-line
 bindkey "^e" end-of-line
 bindkey "^k" kill-line
 bindkey "^j" backward-word
-bindkey "^k" forward-word
 bindkey "^H" backward-kill-word
 # ctrl J & K for going up and down in prev commands
 bindkey "^J" history-search-forward
