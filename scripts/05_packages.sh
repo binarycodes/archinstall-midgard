@@ -6,7 +6,7 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
-VARS_FILE="$(dirname "$0")/packages.yml"
+VARS_FILE="$(dirname "$0")/manifest.yml"
 
 parse_packages() {
     local section="$1"

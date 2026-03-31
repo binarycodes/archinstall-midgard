@@ -7,7 +7,7 @@ Custom Arch Linux installation scripts for a ThinkPad setup. Uses EFISTUB (no bo
 - `scripts/config.sh` -- system configuration variables (disk, username, locale, etc.)
 - `scripts/install.sh` -- main installer that runs all steps in order
 - `scripts/` -- installation and maintenance scripts, numbered by execution order
-- `scripts/packages.yml` -- single source of truth for all packages
+- `scripts/manifest.yml` -- single source of truth for all packages
 - `config/` -- system config files mirroring the filesystem layout (copied to `/` during install)
 
 ## Usage
@@ -32,7 +32,7 @@ This will partition the disk, install the base system, chroot to configure and c
 
 To install new packages or re-apply configs, run `05_packages.sh` again.
 
-To find explicitly installed packages not tracked in `packages.yml`:
+To find explicitly installed packages not tracked in `manifest.yml`:
 
 ```bash
 bash /root/archinstall-midgard/scripts/cleanup_packages.sh
@@ -40,4 +40,4 @@ bash /root/archinstall-midgard/scripts/cleanup_packages.sh
 
 ## Configuration
 
-Edit `scripts/config.sh` and `scripts/packages.yml` to match your system before running. System config files live in `config/` and are copied to `/` during install and after package installs.
+Edit `scripts/config.sh` and `scripts/manifest.yml` to match your system before running. System config files live in `config/` and are copied to `/` during install and after package installs.

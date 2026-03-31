@@ -7,6 +7,8 @@ TIMEZONE="Europe/Helsinki"
 LOCALE="en_US.UTF-8"
 KEYMAP="us"
 
+INSTALL_REPO="archinstall-midgard"
+
 DISK=/dev/nvme0n1
 EFI="${DISK}p1"
 SWAP="${DISK}p2"

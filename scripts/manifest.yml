@@ -157,3 +157,6 @@ user_services:
     - pipewire
     - pipewire-pulse
     - wireplumber
+
+git_repos:
+    - git@github.com:binarycodes/archinstall-midgard.git

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VARS_FILE="$(dirname "$0")/packages.yml"
+VARS_FILE="$(dirname "$0")/manifest.yml"
 
 PACKAGE_SECTIONS=(
     "pacstrap"
@@ -27,7 +27,7 @@ if [ -z "$orphaned" ]; then
     exit 0
 fi
 
-echo "Explicitly installed packages not in packages.yml:"
+echo "Explicitly installed packages not in manifest.yml:"
 echo ""
 echo "$orphaned"
 echo ""

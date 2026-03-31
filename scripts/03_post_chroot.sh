@@ -21,7 +21,7 @@ configure_system() {
 
 install_packages() {
     local packages_file
-    packages_file="$(dirname "$0")/packages.yml"
+    packages_file="$(dirname "$0")/manifest.yml"
     local packages
     packages=$(yq -r '.post_chroot[]' "$packages_file")
     # shellcheck disable=SC2086
