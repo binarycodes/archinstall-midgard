@@ -24,6 +24,7 @@ install_packages() {
     fi
 
     echo "Installing $section..."
+    # shellcheck disable=SC2086
     sudo pacman --noconfirm --needed -S $packages
 }
 
@@ -55,6 +56,7 @@ install_url_packages() {
     fi
 
     echo "Installing URL packages..."
+    # shellcheck disable=SC2086
     sudo pacman --noconfirm --needed -U $urls
 }
 
@@ -69,6 +71,7 @@ install_aur_packages() {
     fi
 
     echo "Installing AUR $section..."
+    # shellcheck disable=SC2086
     yay -S --answerclean None --answerdiff None --noconfirm --needed $packages
 }
 

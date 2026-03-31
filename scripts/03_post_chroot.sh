@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+# shellcheck source-path=SCRIPTDIR
 source "$(dirname "$0")/config.sh"
 
 configure_time() {
@@ -23,6 +24,7 @@ install_packages() {
     packages_file="$(dirname "$0")/packages.yml"
     local packages
     packages=$(yq -r '.post_chroot[]' "$packages_file")
+    # shellcheck disable=SC2086
     pacman --noconfirm -S $packages
     mkinitcpio -P
 }

@@ -15,4 +15,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: run shellcheck
-        run: shellcheck scripts/*.sh
+        run: shellcheck -x scripts/*.sh

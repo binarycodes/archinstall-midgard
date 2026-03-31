@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+# shellcheck source-path=SCRIPTDIR
 source "$(dirname "$0")/config.sh"
 
 # unmount any existing mounts from a previous attempt

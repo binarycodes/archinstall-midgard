@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="/root/archinstall-midgard/scripts"
+# shellcheck source-path=SCRIPTDIR
 source "$SCRIPT_DIR/config.sh"
 
 echo "==> Creating partitions..."

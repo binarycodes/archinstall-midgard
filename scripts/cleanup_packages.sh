@@ -31,8 +31,9 @@ echo "Explicitly installed packages not in packages.yml:"
 echo ""
 echo "$orphaned"
 echo ""
-read -p "Remove these packages? [y/N] " confirm
+read -rp "Remove these packages? [y/N] " confirm
 
 if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+    # shellcheck disable=SC2086
     sudo pacman -Rns $orphaned
 fi
