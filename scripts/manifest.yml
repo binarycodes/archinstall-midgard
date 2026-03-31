@@ -159,4 +159,4 @@ user_services:
     - wireplumber
 
 git_repos:
-    - git@github.com:binarycodes/archinstall-midgard.git
+    - https://github.com/binarycodes/archinstall-midgard.git
