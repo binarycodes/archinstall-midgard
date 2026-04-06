@@ -5,7 +5,7 @@ pacstrap:
     - btrfs-progs
     - git
     - intel-ucode
-    - iptables-nft
+    - iptables
     - less
     - linux
     - linux-firmware
