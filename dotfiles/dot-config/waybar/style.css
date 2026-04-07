@@ -1,31 +1,55 @@
+@define-color color00 #2e3440;
+@define-color color01 #3b4252;
+@define-color color02 #434c5e;
+@define-color color03 #4c566a;
+@define-color color04 #d8dee9;
+@define-color color05 #e5e9f0;
+@define-color color06 #eceff4;
+@define-color color07 #8fbcbb;
+@define-color color08 #88c0d0;
+@define-color color09 #81a1c1;
+@define-color color10 #5e81ac;
+@define-color color11 #bf616a;
+@define-color color12 #d08770;
+@define-color color13 #ebcb8b;
+@define-color color14 #a3be8c;
+@define-color color15 #ba8baf;
+
 * {
     font-family: "JetBrainsMono Nerd Font";
-    font-size: 13px;
+    font-size: 14px;
 }
 
 window#waybar {
-    background-color: #282A36;
-    color: #F8F8F2;
+    background-color: @color00;
+    color: @color04;
 }
 
 #workspaces button {
     padding: 0 8px;
-    color: #BFBFBF;
-    border-bottom: 2px solid transparent;
+    color: @color04;
+    border-bottom: 0px solid transparent;
+}
+
+#workspaces button:hover {
+    color: @color00;
+    background: @color13;
 }
 
 #workspaces button.focused {
-    color: #F8F8F2;
-    border-bottom: 2px solid #BD93F9;
+    color: @color01;
+    background: @color14;
+    border-radius: 0;
+    border-bottom: 0px solid transparent;
 }
 
 #workspaces button.urgent {
-    color: #FF5555;
+    color: @color11;
 }
 
 #window {
     padding: 0 12px;
-    color: #BFBFBF;
+    color: @color13;
 }
 
 #network,
