@@ -1,0 +1,243 @@
+#+property: header-args :tangle "init.el"
+#+startup: content indent
+
+* Custom functions
+
+All emacs cache stuff like elpa caches, savehist files, backups, etc should ideally live in the $XDG_CACHE_HOME
+#+begin_src emacs-lisp
+  (defun bc-emacs-cache-dir (subpath)
+    "Return a full path to a subdirectory under XDG_CACHE_HOME."
+    (file-name-concat (getenv "XDG_CACHE_HOME") "emacs" subpath))
+#+end_src
+
+* Ensure required directories are created before use
+#+begin_src emacs-lisp
+  ;; create relevant directories used later in config
+  (make-directory (bc-emacs-cache-dir "history") t)
+  (make-directory (bc-emacs-cache-dir "backup") t)
+  (make-directory (bc-emacs-cache-dir "packages") t)
+#+end_src
+
+* Basic package configuration (use-package)
+#+begin_src emacs-lisp
+  ;; setup packages
+  (require 'package)
+
+  (setopt package-user-dir (bc-emacs-cache-dir "packages"))
+
+  ;; Initialize the package system early
+  (package-initialize)
+
+  ;; elpa servers
+  (setopt package-archives '(("melpa" . "https://melpa.org/packages/")
+                             ("org" . "https://orgmode.org/elpa/")
+                             ("elpa" . "https://elpa.gnu.org/packages/")))
+
+  ;; Set eln-cache dir
+  (when (boundp 'native-comp-eln-load-path)
+    (startup-redirect-eln-cache (bc-emacs-cache-dir "eln-cache")))
+
+  (require 'use-package)
+  (setopt use-package-always-ensure t)
+#+end_src
+
+* Put custom UI configuration in a separate file
+#+begin_src emacs-lisp
+  (setopt custom-file (locate-user-emacs-file (bc-emacs-cache-dir "custom-vars.el")))
+  (load custom-file 'noerror 'nomessage)
+#+end_src
+
+* Backup configuration
+#+begin_src emacs-lisp
+  ;; save history from previous sessions
+  (setopt savehist-file (bc-emacs-cache-dir "history/savehist"))
+  (savehist-mode 1)
+
+  ;; Set the directory for auto-save files
+  (setopt auto-save-list-file-prefix
+        (file-name-concat (bc-emacs-cache-dir "auto-save-list") ".saves-"))
+
+  ;; backup settings
+  (setopt backup-by-copying t
+    	backup-directory-alist `(("." . ,(bc-emacs-cache-dir "backup")))
+    	delete-old-versions t
+    	kept-new-versions 4
+    	kept-old-versions 2
+    	version-control t
+    	)
+#+end_src
+
+* General Emacs UI settings
+** Basic configuration
+#+begin_src emacs-lisp
+  ;; clean startup
+  (setopt inhibit-startup-message t
+  	inhibit-startup-echo-area-message ""
+  	visible-bell t ; flash the screen, when moving out of bounds, ex, pressing up when already at the first line.
+  	blink-cursor-interval 0.7
+  	use-short-answers t
+  	)
+
+  ;; disable fancy gui stuffs, menu et. all and other ui configs
+  (scroll-bar-mode -1) ; disable visible scrollbar
+  (tool-bar-mode -1)   ; disable the toolbar
+  (menu-bar-mode -1)   ; disable the menu bar
+  (tooltip-mode -1)    ; disable tooltips
+  (mouse-avoidance-mode 'banish) ; banish the cursor as soon as i am typing
+#+end_src
+** Themes and Fonts
+#+begin_src emacs-lisp
+  ;; theme
+  (load-theme 'modus-vivendi t)
+
+  ;; fonts/faces
+  (set-face-attribute 'default nil :font "JetBrains Mono" :height 120)
+  (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 120)
+  (set-face-attribute 'variable-pitch nil :font "Roboto" :height 120 :weight 'regular)
+#+end_src
+** Editor UI
+#+begin_src emacs-lisp
+  (fringe-mode '(10 . 0)) ; give some space for the symbols (only of the left)
+  (column-number-mode 't) ; show column number in the modeline
+
+  ;; show line numbers in all modes
+  (global-display-line-numbers-mode t)
+  ;; disable line numbers for some modes
+  (dolist (mode '(org-mode-hook
+    		term-mode-hook
+    		eshell-mode-hook
+    		treemacs-mode-hook
+                  vterm-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+end_src
+* Text editor settings
+** Basic configuration
+#+begin_src emacs-lisp
+  (put 'upcase-region 'disabled nil)
+  (put 'downcase-region 'disabled nil)
+#+end_src
+** Edit grep search results (wgrep)
+#+begin_src emacs-lisp
+  ;; The `wgrep' packages lets us edit the results of a grep search
+  ;; while inside a `grep-mode' buffer.  All we need is to toggle the
+  ;; editable mode, make the changes, and then type C-c C-c to confirm
+  ;; or C-c C-k to abort.
+  (use-package wgrep
+    :ensure t
+    :bind ( :map grep-mode-map
+            ("e" . wgrep-change-to-wgrep-mode)
+            ("C-x C-q" . wgrep-change-to-wgrep-mode)
+            ("C-c C-c" . wgrep-finish-edit)))
+#+end_src
+* Window management
+#+begin_src emacs-lisp
+  (use-package ace-window
+    :ensure t
+    :config (ace-window-display-mode t))
+#+end_src
+* Minibuffer configuration
+** Vertico mode
+#+begin_src emacs-lisp
+  ;; The `vertico' package applies a vertical layout to the minibuffer.
+  ;; It also pops up the minibuffer eagerly so we can see the available
+  ;; options without further interactions.  This package is very fast
+  ;; and "just works", though it also is highly customisable in case we
+  ;; need to modify its behaviour.
+  (use-package vertico
+    :ensure t
+    :config
+    (setopt vertico-cycle t
+            vertico-resize nil)
+    (vertico-mode t))
+#+end_src
+** Marginalia mode
+#+begin_src emacs-lisp
+  ;; The `marginalia' package provides helpful annotations next to
+  ;; completion candidates in the minibuffer.  The information on
+  ;; display depends on the type of content.  If it is about files, it
+  ;; shows file permissions and the last modified date.  If it is a
+  ;; buffer, it shows the buffer's size, major mode, and the like.
+  (use-package marginalia
+    :ensure t
+    :config
+    (marginalia-mode t))
+#+end_src
+** Consult
+#+begin_src emacs-lisp
+  ;; The `consult' package provides lots of commands that are enhanced
+  ;; variants of basic, built-in functionality.  One of the headline
+  ;; features of `consult' is its preview facility, where it shows in
+  ;; another Emacs window the context of what is currently matched in
+  ;; the minibuffer.  Here I define key bindings for some commands you
+  ;; may find useful.  The mnemonic for their prefix is "alternative
+  ;; search" (as opposed to the basic C-s or C-r keys).
+  (use-package consult
+    :ensure t
+    :bind (;; A recursive grep
+           ("M-s M-g" . consult-grep)
+           ;; Search for files names recursively
+           ("M-s M-f" . consult-find)
+           ;; Search through the outline (headings) of the file
+           ("M-s M-o" . consult-outline)
+           ;; Search the current buffer
+           ("M-s M-l" . consult-line)
+           ;; Switch to another buffer, or bookmarked file, or recently
+           ;; opened file.
+           ("M-s M-b" . consult-buffer)))
+#+end_src
+** Orderless
+#+begin_src emacs-lisp
+  ;; The `orderless' package lets the minibuffer use an out-of-order
+  ;; pattern matching algorithm.  It matches space-separated words or
+  ;; regular expressions in any order.  In its simplest form, something
+  ;; like "ins pac" matches `package-menu-mark-install' as well as
+  ;; `package-install'.  This is a powerful tool because we no longer
+  ;; need to remember exactly how something is named.
+  (use-package orderless
+    :ensure t
+    :config
+    (setopt completion-styles '(orderless basic)))
+#+end_src
+** Embark
+#+begin_src emacs-lisp
+  ;; The `embark-consult' package is glue code to tie together `embark'
+  ;; and `consult'.
+  (use-package embark-consult
+    :ensure t)
+
+  ;; The `embark' package lets you target the thing or context at point
+  ;; and select an action to perform on it.  Use the `embark-act'
+  ;; command while over something to find relevant commands.
+  ;;
+  ;; When inside the minibuffer, `embark' can collect/export the
+  ;; contents to a fully fledged Emacs buffer.  The `embark-collect'
+  ;; command retains the original behaviour of the minibuffer, meaning
+  ;; that if you navigate over the candidate at hit RET, it will do what
+  ;; the minibuffer would have done.  In contrast, the `embark-export'
+  ;; command reads the metadata to figure out what category this is and
+  ;; places them in a buffer whose major mode is specialised for that
+  ;; type of content.  For example, when we are completing against
+  ;; files, the export will take us to a `dired-mode' buffer; when we
+  ;; preview the results of a grep, the export will put us in a
+  ;; `grep-mode' buffer.
+  ;;
+  (use-package embark
+    :ensure t
+    :bind (("C-." . embark-act)
+           :map minibuffer-local-map
+           ("C-c C-c" . embark-collect)
+           ("C-c C-e" . embark-export)))
+#+end_src
+* File/Directory management
+** Recentf
+#+begin_src emacs-lisp
+
+  (use-package recentf
+    :ensure nil
+    :config
+    (setopt recentf-auto-cleanup 'never
+            recentf-max-menu-items 0
+            recentf-max-saved-items 200
+  	  recentf-save-file (bc-emacs-cache-dir "recentf"))
+    (recentf-mode t))
+#+end_src
