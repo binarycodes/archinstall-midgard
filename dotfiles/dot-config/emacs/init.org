@@ -82,9 +82,11 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   ;; clean startup
   (setopt inhibit-startup-message t
   	inhibit-startup-echo-area-message ""
+  	initial-scratch-message ""
   	visible-bell t ; flash the screen, when moving out of bounds, ex, pressing up when already at the first line.
   	blink-cursor-interval 0.7
   	use-short-answers t
+  	use-dialog-box nil
   	)
 
   ;; disable fancy gui stuffs, menu et. all and other ui configs
@@ -121,7 +123,35 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+end_src
 * Text editor settings
 ** Basic configuration
+*** Encoding
 #+begin_src emacs-lisp
+  ;; coding system - utf8 everywhere
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+#+end_src
+*** Spacing
+#+begin_src emacs-lisp
+
+  (setq-default
+   indent-tabs-mode nil
+   tab-width 4
+   tab-stop-list (number-sequence 4 180 4))
+
+  ;; auto revert to on disk changes
+  (global-auto-revert-mode t)
+
+  ;; require new line at the end
+  (setopt require-final-newline t)
+
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+end_src
+*** Other
+#+begin_src emacs-lisp
+  (electric-pair-mode t)
+
+  ;; not sure why these are disabled by default; enable case toggle
   (put 'upcase-region 'disabled nil)
   (put 'downcase-region 'disabled nil)
 
@@ -129,7 +159,6 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (setq-default bidi-display-reordering 'left-to-right
                 bidi-paragraph-direction 'left-to-right)
   (setopt bidi-inhibit-bpa t)
-
 #+end_src
 ** Edit grep search results (wgrep)
 #+begin_src emacs-lisp
@@ -250,6 +279,16 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
            ("C-c C-e" . embark-export)))
 #+end_src
 * File/Directory management
+** Dired
+#+begin_src emacs-lisp
+  (use-package dired
+    :ensure nil
+    :commands (dired)
+    :config
+    (setq  dired-kill-when-opening-new-dired-buffer t
+           dired-listing-switches "-AGFhlv --group-directories-first --time-style=long-iso"))
+#+end_src
+
 ** Recentf
 #+begin_src emacs-lisp
 
@@ -271,5 +310,107 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+end_src
 * Source control
 #+begin_src emacs-lisp
+  (setopt vc-follow-symlinks t)
   (use-package magit)
+#+end_src
+* Project management
+** Treemacs
+#+begin_src emacs-lisp
+  (use-package treemacs
+    :config
+    (treemacs-follow-mode t))
+#+end_src
+
+** Project
+#+begin_src emacs-lisp
+  (use-package project
+    :init
+    (setq project-vc-extra-root-markers '("Cargo.toml" "pyproject.toml" "requirements.txt" "go.mod" "main.tf" "Makefile")))
+#+end_src
+* Keybindings
+** Global
+#+begin_src emacs-lisp
+  ;; prevent C-z from sending emacs to background
+  (global-unset-key (kbd "C-z"))
+
+  ;; ace-window (switch between windows and frames)
+  (global-set-key (kbd "M-o") 'ace-window)
+#+end_src
+* Org mode
+#+begin_src emacs-lisp
+  (use-package org
+    :ensure nil
+    :config
+    (setopt
+     org-adapt-indentation t
+     org-confirm-babel-evaluate nil
+     org-hide-block-startup t
+     org-startup-folded 'fold
+     org-ellipsis "  ⤶"
+     )
+    )
+
+  (org-babel-do-load-languages 'org-babel-load-languages '(
+                                                           (emacs-lisp . t)
+                                                           (python . t))
+                               )
+#+end_src
+* Programming modes
+** General
+#+begin_src emacs-lisp
+  (use-package eglot)
+#+end_src
+** Ansible
+#+begin_src emacs-lisp
+  (defun ansible-vault-mode-maybe ()
+    (when (ansible-vault--is-encrypted-vault-file)
+      (ansible-vault-mode 1)))
+
+  (use-package poly-ansible)
+
+  (use-package ansible-vault
+    :init (add-hook 'yaml-mode-hook 'ansible-vault-mode-maybe)
+    :config (setq ansible-vault-password-file "~/.ansible/vault-password"))
+    #+end_src
+** Docker
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode)
+#+end_src
+** Golang
+#+begin_src emacs-lisp
+  (defun lsp-go-install-save-hooks ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+
+  (use-package go-mode
+    :ensure t
+
+    :config
+    (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+    )
+#+end_src
+** SOPS
+#+begin_src emacs-lisp
+  (use-package sops
+    :ensure t
+    :bind (("C-c C-c" . sops-save-file)
+           ("C-c C-k" . sops-cancel)
+           ("C-c C-d" . sops-edit-file))
+    :init
+    (global-sops-mode 1))
+    #+end_src
+** Terraform
+#+begin_src emacs-lisp
+  (use-package terraform-mode
+    :config
+    (setopt terraform-indent-level 2)
+    :hook
+    (terraform-mode . terraform-format-on-save)
+    )
+#+end_src
+** YAML
+#+begin_src emacs-lisp
+  (use-package yaml-mode
+    :hook (yaml-mode . (lambda ()
+                         (electric-indent-local-mode -1))))
 #+end_src
