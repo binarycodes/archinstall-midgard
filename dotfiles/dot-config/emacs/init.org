@@ -20,10 +20,9 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 
 * Basic package configuration (use-package)
 #+begin_src emacs-lisp
-  ;; setup packages
-  (require 'package)
-
-  (setopt package-user-dir (bc-emacs-cache-dir "packages"))
+  (setopt package-user-dir (bc-emacs-cache-dir "packages")
+  	package-gnupghome-dir (bc-emacs-cache-dir "gnupg")
+  	)
 
   ;; Initialize the package system early
   (package-initialize)
@@ -37,9 +36,8 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (when (boundp 'native-comp-eln-load-path)
     (startup-redirect-eln-cache (bc-emacs-cache-dir "eln-cache")))
 
-  (require 'use-package)
   (setopt use-package-always-ensure t)
-    #+end_src
+#+end_src
 
 * Put custom UI configuration in a separate file
 #+begin_src emacs-lisp
