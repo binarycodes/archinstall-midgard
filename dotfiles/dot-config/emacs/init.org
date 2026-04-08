@@ -39,7 +39,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 
   (require 'use-package)
   (setopt use-package-always-ensure t)
-#+end_src
+    #+end_src
 
 * Put custom UI configuration in a separate file
 #+begin_src emacs-lisp
@@ -53,18 +53,29 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (setopt savehist-file (bc-emacs-cache-dir "history/savehist"))
   (savehist-mode 1)
 
+  ;; clipboard history that survives restarts
+  (setopt savehist-additional-variables
+    	'(search-ring regexp-search-ring kill-ring))
+
+  ;; the kill ring can accumulate text properties (fonts, overlays, etc.) that bloat the savehist file, strip them before saving
+  (add-hook 'savehist-save-hook
+            (lambda ()
+              (setq kill-ring
+                    (mapcar #'substring-no-properties
+                            (cl-remove-if-not #'stringp kill-ring)))))
+
   ;; Set the directory for auto-save files
   (setopt auto-save-list-file-prefix
-        (file-name-concat (bc-emacs-cache-dir "auto-save-list") ".saves-"))
+          (file-name-concat (bc-emacs-cache-dir "auto-save-list") ".saves-"))
 
   ;; backup settings
   (setopt backup-by-copying t
-    	backup-directory-alist `(("." . ,(bc-emacs-cache-dir "backup")))
-    	delete-old-versions t
-    	kept-new-versions 4
-    	kept-old-versions 2
-    	version-control t
-    	)
+        	backup-directory-alist `(("." . ,(bc-emacs-cache-dir "backup")))
+        	delete-old-versions t
+        	kept-new-versions 4
+        	kept-old-versions 2
+        	version-control t
+        	)
 #+end_src
 
 * General Emacs UI settings
@@ -115,6 +126,12 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+begin_src emacs-lisp
   (put 'upcase-region 'disabled nil)
   (put 'downcase-region 'disabled nil)
+
+  ;; assume left-to-right text everywhere and skip the bidirectional parenthesis algorithm
+  (setq-default bidi-display-reordering 'left-to-right
+                bidi-paragraph-direction 'left-to-right)
+  (setopt bidi-inhibit-bpa t)
+
 #+end_src
 ** Edit grep search results (wgrep)
 #+begin_src emacs-lisp
@@ -130,6 +147,12 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
             ("C-c C-c" . wgrep-finish-edit)))
 #+end_src
 * Window management
+** General settings
+#+begin_src emacs-lisp
+  (setopt help-window-select t)
+#+end_src
+
+** Ace-Window
 #+begin_src emacs-lisp
   (use-package ace-window
     :ensure t
@@ -240,4 +263,15 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
             recentf-max-saved-items 200
   	  recentf-save-file (bc-emacs-cache-dir "recentf"))
     (recentf-mode t))
+#+end_src
+* Buffer management
+** Kill ring
+#+begin_src emacs-lisp
+  (setopt save-interprogram-paste-before-kill t ; save the existing clipboard into the kill ring before overwriting it
+  	kill-do-not-save-duplicates t
+  	)
+#+end_src
+* Source control
+#+begin_src emacs-lisp
+  (use-package magit)
 #+end_src
