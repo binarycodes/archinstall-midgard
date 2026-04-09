@@ -239,17 +239,13 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   ;; search" (as opposed to the basic C-s or C-r keys).
   (use-package consult
     :ensure t
-    :bind (;; A recursive grep
-           ("M-s M-g" . consult-grep)
-           ;; Search for files names recursively
-           ("M-s M-f" . consult-find)
-           ;; Search through the outline (headings) of the file
-           ("M-s M-o" . consult-outline)
-           ;; Search the current buffer
-           ("M-s M-l" . consult-line)
-           ;; Switch to another buffer, or bookmarked file, or recently
-           ;; opened file.
-           ("M-s M-b" . consult-buffer)))
+    :bind (("M-s M-g" . consult-grep) ; a recursive grep
+           ("M-s M-f" . consult-find) ; search for files names recursively
+           ("M-s M-o" . consult-outline) ; search through the outline (headings) of the file
+           ("M-s M-l" . consult-line) ; search the current buffer
+           ("M-s M-b" . consult-buffer) ; switch to another buffer, or bookmarked file, or recently opened file.
+           ("M-s M-r" . consult-recent-file) ; search through recently opened files
+           ))
 #+end_src
 ** Orderless
 #+begin_src emacs-lisp
@@ -309,6 +305,37 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
            ("C-c C-c" . embark-collect)
            ("C-c C-e" . embark-export)))
 #+end_src
+* Completion modes
+** Corfu
+#+begin_src emacs-lisp
+  (use-package corfu
+    :hook (after-init . global-corfu-mode)
+    :custom
+    (corfu-cycle t) ; cycle around to first entry after reaching the last
+    (corfu-preview-current nil) ; don't expand text at point until I press return
+    (corfu-min-width 20)
+    (corfu-on-exact-match 'insert) ; complete if there is only a single candidate
+    (corfu-quit-no-match t)
+    (corfu-quit-at-boundary t)
+    :config
+    (setopt corfu-popupinfo-delay '(1.25 . 0.5))
+    (corfu-popupinfo-mode 1) ; shows documentation next to completions
+
+    ;; sort by input history
+    (with-eval-after-load 'savehist
+      (corfu-history-mode 1)
+      (add-to-list 'savehist-additional-variables 'corfu-history))
+    )
+#+end_src
+** Cape
+#+begin_src emacs-lisp
+  (use-package cape
+    :defer t
+    :config
+    (add-hook 'completion-at-point-functions #'cape-dabbrev 20) ; words from buffer
+    (add-hook 'completion-at-point-functions #'cape-file 20))
+#+end_src
+
 * File/Directory management
 ** Dired
 #+begin_src emacs-lisp
@@ -329,15 +356,15 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     (setopt recentf-auto-cleanup 'never
             recentf-max-menu-items 0
             recentf-max-saved-items 200
-  	  recentf-save-file (bc-emacs-cache-dir "recentf"))
+  	      recentf-save-file (bc-emacs-cache-dir "recentf"))
     (recentf-mode t))
 #+end_src
 * Buffer management
 ** Kill ring
 #+begin_src emacs-lisp
   (setopt save-interprogram-paste-before-kill t ; save the existing clipboard into the kill ring before overwriting it
-  	kill-do-not-save-duplicates t
-  	)
+  	    kill-do-not-save-duplicates t
+  	    )
 #+end_src
 * Source control
 #+begin_src emacs-lisp
@@ -391,7 +418,18 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 * Programming modes
 ** General
 #+begin_src emacs-lisp
-  (use-package eglot)
+  (setopt tab-always-indent 'complete)
+
+  (use-package eglot
+    :ensure nil
+    :functions (eglot-ensure)
+    :commands (eglot)
+    :hook (prog-mode . eglot-ensure)
+    :config
+    (set-face-attribute 'eglot-highlight-symbol-face nil
+                        :foreground "#ffd700"
+                        :underline t)
+    )
 #+end_src
 ** Ansible
 #+begin_src emacs-lisp
