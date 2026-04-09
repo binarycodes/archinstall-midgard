@@ -261,8 +261,23 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   ;; need to remember exactly how something is named.
   (use-package orderless
     :ensure t
+    :custom
+    (orderless-matching-styles '(orderless-prefixes))
+    (completion-ignore-case t)
     :config
-    (setopt completion-styles '(orderless basic)))
+    (set-face-attribute 'orderless-match-face-0 nil
+                        :foreground "#d70000")
+    (set-face-attribute 'orderless-match-face-1 nil
+                        :foreground "#005fd7")
+    (set-face-attribute 'orderless-match-face-2 nil
+                        :foreground "#007f3a")
+    (set-face-attribute 'orderless-match-face-3 nil
+                        :foreground "#d700d7")
+
+    (setopt completion-styles '(basic substring initials orderless)
+            completion-category-overrides '((file (styles basic partial-completion))))
+
+    )
 #+end_src
 ** Embark
 #+begin_src emacs-lisp
