@@ -47,7 +47,8 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (load custom-file 'noerror 'nomessage)
 #+end_src
 
-* Backup configuration
+* Backup / History & related configuration
+** Save history
 #+begin_src emacs-lisp
   ;; save history from previous sessions
   (setopt savehist-file (bc-emacs-cache-dir "history/savehist"))
@@ -67,7 +68,10 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   ;; Set the directory for auto-save files
   (setopt auto-save-list-file-prefix
           (file-name-concat (bc-emacs-cache-dir "auto-save-list") ".saves-"))
+#+end_src
 
+** Backup / versioning
+#+begin_src emacs-lisp
   ;; backup settings
   (setopt backup-by-copying t
           backup-directory-alist `(("." . ,(bc-emacs-cache-dir "backup")))
@@ -78,7 +82,12 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
           version-control t
           )
 #+end_src
-
+** Transient
+#+begin_src emacs-lisp
+  (setopt transient-levels-file (bc-emacs-cache-dir "transient/levels.el")
+          transient-values-file (bc-emacs-cache-dir "transient/values.el")
+          transient-history-file (bc-emacs-cache-dir "transient/history.el"))
+#+end_src
 * General Emacs UI settings
 ** Basic configuration
 #+begin_src emacs-lisp
@@ -332,7 +341,9 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+begin_src emacs-lisp
   (use-package project
     :init
-    (setq project-vc-extra-root-markers '("Cargo.toml" "pyproject.toml" "requirements.txt" "go.mod" "main.tf" "Makefile")))
+    (setq project-vc-extra-root-markers '("Cargo.toml" "pyproject.toml" "requirements.txt" "go.mod" "main.tf" "Makefile"))
+    :config
+    (setopt project-list-file (bc-emacs-cache-dir "projects.el")))
 #+end_src
 * Keybindings
 ** Global
@@ -420,4 +431,9 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (use-package yaml-mode
     :hook (yaml-mode . (lambda ()
                          (electric-indent-local-mode -1))))
+#+end_src
+* Shell
+** Eshell
+#+begin_src emacs-lisp
+  (setopt eshell-directory-name (bc-emacs-cache-dir "eshell"))
 #+end_src
