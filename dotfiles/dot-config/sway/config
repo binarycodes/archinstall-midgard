@@ -3,7 +3,7 @@ set $mod Mod4
 
 # terminal and launcher
 set $term $TERMINAL
-set $menu wofi --show drun
+set $menu "wofi -G --show run"
 
 # appearance
 default_border pixel 2
