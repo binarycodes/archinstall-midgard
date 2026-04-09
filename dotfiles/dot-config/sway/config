@@ -126,3 +126,10 @@ exec swayidle -w \
     timeout 600 'swaymsg "output * power off"' \
     resume 'swaymsg "output * power on"' \
     before-sleep 'swaylock -f -c 282A36'
+
+
+# window rules
+for_window {
+  [class="Emacs"] move to workspace 3, focus
+  [app_id="org.qutebrowser.qutebrowser"] move to workspace 2, focus
+}
