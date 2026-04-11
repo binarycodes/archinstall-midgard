@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/emacs --daemon
+ExecStart=/usr/bin/emacs --fg-daemon
 # Emacs will exit with status 15 after having received SIGTERM, which
 # is the default "KillSignal" value systemd uses to stop services.
 SuccessExitStatus=15
