@@ -295,7 +295,8 @@
 
 (use-package treemacs
   :config
-  (treemacs-follow-mode t))
+  (treemacs-follow-mode t)
+  (setopt treemacs-persist-file (bc-emacs-cache-dir "treemacs/persist")))
 
 (use-package project
   :init

@@ -376,7 +376,8 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+begin_src emacs-lisp
   (use-package treemacs
     :config
-    (treemacs-follow-mode t))
+    (treemacs-follow-mode t)
+    (setopt treemacs-persist-file (bc-emacs-cache-dir "treemacs/persist")))
 #+end_src
 
 ** Project
