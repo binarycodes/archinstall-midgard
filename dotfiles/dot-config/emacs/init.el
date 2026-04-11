@@ -216,9 +216,12 @@
   (set-face-attribute 'orderless-match-face-3 nil
                       :foreground "#d700d7")
 
-  (setopt completion-styles '(basic substring initials orderless)
-          completion-category-overrides '((file (styles basic partial-completion))))
-
+  (setopt completion-styles '(orderless partial-completion basic)
+          completion-category-overrides '(
+                                          (file (styles orderless basic partial-completion))
+                                          (buffer (styles orderless partial-completion basic))
+                                          )
+          )
   )
 
 ;; The `embark-consult' package is glue code to tie together `embark'
