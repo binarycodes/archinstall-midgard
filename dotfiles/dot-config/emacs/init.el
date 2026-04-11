@@ -1,3 +1,5 @@
+;;; init.el -*- lexical-binding: t; -*-
+
 (defun bc-emacs-cache-dir (subpath)
   "Return a full path to a subdirectory under XDG_CACHE_HOME."
   (file-name-concat (getenv "XDG_CACHE_HOME") "emacs" subpath))
@@ -306,6 +308,8 @@
   :config
   (setopt project-list-file (bc-emacs-cache-dir "projects.el")))
 
+(repeat-mode 1)
+
 ;; prevent C-z from sending emacs to background
 (global-unset-key (kbd "C-z"))
 
@@ -328,6 +332,11 @@
                                                          (emacs-lisp . t)
                                                          (python . t))
                              )
+
+;; add the option #+auto_tangle: t in org files to auto tangle
+(use-package org-auto-tangle
+  :defer t
+  :hook (org-mode . org-auto-tangle-mode))
 
 (setopt tab-always-indent 'complete)
 

@@ -1,6 +1,11 @@
 #+property: header-args :tangle "init.el"
 #+startup: content indent
+#+auto_tangle: t
 
+* Enable lexical bindings
+#+begin_src emacs-lisp
+  ;;; init.el -*- lexical-binding: t; -*-
+#+end_src
 * Custom functions
 
 All emacs cache stuff like elpa caches, savehist files, backups, etc should ideally live in the $XDG_CACHE_HOME
@@ -393,6 +398,8 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 * Keybindings
 ** Global
 #+begin_src emacs-lisp
+  (repeat-mode 1)
+
   ;; prevent C-z from sending emacs to background
   (global-unset-key (kbd "C-z"))
 
@@ -400,6 +407,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (global-set-key (kbd "M-o") 'ace-window)
 #+end_src
 * Org mode
+** General
 #+begin_src emacs-lisp
   (use-package org
     :ensure nil
@@ -417,6 +425,13 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
                                                            (emacs-lisp . t)
                                                            (python . t))
                                )
+#+end_src
+** Auto tangle
+#+begin_src emacs-lisp
+  ;; add the option #+auto_tangle: t in org files to auto tangle
+  (use-package org-auto-tangle
+    :defer t
+    :hook (org-mode . org-auto-tangle-mode))
 #+end_src
 * Programming modes
 ** General
