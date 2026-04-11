@@ -25,7 +25,7 @@ post_chroot:
     - zsh
 
 basic_packages:
-    - emacs
+    - emacs-wayland
     - iperf3
     - ipmitool
     - man-db

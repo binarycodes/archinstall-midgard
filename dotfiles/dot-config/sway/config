@@ -130,6 +130,6 @@ exec swayidle -w \
 
 # window rules
 for_window {
-  [class="Emacs"] move to workspace 3, focus
+  [app_id="emacs"] move to workspace 3, focus
   [app_id="org.qutebrowser.qutebrowser"] move to workspace 2, focus
 }
