@@ -438,7 +438,7 @@ Ansible
     (when (ansible-vault--is-encrypted-vault-file)
       (ansible-vault-mode 1)))
 
-  (use-package poly-ansibl)
+  (use-package poly-ansible)
 
   (use-package ansible-vault
     :init
