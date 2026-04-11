@@ -109,7 +109,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (scroll-bar-mode -1) ; disable visible scrollbar
   (tool-bar-mode -1)   ; disable the toolbar
   (tooltip-mode -1)    ; disable tooltips
-  #+end_src
+#+end_src
 ** Themes and Fonts
 #+begin_src emacs-lisp
   ;; theme
@@ -122,20 +122,20 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+end_src
 ** Editor UI
 #+begin_src emacs-lisp
-    (fringe-mode '(10 . 0)) ; give some space for the symbols (only of the left)
-    (column-number-mode 't) ; show column number in the modeline
+  (fringe-mode '(10 . 0)) ; give some space for the symbols (only of the left)
+  (column-number-mode 't) ; show column number in the modeline
 
-    ;; show line numbers in all modes
-    (global-display-line-numbers-mode t)
-    ;; disable line numbers for some modes
-    (dolist (mode '(
-                    eshell-mode-hook
-                    term-mode-hook
-                    treemacs-mode-hook
-                    vterm-mode-hook
-                    org-mode-hook
-                    ))
-      (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  ;; show line numbers in all modes
+  (global-display-line-numbers-mode t)
+  ;; disable line numbers for some modes
+  (dolist (mode '(
+                  eshell-mode-hook
+                  term-mode-hook
+                  treemacs-mode-hook
+                  vterm-mode-hook
+                  org-mode-hook
+                  ))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
 * Text editor settings
 ** Basic configuration
@@ -431,17 +431,20 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
                         :underline t)
     )
 #+end_src
-** Ansible
+**
+Ansible
 #+begin_src emacs-lisp
   (defun ansible-vault-mode-maybe ()
     (when (ansible-vault--is-encrypted-vault-file)
       (ansible-vault-mode 1)))
 
-  (use-package poly-ansible)
+  (use-package poly-ansibl)
 
   (use-package ansible-vault
-    :init (add-hook 'yaml-mode-hook 'ansible-vault-mode-maybe)
-    :config (setq ansible-vault-password-file "~/.ansible/vault-password"))
+    :init
+    (add-hook 'yaml-mode-hook 'ansible-vault-mode-maybe)
+    :config
+    (setq ansible-vault-password-file "~/.ansible/vault-password"))
     #+end_src
 ** Docker
 #+begin_src emacs-lisp
@@ -449,15 +452,19 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+end_src
 ** Golang
 #+begin_src emacs-lisp
-  (defun lsp-go-install-save-hooks ()
-    (add-hook 'before-save-hook #'lsp-format-buffer t t)
-    (add-hook 'before-save-hook #'lsp-organize-imports t t))
-
-  (use-package go-mode
-    :ensure t
-
+  (use-package go-ts-mode
+    :init
+    (add-to-list 'treesit-language-source-alist '(go "https://github.com/tree-sitter/tree-sitter-go"))
+    (add-to-list 'treesit-language-source-alist '(gomod "https://github.com/camdencheek/tree-sitter-go-mod"))
+    (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
+    (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
+    :hook
+    (go-ts-mode . eglot-ensure)
+    (go-ts-mode . go-format-on-save-mode)
     :config
-    (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+    (reformatter-define go-format
+                        :program "goimports"
+                        :args '("/dev/stdin"))
     )
 #+end_src
 ** SOPS
