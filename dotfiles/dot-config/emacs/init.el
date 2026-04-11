@@ -93,17 +93,19 @@
 (fringe-mode '(10 . 0)) ; give some space for the symbols (only of the left)
 (column-number-mode 't) ; show column number in the modeline
 
-;; show line numbers in all modes
-(global-display-line-numbers-mode t)
-;; disable line numbers for some modes
-(dolist (mode '(
-                eshell-mode-hook
-                term-mode-hook
-                treemacs-mode-hook
-                vterm-mode-hook
-                org-mode-hook
-                ))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+(global-display-line-numbers-mode 0)
+
+;; show line numbers in specific modes
+(use-package display-line-numbers
+  :defer
+  :custom
+  (display-line-numbers-width-start t)
+  :hook
+  (prog-mode . display-line-numbers-mode)
+  (TeX-mode . display-line-numbers-mode)
+  (markdown-mode . display-line-numbers-mode)
+  (conf-mode . display-line-numbers-mode)
+  )
 
 ;; coding system - utf8 everywhere
 (prefer-coding-system 'utf-8)
