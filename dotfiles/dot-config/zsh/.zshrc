@@ -31,15 +31,33 @@ HISTFILE="$XDG_CACHE_HOME/zsh_history" # move histfile to cache
 HISTCONTROL=ignoreboth # consecutive duplicates & commands starting with space are not saved
 
 # binds
-bindkey "^a" beginning-of-line
-bindkey "^e" end-of-line
-bindkey "^k" kill-line
-bindkey "^j" backward-word
-bindkey "^h" backward-kill-word
+bindkey -e
 bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
-bindkey "^r" history-incremental-pattern-search-backward
-bindkey "^s" history-incremental-pattern-search-forward
+
+# Copy (like M-w in Emacs)
+function zle-copy-region-to-clipboard() {
+  zle copy-region-as-kill
+  print -rn -- "$CUTBUFFER" | wl-copy
+}
+zle -N zle-copy-region-to-clipboard
+bindkey '^[w' zle-copy-region-to-clipboard
+
+# Cut (like C-w in Emacs)
+function zle-kill-region-to-clipboard() {
+  zle kill-region
+  print -rn -- "$CUTBUFFER" | wl-copy
+}
+zle -N zle-kill-region-to-clipboard
+bindkey '^w' zle-kill-region-to-clipboard
+
+# Paste (like C-y in Emacs)
+function paste-from-clipboard() {
+  LBUFFER+=$(wl-paste)
+}
+zle -N paste-from-clipboard
+bindkey '^y' paste-from-clipboard
+
 
 # set up prompt
 NEWLINE=$'\n'
@@ -54,4 +72,3 @@ PROMPT="%K{#2E3440}%F{#E5E9F0}$(date +%0H:%M) %K{#3b4252}%F{#ECEFF4} %n %K{#4c56
 # autosuggestions
 # requires zsh-autosuggestions
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-
