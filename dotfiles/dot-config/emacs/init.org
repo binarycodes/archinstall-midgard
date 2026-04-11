@@ -44,7 +44,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     (startup-redirect-eln-cache (bc-emacs-cache-dir "eln-cache")))
 
   (setopt use-package-always-ensure t)
-  #+end_src
+#+end_src
 
 * Put custom UI configuration in a separate file
 #+begin_src emacs-lisp
@@ -206,7 +206,11 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+begin_src emacs-lisp
   (use-package ace-window
     :ensure t
-    :config (ace-window-display-mode t))
+    :config (ace-window-display-mode t)
+    :custom
+    (aw-scope 'frame)
+    (aw-minibuffer-flag t)
+    )
 #+end_src
 * Minibuffer configuration
 ** Vertico mode
@@ -517,4 +521,9 @@ Ansible
 ** Eshell
 #+begin_src emacs-lisp
   (setopt eshell-directory-name (bc-emacs-cache-dir "eshell"))
+#+end_src
+** Vterm
+#+begin_src emacs-lisp
+  (use-package vterm
+    :ensure t)
 #+end_src

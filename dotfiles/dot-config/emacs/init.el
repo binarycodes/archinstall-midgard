@@ -154,7 +154,11 @@
 
 (use-package ace-window
   :ensure t
-  :config (ace-window-display-mode t))
+  :config (ace-window-display-mode t)
+  :custom
+  (aw-scope 'frame)
+  (aw-minibuffer-flag t)
+  )
 
 ;; The `vertico' package applies a vertical layout to the minibuffer.
 ;; It also pops up the minibuffer eagerly so we can see the available
@@ -403,3 +407,6 @@
                        (electric-indent-local-mode -1))))
 
 (setopt eshell-directory-name (bc-emacs-cache-dir "eshell"))
+
+(use-package vterm
+  :ensure t)
