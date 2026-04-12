@@ -65,6 +65,9 @@
         transient-values-file (bc-emacs-cache-dir "transient/values.el")
         transient-history-file (bc-emacs-cache-dir "transient/history.el"))
 
+(setopt tramp-persistency-file-name (bc-emacs-cache-dir "tramp/persist")
+        tramp-histfile-override (bc-emacs-cache-dir "tramp/history"))
+
 ;; clean startup
 (setopt
  blink-cursor-interval 0.7
