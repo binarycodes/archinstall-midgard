@@ -150,6 +150,10 @@
 
 (electric-pair-mode t)
 
+;; more marks are always better
+(setopt mark-ring-max 1000
+        global-mark-ring-max 2000)
+
 ;; not sure why these are disabled by default; enable case toggle
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
