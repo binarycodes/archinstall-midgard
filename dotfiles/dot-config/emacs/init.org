@@ -212,6 +212,18 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     (aw-minibuffer-flag t)
     )
 #+end_src
+** Windmove
+#+begin_src emacs-lisp
+  (defvar-keymap bc/windmove-keymap
+    :repeat t
+    "h" #'windmove-left
+    "j" #'windmove-up
+    "k" #'windmove-down
+    "l" #'windmove-right
+    )
+
+  (keymap-global-set "C-c w" bc/windmove-keymap)
+  #+end_src
 * Minibuffer configuration
 ** Vertico mode
 #+begin_src emacs-lisp
@@ -470,7 +482,7 @@ Ansible
     (add-hook 'yaml-mode-hook 'ansible-vault-mode-maybe)
     :config
     (setq ansible-vault-password-file "~/.ansible/vault-password"))
-    #+end_src
+#+end_src
 ** Docker
 #+begin_src emacs-lisp
   (use-package dockerfile-mode)
@@ -501,7 +513,7 @@ Ansible
            ("C-c C-d" . sops-edit-file))
     :init
     (global-sops-mode 1))
-    #+end_src
+#+end_src
 ** Terraform
 #+begin_src emacs-lisp
   (use-package terraform-mode

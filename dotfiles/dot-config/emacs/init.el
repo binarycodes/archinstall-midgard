@@ -160,6 +160,16 @@
   (aw-minibuffer-flag t)
   )
 
+(defvar-keymap bc/windmove-keymap
+  :repeat t
+  "h" #'windmove-left
+  "j" #'windmove-up
+  "k" #'windmove-down
+  "l" #'windmove-right
+  )
+
+(keymap-global-set "C-c w" bc/windmove-keymap)
+
 ;; The `vertico' package applies a vertical layout to the minibuffer.
 ;; It also pops up the minibuffer eagerly so we can see the available
 ;; options without further interactions.  This package is very fast
