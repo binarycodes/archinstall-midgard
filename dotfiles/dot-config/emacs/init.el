@@ -18,7 +18,7 @@
                            ("org" . "https://orgmode.org/elpa/")
                            ("elpa" . "https://elpa.gnu.org/packages/")))
 
-(setopt gnutls-algorithm-priority "SECURE256:+VERS-TLS1.3")
+(setopt gnutls-algorithm-priority "NORMAL:+VERS-TLS1.3")
 
 ;; Initialize the package system early
 (package-initialize)
