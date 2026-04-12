@@ -85,7 +85,11 @@
 (tooltip-mode -1)    ; disable tooltips
 
 ;; theme
-(load-theme 'modus-vivendi t)
+(use-package modus-themes
+  :ensure t
+  :demand t
+  :config
+  (modus-themes-load-theme 'modus-vivendi-tinted))
 
 ;; fonts/faces
 (set-face-attribute 'default nil :font "JetBrains Mono" :height 120)
@@ -107,6 +111,16 @@
    (TeX-mode . display-line-numbers-mode)
    (markdown-mode . display-line-numbers-mode)
    (conf-mode . display-line-numbers-mode)))
+
+
+(use-package server
+  :ensure nil
+  :defer 1
+  :config
+  (setopt server-client-instructions nil)
+  (unless (server-running-p)
+    (server-start))
+  )
 
 ;; coding system - utf8 everywhere
 (prefer-coding-system 'utf-8)

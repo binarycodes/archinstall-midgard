@@ -118,7 +118,11 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 ** Themes and Fonts
 #+begin_src emacs-lisp
   ;; theme
-  (load-theme 'modus-vivendi t)
+  (use-package modus-themes
+    :ensure t
+    :demand t
+    :config
+    (modus-themes-load-theme 'modus-vivendi-tinted))
 
   ;; fonts/faces
   (set-face-attribute 'default nil :font "JetBrains Mono" :height 120)
@@ -143,6 +147,18 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
      (markdown-mode . display-line-numbers-mode)
      (conf-mode . display-line-numbers-mode)))
 #+end_src
+* Emacs Server
+#+begin_src emacs-lisp
+  (use-package server
+    :ensure nil
+    :defer 1
+    :config
+    (setopt server-client-instructions nil)
+    (unless (server-running-p)
+      (server-start))
+    )
+#+end_src
+
 * Text editor settings
 ** Basic configuration
 *** Encoding
