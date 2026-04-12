@@ -95,8 +95,8 @@
   (modus-themes-load-theme 'modus-vivendi-tinted))
 
 ;; fonts/faces
-(set-face-attribute 'default nil :font "JetBrains Mono" :height 120)
-(set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 120)
+(set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 120)
+(set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height 120)
 (set-face-attribute 'variable-pitch nil :font "Roboto" :height 120 :weight 'regular)
 
 (fringe-mode '(10 . 0)) ; give some space for the symbols (only of the left)

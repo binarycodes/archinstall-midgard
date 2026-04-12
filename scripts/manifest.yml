@@ -96,6 +96,7 @@ fonts:
     - ttf-jetbrains-mono-nerd
     - ttf-liberation
     - ttf-libertinus
+    - ttf-nerd-fonts-symbols
     - ttf-opensans
     - ttf-roboto
     - ttf-ubuntu-font-family
