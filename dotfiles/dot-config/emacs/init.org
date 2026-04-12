@@ -138,11 +138,10 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     :custom
     (display-line-numbers-width-start t)
     :hook
-    (prog-mode . display-line-numbers-mode)
-    (TeX-mode . display-line-numbers-mode)
-    (markdown-mode . display-line-numbers-mode)
-    (conf-mode . display-line-numbers-mode)
-    )
+    ((prog-mode . display-line-numbers-mode)
+     (TeX-mode . display-line-numbers-mode)
+     (markdown-mode . display-line-numbers-mode)
+     (conf-mode . display-line-numbers-mode)))
 #+end_src
 * Text editor settings
 ** Basic configuration
@@ -211,7 +210,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     (aw-scope 'frame)
     (aw-minibuffer-flag t)
     )
-#+end_srctre
+#+end_src
 ** Windmove
 #+begin_src emacs-lisp
   (defvar-keymap bc/windmove-keymap
@@ -223,7 +222,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     )
 
   (keymap-global-set "C-c w" bc/windmove-keymap)
-  #+end_src
+#+end_src
 * Minibuffer configuration
 ** Vertico mode
 #+begin_src emacs-lisp
@@ -295,7 +294,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 
     (setopt completion-styles '(orderless partial-completion basic)
             completion-category-overrides '(
-                                            (file (styles orderless basic partial-completion))
+                                            (file (styles orderless partial-completion basic))
                                             (buffer (styles orderless partial-completion basic))
                                             )
             )
@@ -332,10 +331,15 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
            ("C-c C-e" . embark-export)))
 #+end_src
 * Completion modes
+** General
+#+begin_src emacs-lisp
+  (setopt tab-always-indent 'complete)
+#+end_src
 ** Corfu
 #+begin_src emacs-lisp
   (use-package corfu
-    :hook (after-init . global-corfu-mode)
+    :hook
+    (after-init . global-corfu-mode)
     :custom
     (corfu-cycle t) ; cycle around to first entry after reaching the last
     (corfu-preview-current nil) ; don't expand text at point until I press return
@@ -361,7 +365,6 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     (add-hook 'completion-at-point-functions #'cape-dabbrev 20) ; words from buffer
     (add-hook 'completion-at-point-functions #'cape-file 20))
 #+end_src
-
 * File/Directory management
 ** Dired
 #+begin_src emacs-lisp
@@ -401,9 +404,14 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 ** Treemacs
 #+begin_src emacs-lisp
   (use-package treemacs
+    :bind
+    ("<f11>" . treemacs)
+    :hook
+    ((treemacs-mode . treemacs-project-follow-mode)
+     (treemacs-mode . treemacs-follow-mode))
     :config
-    (treemacs-follow-mode t)
-    (setopt treemacs-persist-file (bc-emacs-cache-dir "treemacs/persist")))
+    (setopt treemacs-persist-file (bc-emacs-cache-dir "treemacs/persist")
+            treemacs-is-never-other-window t))
 #+end_src
 
 ** Project
@@ -424,10 +432,6 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 
   ;; ace-window (switch between windows and frames)
   (global-set-key (kbd "M-o") 'ace-window)
-
-  ;; open or select treemacs
-  (global-set-key (kbd "<f11>") 'treemacs-select-window)
-  (global-set-key (kbd "C-<f11>") 'treemacs)
 #+end_src
 * Org mode
 ** General
@@ -454,26 +458,34 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   ;; add the option #+auto_tangle: t in org files to auto tangle
   (use-package org-auto-tangle
     :defer t
-    :hook (org-mode . org-auto-tangle-mode))
+    :hook
+    (org-mode . org-auto-tangle-mode))
 #+end_src
 * Programming modes
 ** General
 #+begin_src emacs-lisp
-  (setopt tab-always-indent 'complete)
-
+  (use-package prog-mode
+    :ensure nil
+    :hook
+    ((prog-mode . subword-mode) ; useful to move through camel case words
+     (prog-mode . which-function-mode) ; show the function name in the modeline
+     ))
+#+end_src
+** Language server (eglot)
+#+begin_src emacs-lisp
   (use-package eglot
     :ensure nil
     :functions (eglot-ensure)
     :commands (eglot)
-    :hook (prog-mode . eglot-ensure)
+    :hook
+    (prog-mode . eglot-ensure)
     :config
     (set-face-attribute 'eglot-highlight-symbol-face nil
                         :foreground "#ffd700"
                         :underline t)
     )
 #+end_src
-**
-Ansible
+** Ansible
 #+begin_src emacs-lisp
   (defun ansible-vault-mode-maybe ()
     (when (ansible-vault--is-encrypted-vault-file)
@@ -500,8 +512,8 @@ Ansible
     (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
     (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
     :hook
-    (go-ts-mode . eglot-ensure)
-    (go-ts-mode . go-format-on-save-mode)
+    ((go-ts-mode . eglot-ensure)
+     (go-ts-mode . go-format-on-save-mode))
     :config
     (reformatter-define go-format
                         :program "goimports"
@@ -524,14 +536,14 @@ Ansible
     :config
     (setopt terraform-indent-level 2)
     :hook
-    (terraform-mode . terraform-format-on-save)
-    )
+    (terraform-mode . terraform-format-on-save))
 #+end_src
 ** YAML
 #+begin_src emacs-lisp
   (use-package yaml-mode
-    :hook (yaml-mode . (lambda ()
-                         (electric-indent-local-mode -1))))
+    :hook
+    (yaml-mode . (lambda ()
+                   (electric-indent-local-mode -1))))
 #+end_src
 * Shell
 ** Eshell
@@ -541,5 +553,8 @@ Ansible
 ** Vterm
 #+begin_src emacs-lisp
   (use-package vterm
-    :ensure t)
+    :ensure t
+    :custom
+    (vterm-max-scrollback 100000)
+    )
 #+end_src

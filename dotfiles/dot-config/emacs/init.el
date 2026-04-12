@@ -103,11 +103,10 @@
   :custom
   (display-line-numbers-width-start t)
   :hook
-  (prog-mode . display-line-numbers-mode)
-  (TeX-mode . display-line-numbers-mode)
-  (markdown-mode . display-line-numbers-mode)
-  (conf-mode . display-line-numbers-mode)
-  )
+  ((prog-mode . display-line-numbers-mode)
+   (TeX-mode . display-line-numbers-mode)
+   (markdown-mode . display-line-numbers-mode)
+   (conf-mode . display-line-numbers-mode)))
 
 ;; coding system - utf8 everywhere
 (prefer-coding-system 'utf-8)
@@ -151,6 +150,14 @@
           ("C-c C-c" . wgrep-finish-edit)))
 
 (setopt help-window-select t)
+
+(use-package ace-window
+  :ensure t
+  :config (ace-window-display-mode t)
+  :custom
+  (aw-scope 'frame)
+  (aw-minibuffer-flag t)
+  )
 
 (defvar-keymap bc/windmove-keymap
   :repeat t
@@ -224,7 +231,7 @@
 
   (setopt completion-styles '(orderless partial-completion basic)
           completion-category-overrides '(
-                                          (file (styles orderless basic partial-completion))
+                                          (file (styles orderless partial-completion basic))
                                           (buffer (styles orderless partial-completion basic))
                                           )
           )
@@ -258,8 +265,11 @@
          ("C-c C-c" . embark-collect)
          ("C-c C-e" . embark-export)))
 
+(setopt tab-always-indent 'complete)
+
 (use-package corfu
-  :hook (after-init . global-corfu-mode)
+  :hook
+  (after-init . global-corfu-mode)
   :custom
   (corfu-cycle t) ; cycle around to first entry after reaching the last
   (corfu-preview-current nil) ; don't expand text at point until I press return
@@ -307,9 +317,14 @@
 (use-package magit)
 
 (use-package treemacs
+  :bind
+  ("<f11>" . treemacs)
+  :hook
+  ((treemacs-mode . treemacs-project-follow-mode)
+   (treemacs-mode . treemacs-follow-mode))
   :config
-  (treemacs-follow-mode t)
-  (setopt treemacs-persist-file (bc-emacs-cache-dir "treemacs/persist")))
+  (setopt treemacs-persist-file (bc-emacs-cache-dir "treemacs/persist")
+          treemacs-is-never-other-window t))
 
 (use-package project
   :init
@@ -324,10 +339,6 @@
 
 ;; ace-window (switch between windows and frames)
 (global-set-key (kbd "M-o") 'ace-window)
-
-;; open or select treemacs
-(global-set-key (kbd "<f11>") 'treemacs-select-window)
-(global-set-key (kbd "C-<f11>") 'treemacs)
 
 (use-package org
   :ensure nil
@@ -349,15 +360,22 @@
 ;; add the option #+auto_tangle: t in org files to auto tangle
 (use-package org-auto-tangle
   :defer t
-  :hook (org-mode . org-auto-tangle-mode))
+  :hook
+  (org-mode . org-auto-tangle-mode))
 
-(setopt tab-always-indent 'complete)
+(use-package prog-mode
+  :ensure nil
+  :hook
+  ((prog-mode . subword-mode) ; useful to move through camel case words
+   (prog-mode . which-function-mode) ; show the function name in the modeline
+   ))
 
 (use-package eglot
   :ensure nil
   :functions (eglot-ensure)
   :commands (eglot)
-  :hook (prog-mode . eglot-ensure)
+  :hook
+  (prog-mode . eglot-ensure)
   :config
   (set-face-attribute 'eglot-highlight-symbol-face nil
                       :foreground "#ffd700"
@@ -385,8 +403,8 @@
   (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
   (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
   :hook
-  (go-ts-mode . eglot-ensure)
-  (go-ts-mode . go-format-on-save-mode)
+  ((go-ts-mode . eglot-ensure)
+   (go-ts-mode . go-format-on-save-mode))
   :config
   (reformatter-define go-format
                       :program "goimports"
@@ -405,14 +423,17 @@
   :config
   (setopt terraform-indent-level 2)
   :hook
-  (terraform-mode . terraform-format-on-save)
-  )
+  (terraform-mode . terraform-format-on-save))
 
 (use-package yaml-mode
-  :hook (yaml-mode . (lambda ()
-                       (electric-indent-local-mode -1))))
+  :hook
+  (yaml-mode . (lambda ()
+                 (electric-indent-local-mode -1))))
 
 (setopt eshell-directory-name (bc-emacs-cache-dir "eshell"))
 
 (use-package vterm
-  :ensure t)
+  :ensure t
+  :custom
+  (vterm-max-scrollback 100000)
+  )
