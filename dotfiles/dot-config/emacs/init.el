@@ -112,6 +112,13 @@
    (markdown-mode . display-line-numbers-mode)
    (conf-mode . display-line-numbers-mode)))
 
+(use-package doom-modeline
+  :ensure t
+  :config
+  (doom-modeline-mode 1)
+  :custom
+  ((doom-modeline-height 15)
+   (doom-modeline-icon t)))
 
 (use-package server
   :ensure nil

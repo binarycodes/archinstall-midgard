@@ -147,6 +147,16 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
      (markdown-mode . display-line-numbers-mode)
      (conf-mode . display-line-numbers-mode)))
 #+end_src
+** Modeline
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :config
+    (doom-modeline-mode 1)
+    :custom
+    ((doom-modeline-height 15)
+     (doom-modeline-icon t)))
+#+end_src
 * Emacs Server
 #+begin_src emacs-lisp
   (use-package server
