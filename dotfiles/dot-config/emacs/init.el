@@ -152,14 +152,6 @@
 
 (setopt help-window-select t)
 
-(use-package ace-window
-  :ensure t
-  :config (ace-window-display-mode t)
-  :custom
-  (aw-scope 'frame)
-  (aw-minibuffer-flag t)
-  )
-
 (defvar-keymap bc/windmove-keymap
   :repeat t
   "h" #'windmove-left
@@ -218,7 +210,7 @@
 (use-package orderless
   :ensure t
   :custom
-  (orderless-matching-styles '(orderless-prefixes))
+  (orderless-matching-styles '(orderless-literal orderless-prefixes))
   (completion-ignore-case t)
   :config
   (set-face-attribute 'orderless-match-face-0 nil
@@ -332,6 +324,10 @@
 
 ;; ace-window (switch between windows and frames)
 (global-set-key (kbd "M-o") 'ace-window)
+
+;; open or select treemacs
+(global-set-key (kbd "<f11>") 'treemacs-select-window)
+(global-set-key (kbd "C-<f11>") 'treemacs)
 
 (use-package org
   :ensure nil

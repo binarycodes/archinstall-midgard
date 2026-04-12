@@ -211,7 +211,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     (aw-scope 'frame)
     (aw-minibuffer-flag t)
     )
-#+end_src
+#+end_srctre
 ** Windmove
 #+begin_src emacs-lisp
   (defvar-keymap bc/windmove-keymap
@@ -281,7 +281,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (use-package orderless
     :ensure t
     :custom
-    (orderless-matching-styles '(orderless-prefixes))
+    (orderless-matching-styles '(orderless-literal orderless-prefixes))
     (completion-ignore-case t)
     :config
     (set-face-attribute 'orderless-match-face-0 nil
@@ -424,6 +424,10 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 
   ;; ace-window (switch between windows and frames)
   (global-set-key (kbd "M-o") 'ace-window)
+
+  ;; open or select treemacs
+  (global-set-key (kbd "<f11>") 'treemacs-select-window)
+  (global-set-key (kbd "C-<f11>") 'treemacs)
 #+end_src
 * Org mode
 ** General
