@@ -147,6 +147,50 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
      (markdown-mode . display-line-numbers-mode)
      (conf-mode . display-line-numbers-mode)))
 #+end_src
+** Modeline
+#+begin_src emacs-lisp
+  (defface bc-mode-line-buffer-background
+    '((t :background "#995588" :foreground "white" :inherit bold))
+    "Face for displaying the `buffer-name' in the mode line")
+
+  (defface bc-mode-line-major-mode-background
+    '((t :background "#008800" :foreground "white" :inherit bold))
+    "Face for displaying the `major-mode' in the mode line")
+
+
+  (defun bc-mode-line--buffer-name ()
+    "Return `buffer-name' with spaces around it"
+    (format " %s " (buffer-name)))
+
+  (defun bc-mode-line--major-mode-name ()
+    "Return `major-mode' name capitalized and with spaces around it"
+    (format " %s " (capitalize (symbol-name major-mode))))
+
+  (defvar-local bc-mode-line-buffer-name
+      '(:eval
+        (propertize (bc-mode-line--buffer-name) 'face 'bc-mode-line-buffer-background))
+    "Mode line construct to display the buffer name")
+
+  (defvar-local bc-mode-line-major-mode
+      '(:eval
+        (propertize (bc-mode-line--major-mode-name) 'face 'bc-mode-line-major-mode-background))
+    "Mode line construct to display the major mode")
+
+  ;; the `risky-local-variable' is critical
+  ;; variables will not work without it
+  (dolist (construct '(bc-mode-line-buffer-name
+                       bc-mode-line-major-mode
+                       ))
+    (put construct 'risky-local-variable t))
+
+
+  (setq-default mode-line-format
+                '("%e"
+                  bc-mode-line-buffer-name
+                  bc-mode-line-major-mode
+                  ))
+
+#+end_src
 * Emacs Server
 #+begin_src emacs-lisp
   (use-package server
