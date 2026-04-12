@@ -20,7 +20,7 @@ client.unfocused        #4C566A #4C566A #E5E9F0 #4C566A   #4C566A
 client.urgent           #D08770 #D08770 #E5E9F0 #D08770   #D08770
 
 # wallpaper
-output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+output * bg $HOME/wallpapers/current.jpg fill
 
 # input
 input type:touchpad {
