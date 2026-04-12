@@ -318,7 +318,8 @@
 
 (use-package treemacs
   :bind
-  ("<f11>" . treemacs)
+  (("<f11>" . treemacs)
+   ("C-<f11>" . treemacs-select-window))
   :hook
   ((treemacs-mode . treemacs-project-follow-mode)
    (treemacs-mode . treemacs-follow-mode))
