@@ -195,6 +195,16 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
             ("C-x C-q" . wgrep-change-to-wgrep-mode)
             ("C-c C-c" . wgrep-finish-edit)))
 #+end_src
+** Markdown mode
+#+begin_src emacs-lisp
+  (use-package markdown-mode
+    :ensure t
+    :defer t
+    :config
+    (setq markdown-fontify-code-blocks-natively t)
+    )
+#+end_src
+
 * Window management
 ** General settings
 #+begin_src emacs-lisp

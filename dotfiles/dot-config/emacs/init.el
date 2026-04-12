@@ -149,6 +149,13 @@
           ("C-x C-q" . wgrep-change-to-wgrep-mode)
           ("C-c C-c" . wgrep-finish-edit)))
 
+(use-package markdown-mode
+  :ensure t
+  :defer t
+  :config
+  (setq markdown-fontify-code-blocks-natively t)
+  )
+
 (setopt help-window-select t)
 
 (use-package ace-window
