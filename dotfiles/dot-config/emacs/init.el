@@ -77,7 +77,7 @@
  initial-scratch-message ""
  use-dialog-box nil
  use-short-answers t
- visible-bell t ; flash the screen, when moving out of bounds, ex, pressing up when already at the first line.
+ visible-bell nil ; do not flash the screen, when moving out of bounds, ex, pressing up when already at the first line.
  )
 
 ;; disable fancy gui stuffs, menu et. all and other ui configs
@@ -95,9 +95,15 @@
   (modus-themes-load-theme 'modus-vivendi-tinted))
 
 ;; fonts/faces
-(set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 120)
-(set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height 120)
-(set-face-attribute 'variable-pitch nil :font "Roboto" :height 120 :weight 'regular)
+(defun bc-set-font-faces ()
+  (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 120)
+  (set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height 120)
+  (set-face-attribute 'variable-pitch nil :font "Roboto" :height 120 :weight 'regular))
+
+;; if emacs is running as daemon, then setting font dont work till frame is created
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook #'bc-set-font-faces)
+  (bc-set-font-faces))
 
 (fringe-mode '(10 . 0)) ; give some space for the symbols (only of the left)
 (column-number-mode 't) ; show column number in the modeline
@@ -404,6 +410,7 @@
   :hook
   ((prog-mode . subword-mode) ; useful to move through camel case words
    (prog-mode . which-function-mode) ; show the function name in the modeline
+   (prog-mode . completion-preview-mode) ; show inline completion preview
    ))
 
 (use-package eglot
