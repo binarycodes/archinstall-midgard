@@ -315,11 +315,15 @@
   (corfu-cycle t) ; cycle around to first entry after reaching the last
   (corfu-preview-current nil) ; don't expand text at point until I press return
   (corfu-min-width 20)
-  (corfu-on-exact-match 'insert) ; complete if there is only a single candidate
+  (corfu-on-exact-match 'show) ; complete if there is only a single candidate
   (corfu-quit-no-match t)
   (corfu-quit-at-boundary t)
   :config
-  (setopt corfu-popupinfo-delay '(1.25 . 0.5))
+  (setopt corfu-auto t
+          corfu-auto-delay 0.2
+          corfu-auto-prefix 1
+          corfu-preselect 'prompt
+          )
   (corfu-popupinfo-mode 1) ; shows documentation next to completions
 
   ;; sort by input history
@@ -327,6 +331,11 @@
     (corfu-history-mode 1)
     (add-to-list 'savehist-additional-variables 'corfu-history))
   )
+
+(use-package kind-icon
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package cape
   :defer t
@@ -423,6 +432,8 @@
   (set-face-attribute 'eglot-highlight-symbol-face nil
                       :foreground "#ffd700"
                       :underline t)
+  (setq eglot-workspace-configuration
+        '(:java (:completion (:guessMethodArguments :json-false))))
   )
 
 (defun ansible-vault-mode-maybe ()
