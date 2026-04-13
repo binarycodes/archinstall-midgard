@@ -129,6 +129,22 @@
   ((doom-modeline-height 15)
    (doom-modeline-icon t)))
 
+(use-package spacious-padding
+  :ensure t
+  :custom
+  (spacious-padding-subtle-mode-line t)
+  (spacious-padding-widths '(
+                             :internal-border-width 5
+                             :header-line-width 4
+                             :mode-line-width 6
+                             :custom-button-width 3
+                             :tab-width 4
+                             :right-divider-width 10
+                             :scroll-bar-width 8
+                             :fringe-width 8))
+  :config
+  (spacious-padding-mode 1))
+
 (use-package server
   :ensure nil
   :defer 1
