@@ -13,6 +13,10 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (defun bc-emacs-cache-dir (subpath)
     "Return a full path to a subdirectory under XDG_CACHE_HOME."
     (file-name-concat (getenv "XDG_CACHE_HOME") "emacs" subpath))
+
+  (defun bc-emacs-config-dir (subpath)
+    "Return a full path to a subdirectory under XDG_CONFIG_HOME."
+    (file-name-concat (getenv "XDG_CONFIG_HOME") "emacs" subpath))
 #+end_src
 
 * Ensure required directories are created before use
@@ -123,7 +127,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (scroll-bar-mode -1) ; disable visible scrollbar
   (tool-bar-mode -1)   ; disable the toolbar
   (tooltip-mode -1)    ; disable tooltips
-   #+end_src
+#+end_src
 ** Themes and Fonts
 *** Theme
 #+begin_src emacs-lisp
@@ -440,7 +444,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     :config
     (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
- #+end_src
+#+end_src
 ** Cape
 #+begin_src emacs-lisp
   (use-package cape
@@ -645,4 +649,20 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     :custom
     (vterm-max-scrollback 100000)
     )
+#+end_src
+* News / RSS
+**
+Elfeed
+#+begin_src emacs-lisp
+  (use-package elfeed
+    :ensure t
+    :config
+    (setq elfeed-db-directory (bc-emacs-cache-dir "elfeed-db")
+          elfeed-feeds
+          '(
+            ("https://karthinks.com/index.xml" dev emacs)
+            ("https://feeds.feedburner.com/TheHackersNews" security cyber tech news)
+            ("https://feed.itsfoss.com/" linux tech news)
+            )
+          ))
 #+end_src

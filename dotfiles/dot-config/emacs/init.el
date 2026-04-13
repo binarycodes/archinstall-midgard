@@ -4,6 +4,10 @@
   "Return a full path to a subdirectory under XDG_CACHE_HOME."
   (file-name-concat (getenv "XDG_CACHE_HOME") "emacs" subpath))
 
+(defun bc-emacs-config-dir (subpath)
+  "Return a full path to a subdirectory under XDG_CONFIG_HOME."
+  (file-name-concat (getenv "XDG_CONFIG_HOME") "emacs" subpath))
+
 ;; create relevant directories used later in config
 (make-directory (bc-emacs-cache-dir "history") t)
 (make-directory (bc-emacs-cache-dir "backup") t)
@@ -509,3 +513,15 @@
   :custom
   (vterm-max-scrollback 100000)
   )
+
+(use-package elfeed
+  :ensure t
+  :config
+  (setq elfeed-db-directory (bc-emacs-cache-dir "elfeed-db")
+        elfeed-feeds
+        '(
+          ("https://karthinks.com/index.xml" dev emacs)
+          ("https://feeds.feedburner.com/TheHackersNews" security cyber tech news)
+          ("https://feed.itsfoss.com/" linux tech news)
+          )
+        ))
