@@ -62,6 +62,7 @@ dev_packages:
     - age
     - ansible
     - ansible-lint
+    - bash-language-server
     - cmake # required to build emacs vterm-module
     - dbeaver
     - delve #go debugger
