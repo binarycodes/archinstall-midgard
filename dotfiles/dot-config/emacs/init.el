@@ -68,6 +68,8 @@
 (setopt tramp-persistency-file-name (bc-emacs-cache-dir "tramp/persist")
         tramp-histfile-override (bc-emacs-cache-dir "tramp/history"))
 
+(setopt svg-lib-icons-dir (bc-emacs-cache-dir "svg-lib"))
+
 ;; clean startup
 (setopt
  blink-cursor-interval 0.7

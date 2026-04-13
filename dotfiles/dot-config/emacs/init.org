@@ -95,10 +95,13 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+end_src
 ** Tramp history
 #+begin_src emacs-lisp
-    (setopt tramp-persistency-file-name (bc-emacs-cache-dir "tramp/persist")
-            tramp-histfile-override (bc-emacs-cache-dir "tramp/history"))
+  (setopt tramp-persistency-file-name (bc-emacs-cache-dir "tramp/persist")
+          tramp-histfile-override (bc-emacs-cache-dir "tramp/history"))
 #+end_src
-
+** SVG lib cache
+#+begin_src emacs-lisp
+  (setopt svg-lib-icons-dir (bc-emacs-cache-dir "svg-lib"))
+#+end_src
 * General Emacs UI settings
 ** Basic configuration
 #+begin_src emacs-lisp
