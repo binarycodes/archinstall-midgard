@@ -142,6 +142,7 @@ aur_packages:
     - brother-mfc-l2860dwe
     - google-chrome
     - infisical-bin
+    - jdtls
     - terraform-ls-bin
     - ttf-monaco
     - ttf-ms-fonts
