@@ -1,7 +1,17 @@
+# --- Paths for autoloading ---
+fpath=(
+  ~/.zsh/functions
+  $fpath
+)
+
 # load modules
 zmodload zsh/complist
 autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME}/zcompdump
 autoload -Uz colors && colors
+autoload -Uz edit-command-line
+
+# load custom functions/widgets
+autoload -Uz ~/.config/zsh/functions/*
 
 # cmp opts
 zstyle ':completion::complete:*' cache-path ${XDG_CACHE_HOME}/zcompcache
@@ -27,7 +37,7 @@ stty stop undef # disable accidental ctrl s
 # history opts
 HISTSIZE=1000000
 SAVEHIST=1000000
-HISTFILE="$XDG_CACHE_HOME/zsh_history" # move histfile to cache
+HISTFILE="${XDG_CACHE_HOME}/zsh_history" # move histfile to cache
 HISTCONTROL=ignoreboth # consecutive duplicates & commands starting with space are not saved
 
 # binds
@@ -36,28 +46,20 @@ bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
 
 # Copy (like M-w in Emacs)
-function zle-copy-region-to-clipboard() {
-  zle copy-region-as-kill
-  print -rn -- "$CUTBUFFER" | wl-copy
-}
 zle -N zle-copy-region-to-clipboard
 bindkey '^[w' zle-copy-region-to-clipboard
 
 # Cut (like C-w in Emacs)
-function zle-kill-region-to-clipboard() {
-  zle kill-region
-  print -rn -- "$CUTBUFFER" | wl-copy
-}
 zle -N zle-kill-region-to-clipboard
 bindkey '^w' zle-kill-region-to-clipboard
 
 # Paste (like C-y in Emacs)
-function paste-from-clipboard() {
-  LBUFFER+=$(wl-paste)
-}
 zle -N paste-from-clipboard
 bindkey '^y' paste-from-clipboard
 
+# Open editor to edit command line (C-x C-e)
+zle -N edit-command-line-editor
+bindkey '^X^E' edit-command-line-editor
 
 # set up prompt
 NEWLINE=$'\n'

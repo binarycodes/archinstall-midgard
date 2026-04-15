@@ -1,0 +1,3 @@
+edit-command-line-editor() {
+  VISUAL="$EDITOR" edit-command-line
+}

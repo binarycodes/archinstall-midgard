@@ -1,0 +1,3 @@
+function paste-from-clipboard() {
+  LBUFFER+=$(wl-paste)
+}
