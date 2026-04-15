@@ -1,5 +1,19 @@
 ;;; init.el -*- lexical-binding: t; -*-
 
+(defun bc-ensure-env (vars)
+  "Ensure environment variables are set, using fallback value if unset.
+VARS is an alist of (VAR . FALLBACK) pairs."
+
+  (dolist (pair vars)
+    (let ((var (car pair))
+          (fallback (cdr pair)))
+      (unless (getenv var)
+        (setenv var fallback)))))
+
+(bc-ensure-env
+ `(("XDG_CONFIG_HOME" . ,(expand-file-name "~/.config"))
+   ("XDG_CACHE_HOME" . ,(expand-file-name "~/.cache"))))
+
 (defun bc-emacs-cache-dir (subpath)
   "Return a full path to a subdirectory under XDG_CACHE_HOME."
   (file-name-concat (getenv "XDG_CACHE_HOME") "emacs" subpath))
@@ -102,9 +116,15 @@
 
 ;; fonts/faces
 (defun bc-set-font-faces ()
-  (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 120)
-  (set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height 120)
-  (set-face-attribute 'variable-pitch nil :font "Roboto" :height 120 :weight 'regular))
+  (cond
+   ((eq system-type 'darwin)
+    (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 120)
+    (set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height 120)
+    (set-face-attribute 'variable-pitch nil :font "Roboto" :height 120 :weight 'regular))
+   (t
+    (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 120)
+    (set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height 120)
+    (set-face-attribute 'variable-pitch nil :font "Roboto" :height 120 :weight 'regular))))
 
 ;; if emacs is running as daemon, then setting font dont work till frame is created
 (if (daemonp)
