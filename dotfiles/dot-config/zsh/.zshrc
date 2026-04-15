@@ -38,7 +38,11 @@ stty stop undef # disable accidental ctrl s
 HISTSIZE=1000000
 SAVEHIST=1000000
 HISTFILE="${XDG_CACHE_HOME}/zsh_history" # move histfile to cache
-HISTCONTROL=ignoreboth # consecutive duplicates & commands starting with space are not saved
+
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
 
 # binds
 bindkey -e
@@ -63,8 +67,8 @@ bindkey '^X^E' edit-command-line-editor
 
 # set up prompt
 NEWLINE=$'\n'
-PROMPT="%K{#2E3440}%F{#E5E9F0}$(date +%0H:%M) %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ %f%k ❯ "
+PROMPT="%K{#2E3440}%F{#E5E9F0}%D{%H:%M} %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ %f%k ❯ "
 
 # autosuggestions
 # requires zsh-autosuggestions
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source "${ZSH_AUTOSUGGESTIONS_PATH:-/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh}"
