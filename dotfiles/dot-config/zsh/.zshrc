@@ -46,8 +46,9 @@ setopt HIST_EXPIRE_DUPS_FIRST
 
 # binds
 bindkey -e
-bindkey "^[[A" history-beginning-search-backward
-bindkey "^[[B" history-beginning-search-forward
+bindkey "^[[A" history-beginning-search-backward # up arrow
+bindkey "^[[B" history-beginning-search-forward # down arrow
+bindkey "^[[Z" magic-space # shift-tab
 
 # Copy (like M-w in Emacs)
 zle -N zle-copy-region-to-clipboard
