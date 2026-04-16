@@ -70,6 +70,8 @@ bindkey '^X^E' edit-command-line-editor
 NEWLINE=$'\n'
 PROMPT="%K{#2E3440}%F{#E5E9F0}%D{%H:%M} %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ %f%k ❯ "
 
-# autosuggestions
+# autosuggestions - but not in tty sessions
 # requires zsh-autosuggestions
-source "${ZSH_AUTOSUGGESTIONS_PATH:-/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh}"
+if [[ -n "$WAYLAND_DISPLAY" || -n "$DISPLAY" ]]; then
+    source "${ZSH_AUTOSUGGESTIONS_PATH:-/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh}"
+fi
