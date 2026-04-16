@@ -2,11 +2,15 @@
 #+startup: content indent
 #+auto_tangle: t
 
-* Enable lexical bindings
+* Early Init
+:PROPERTIES:
+:header-args: :tangle "early-init.el"
+:END:
+** Enable lexical bindings
 #+begin_src emacs-lisp
-  ;;; init.el -*- lexical-binding: t; -*-
+  ;;; early-init.el -*- lexical-binding: t; -*-
 #+end_src
-* Ensure XDG directories are setup
+** Ensure XDG directories are setup
 #+begin_src emacs-lisp
   (defun bc-ensure-env (vars)
     "Ensure environment variables are set, using fallback value if unset.
@@ -22,8 +26,7 @@
    `(("XDG_CONFIG_HOME" . ,(expand-file-name "~/.config"))
      ("XDG_CACHE_HOME" . ,(expand-file-name "~/.cache"))))
 #+end_src
-* Custom functions
-
+** Custom functions
 All emacs cache stuff like elpa caches, savehist files, backups, etc should ideally live in the $XDG_CACHE_HOME
 #+begin_src emacs-lisp
   (defun bc-emacs-cache-dir (subpath)
@@ -35,7 +38,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
     (file-name-concat (getenv "XDG_CONFIG_HOME") "emacs" subpath))
 #+end_src
 
-* Ensure required directories are created before use
+** Ensure required directories are created before use
 #+begin_src emacs-lisp
   ;; create relevant directories used later in config
   (make-directory (bc-emacs-cache-dir "history") t)
@@ -43,7 +46,7 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (make-directory (bc-emacs-cache-dir "packages") t)
 #+end_src
 
-* Basic package configuration (use-package)
+** Basic package configuration (use-package)
 #+begin_src emacs-lisp
   (setopt package-user-dir (bc-emacs-cache-dir "packages")
   	    package-gnupghome-dir (bc-emacs-cache-dir "gnupg")
@@ -52,7 +55,8 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   ;; elpa servers
   (setopt package-archives '(("melpa" . "https://melpa.org/packages/")
                              ("org" . "https://orgmode.org/elpa/")
-                             ("elpa" . "https://elpa.gnu.org/packages/")))
+                             ("elpa" . "https://elpa.gnu.org/packages/")
+                             ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 
   (setopt gnutls-algorithm-priority "NORMAL:+VERS-TLS1.3")
 
@@ -66,12 +70,33 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   (setopt use-package-always-ensure t)
 #+end_src
 
-* Put custom UI configuration in a separate file
+** Put custom UI configuration in a separate file
 #+begin_src emacs-lisp
   (setopt custom-file (locate-user-emacs-file (bc-emacs-cache-dir "custom-vars.el")))
   (load custom-file 'noerror 'nomessage)
 #+end_src
 
+** Clean startup
+#+begin_src emacs-lisp
+  (setopt
+   blink-cursor-interval 0.7
+   confirm-kill-emacs 'yes-or-no-p
+   inhibit-startup-screen t
+   inhibit-startup-message t
+   initial-scratch-message ""
+   inhibit-startup-echo-area-message (user-login-name)
+   use-dialog-box nil
+   use-short-answers t
+   visible-bell nil ; do not flash the screen, when moving out of bounds, ex, pressing up when already at the first line.
+   )
+
+  (defun display-startup-echo-area-message ()
+    (message "Let the hacking begin!"))
+#+end_src
+* Enable lexical bindings
+#+begin_src emacs-lisp
+  ;;; init.el -*- lexical-binding: t; -*-
+#+end_src
 * Backup / History & related configuration
 ** Save history
 #+begin_src emacs-lisp
@@ -125,18 +150,6 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 * General Emacs UI settings
 ** Basic configuration
 #+begin_src emacs-lisp
-  ;; clean startup
-  (setopt
-   blink-cursor-interval 0.7
-   confirm-kill-emacs 'yes-or-no-p
-   inhibit-startup-echo-area-message ""
-   inhibit-startup-message t
-   initial-scratch-message ""
-   use-dialog-box nil
-   use-short-answers t
-   visible-bell nil ; do not flash the screen, when moving out of bounds, ex, pressing up when already at the first line.
-   )
-
   ;; disable fancy gui stuffs, menu et. all and other ui configs
   (menu-bar-mode -1)   ; disable the menu bar
   (mouse-avoidance-mode 'banish) ; banish the cursor as soon as i am typing
@@ -673,13 +686,15 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 #+begin_src emacs-lisp
   (setopt eshell-directory-name (bc-emacs-cache-dir "eshell"))
 #+end_src
-** Vterm
+** Eat - Emulate A Terminal
+https://codeberg.org/akib/emacs-eat
+
 #+begin_src emacs-lisp
-  (use-package vterm
+  (use-package eat
     :ensure t
-    :custom
-    (vterm-max-scrollback 100000)
-    )
+    :bind (("C-c t" . eat))
+    :config
+    (setq eat-kill-buffer-on-exit t))
 #+end_src
 * News / RSS
 **
