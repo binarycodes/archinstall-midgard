@@ -111,8 +111,17 @@ VARS is an alist of (VAR . FALLBACK) pairs."
 (use-package modus-themes
   :ensure t
   :demand t
-  :config
-  (modus-themes-load-theme 'modus-vivendi-tinted))
+  )
+
+(defun bc-load-theme ()
+  (if (display-graphic-p)
+      (modus-themes-load-theme 'modus-vivendi-tinted)
+    (modus-themes-load-theme 'modus-vivendi)))
+
+;; if emacs is running as daemon, then setting font dont work till frame is created
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook #'bc-load-theme)
+  (bc-load-theme))
 
 ;; fonts/faces
 (defun bc-set-font-faces ()
