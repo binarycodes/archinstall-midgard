@@ -112,7 +112,7 @@
                              :mode-line-width 6
                              :custom-button-width 3
                              :tab-width 4
-                             :right-divider-width 10
+                             :right-divider-width 1
                              :scroll-bar-width 8
                              :fringe-width 8))
   :config
@@ -346,6 +346,8 @@
           recentf-max-menu-items 0
           recentf-max-saved-items 200
 	      recentf-save-file (bc-emacs-cache-dir "recentf"))
+  (dolist (pattern `(,(bc-emacs-cache-dir "*") "/tmp/zsh.*\\.zsh"))
+    (add-to-list 'recentf-exclude pattern))
   (recentf-mode t))
 
 (setopt save-interprogram-paste-before-kill t ; save the existing clipboard into the kill ring before overwriting it
