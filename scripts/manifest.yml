@@ -109,8 +109,10 @@ applications:
     - cups-pdf
     - cyme
     - fastfetch
+    - mpv
     - qutebrowser
     - usbutils
+    - yt-dlp
 
 wayland:
     - brightnessctl
