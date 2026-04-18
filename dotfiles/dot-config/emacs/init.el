@@ -494,3 +494,13 @@
           ("https://feed.itsfoss.com/" linux tech news)
           )
         ))
+
+(use-package eww
+  :ensure nil
+  :init
+  (setopt browse-url-browser-function 'browse-url-default-browser
+          url-configuration-directory (bc-emacs-cache-dir "url")
+          url-cookie-file (bc-emacs-cache-dir "url/cookies"))
+  :config
+  (setopt eww-auto-rename-buffer 'title
+          browse-url-browser-function 'eww-browse-url))

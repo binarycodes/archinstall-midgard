@@ -699,8 +699,7 @@ https://codeberg.org/akib/emacs-eat
     (setq eat-kill-buffer-on-exit t))
 #+end_src
 * News / RSS
-**
-Elfeed
+** Elfeed
 #+begin_src emacs-lisp
   (use-package elfeed
     :ensure t
@@ -713,4 +712,16 @@ Elfeed
             ("https://feed.itsfoss.com/" linux tech news)
             )
           ))
+#+end_src
+** EWW - Emacs Web Wowser (Browser)
+#+begin_src emacs-lisp
+  (use-package eww
+    :ensure nil
+    :init
+    (setopt browse-url-browser-function 'browse-url-default-browser
+            url-configuration-directory (bc-emacs-cache-dir "url")
+            url-cookie-file (bc-emacs-cache-dir "url/cookies"))
+    :config
+    (setopt eww-auto-rename-buffer 'title
+            browse-url-browser-function 'eww-browse-url))
 #+end_src
