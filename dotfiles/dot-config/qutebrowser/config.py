@@ -2,16 +2,18 @@ config.load_autoconfig(False)
 
 c.auto_save.session = True
 
-c.completion.shrink = True
+c.colors.webpage.preferred_color_scheme = "dark"
 
-c.downloads.position = 'bottom'
-c.downloads.remove_finished = 5000
-c.downloads.location.remember = False
+c.completion.shrink = True
 
 c.content.javascript.can_open_tabs_automatically = False
 c.content.javascript.clipboard = 'access'
 c.content.notifications.enabled = False
 c.content.pdfjs = True
+
+c.downloads.location.remember = False
+c.downloads.position = 'bottom'
+c.downloads.remove_finished = 5000
 
 c.input.insert_mode.auto_enter = True
 c.input.insert_mode.auto_leave = True
