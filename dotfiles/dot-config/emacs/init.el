@@ -382,6 +382,16 @@
 ;; ace-window (switch between windows and frames)
 (global-set-key (kbd "M-o") 'ace-window)
 
+(use-package which-key
+  :ensure t
+  :init
+  (which-key-mode)
+  :config
+  (setq which-key-idle-delay 0.1
+        which-key-idle-secondary-delay 0.05
+        which-key-sort-order 'which-key-key-order-alpha
+        which-key-max-description-length 40))
+
 (use-package org
   :ensure nil
   :config

@@ -568,6 +568,20 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
   ;; ace-window (switch between windows and frames)
   (global-set-key (kbd "M-o") 'ace-window)
 #+end_src
+** Which-Key
+Shows available key bindings when a partial/prefix keybinding is invoked
+#+begin_src emacs-lisp
+  (use-package which-key
+    :ensure t
+    :init
+    (which-key-mode)
+    :config
+    (setq which-key-idle-delay 0.1
+          which-key-idle-secondary-delay 0.05
+          which-key-sort-order 'which-key-key-order-alpha
+          which-key-max-description-length 40))
+#+end_src
+
 * Org mode
 ** General
 #+begin_src emacs-lisp
