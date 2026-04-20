@@ -8,6 +8,7 @@ PACKAGE_SECTIONS=(
     "basic_packages"
     "essential_drivers"
     "dev_packages"
+    "language_servers"
     "fonts"
     "applications"
     "wayland"

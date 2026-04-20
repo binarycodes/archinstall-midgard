@@ -1,170 +1,175 @@
 ---
 pacstrap:
-    - base
-    - base-devel
-    - btrfs-progs
-    - git
-    - intel-ucode
-    - iptables
-    - less
-    - linux
-    - linux-firmware
-    - linux-headers
-    - mkinitcpio
-    - rsync
-    - vim
-    - yq
+  - base
+  - base-devel
+  - btrfs-progs
+  - git
+  - intel-ucode
+  - iptables
+  - less
+  - linux
+  - linux-firmware
+  - linux-headers
+  - mkinitcpio
+  - rsync
+  - vim
+  - yq
 
 post_chroot:
-    - efibootmgr
-    - iwd
-    - linux-lts
-    - linux-lts-headers
-    - openssh
-    - sudo
-    - zsh
+  - efibootmgr
+  - iwd
+  - linux-lts
+  - linux-lts-headers
+  - openssh
+  - sudo
+  - zsh
 
 basic_packages:
-    - emacs-wayland
-    - iperf3
-    - ipmitool
-    - man-db
-    - man-pages
-    - nfs-utils
-    - openbsd-netcat
-    - openssh
-    - pacman-contrib
-    - pkgfile
-    - ripgrep
-    - rsync
-    - stow
-    - texinfo
-    - tree
-    - unzip
-    - vim
-    - zsh
-    - zsh-autosuggestions
+  - emacs-wayland
+  - iperf3
+  - ipmitool
+  - man-db
+  - man-pages
+  - nfs-utils
+  - openbsd-netcat
+  - openssh
+  - pacman-contrib
+  - pkgfile
+  - ripgrep
+  - rsync
+  - stow
+  - texinfo
+  - tree
+  - unzip
+  - vim
+  - zsh
+  - zsh-autosuggestions
 
 essential_drivers:
-    - bluez
-    - bluez-utils
-    - inxi
-    - pavucontrol
-    - pipewire
-    - pipewire-alsa
-    - pipewire-jack
-    - pipewire-pulse
-    - rtkit
-    - sof-firmware
-    - solaar
+  - bluez
+  - bluez-utils
+  - inxi
+  - pavucontrol
+  - pipewire
+  - pipewire-alsa
+  - pipewire-jack
+  - pipewire-pulse
+  - rtkit
+  - sof-firmware
+  - solaar
 
 dev_packages:
-    - age
-    - ansible
-    - ansible-lint
-    - bash-language-server
-    - cmake # required to build emacs vterm-module
-    - dbeaver
-    - delve #go debugger
-    - direnv
-    - docker
-    - docker-compose
-    - git
-    - go
-    - golangci-lint
-    - intellij-idea-community-edition
-    - jdk21-openjdk
-    - jq
-    - maven
-    - opentofu
-    - packer
-    - terraform
-    - tflint
-    - yq
+  - age
+  - ansible
+  - ansible-lint
+  - cmake # required to build emacs vterm-module
+  - dbeaver
+  - delve #go debugger
+  - direnv
+  - docker
+  - docker-compose
+  - git
+  - go
+  - golangci-lint
+  - intellij-idea-community-edition
+  - jdk21-openjdk
+  - jq
+  - maven
+  - opentofu
+  - packer
+  - python
+  - uv # python package installer
+  - terraform
+  - tflint
+  - yq
+
+language_servers:
+  - bash-language-server
+  - gopls
 
 fonts:
-    - freetype2
-    - noto-fonts
-    - otf-libertinus
-    - otf-overpass
-    - tex-gyre-fonts
-    - ttf-bitstream-vera
-    - ttf-caladea
-    - ttf-carlito
-    - ttf-dejavu
-    - ttf-freefont
-    - ttf-jetbrains-mono
-    - ttf-jetbrains-mono-nerd
-    - ttf-liberation
-    - ttf-libertinus
-    - ttf-nerd-fonts-symbols
-    - ttf-opensans
-    - ttf-roboto
-    - ttf-ubuntu-font-family
+  - freetype2
+  - noto-fonts
+  - otf-libertinus
+  - otf-overpass
+  - tex-gyre-fonts
+  - ttf-bitstream-vera
+  - ttf-caladea
+  - ttf-carlito
+  - ttf-dejavu
+  - ttf-freefont
+  - ttf-jetbrains-mono
+  - ttf-jetbrains-mono-nerd
+  - ttf-liberation
+  - ttf-libertinus
+  - ttf-nerd-fonts-symbols
+  - ttf-opensans
+  - ttf-roboto
+  - ttf-ubuntu-font-family
 
 applications:
-    - bitwarden
-    - btop
-    - cups
-    - cups-pdf
-    - cyme
-    - fastfetch
-    - mpv
-    - qutebrowser
-    - usbutils
-    - yt-dlp
+  - bitwarden
+  - btop
+  - cups
+  - cups-pdf
+  - cyme
+  - fastfetch
+  - mpv
+  - qutebrowser
+  - usbutils
+  - yt-dlp
 
 wayland:
-    - brightnessctl
-    - foot
-    - greetd
-    - greetd-tuigreet
-    - grim
-    - mako
-    - slurp
-    - sway
-    - swaybg
-    - swayidle
-    - swaylock
-    - waybar
-    - wayland
-    - wev
-    - wl-clipboard
-    - wofi
-    - xdg-desktop-portal-wlr
-    - xorg-xwayland
+  - brightnessctl
+  - foot
+  - greetd
+  - greetd-tuigreet
+  - grim
+  - mako
+  - slurp
+  - sway
+  - swaybg
+  - swayidle
+  - swaylock
+  - waybar
+  - wayland
+  - wev
+  - wl-clipboard
+  - wofi
+  - xdg-desktop-portal-wlr
+  - xorg-xwayland
 
 pacman_keys:
-    - key: B929081F184DE398E1487552FF8D24F0A3FC59A6
-      server: keyserver.ubuntu.com
+  - key: B929081F184DE398E1487552FF8D24F0A3FC59A6
+    server: keyserver.ubuntu.com
 
 url_packages:
-    - https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
+  - https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
 
 aur_packages:
-    - brother-mfc-l2860dwe
-    - google-chrome
-    - infisical-bin
-    - jdtls
-    - terraform-ls-bin
-    - ttf-monaco
-    - ttf-ms-fonts
-    - winbox
-    - zen-browser-bin
+  - brother-mfc-l2860dwe
+  - google-chrome
+  - infisical-bin
+  - jdtls
+  - terraform-ls-bin
+  - ttf-monaco
+  - ttf-ms-fonts
+  - winbox
+  - zen-browser-bin
 
 system_services:
-    - bluetooth
-    - docker
-    - greetd
-    - iptables
-    - iwd
-    - rtkit-daemon
+  - bluetooth
+  - docker
+  - greetd
+  - iptables
+  - iwd
+  - rtkit-daemon
 
 user_services:
-    - pipewire
-    - pipewire-pulse
-    - wireplumber
-    - emacs
+  - pipewire
+  - pipewire-pulse
+  - wireplumber
+  - emacs
 
 git_repos:
-    - https://github.com/binarycodes/archinstall-midgard.git
+  - https://github.com/binarycodes/archinstall-midgard.git
