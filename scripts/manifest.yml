@@ -26,6 +26,7 @@ post_chroot:
 
 basic_packages:
   - emacs-wayland
+  - go-task # taskfile - task runner
   - iperf3
   - ipmitool
   - man-db
@@ -148,7 +149,6 @@ url_packages:
 
 aur_packages:
   - brother-mfc-l2860dwe
-  - google-chrome
   - infisical-bin
   - jdtls
   - terraform-ls-bin
