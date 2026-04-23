@@ -11,7 +11,7 @@ autoload -Uz colors && colors
 autoload -Uz edit-command-line
 
 # load custom functions/widgets
-autoload -Uz ~/.config/zsh/functions/*
+autoload -Uz ${ZDOTDIR}/functions/*
 
 # cmp opts
 zstyle ':completion::complete:*' cache-path ${XDG_CACHE_HOME}/zcompcache
@@ -44,28 +44,6 @@ setopt HIST_IGNORE_SPACE
 setopt HIST_SAVE_NO_DUPS
 setopt HIST_EXPIRE_DUPS_FIRST
 
-# binds
-bindkey -e
-bindkey "^[[A" history-beginning-search-backward # up arrow
-bindkey "^[[B" history-beginning-search-forward # down arrow
-bindkey "^[[Z" magic-space # shift-tab
-
-# Copy (like M-w in Emacs)
-zle -N zle-copy-region-to-clipboard
-bindkey '^[w' zle-copy-region-to-clipboard
-
-# Cut (like C-w in Emacs)
-zle -N zle-kill-region-to-clipboard
-bindkey '^w' zle-kill-region-to-clipboard
-
-# Paste (like C-y in Emacs)
-zle -N paste-from-clipboard
-bindkey '^y' paste-from-clipboard
-
-# Open editor to edit command line (C-x C-e)
-zle -N edit-command-line-editor
-bindkey '^X^E' edit-command-line-editor
-
 # set up prompt
 NEWLINE=$'\n'
 PROMPT="%K{#2E3440}%F{#E5E9F0}%D{%H:%M} %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ %f%k ❯ "
@@ -75,3 +53,7 @@ PROMPT="%K{#2E3440}%F{#E5E9F0}%D{%H:%M} %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~
 if [[ -n "$WAYLAND_DISPLAY" || -n "$DISPLAY" ]]; then
     source "${ZSH_AUTOSUGGESTIONS_PATH:-/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh}"
 fi
+
+for file in "$ZDOTDIR"/{aliases,bindkeys}.zsh; do
+    [[ -r "$file" ]] && source "$file"
+done
