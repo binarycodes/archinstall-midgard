@@ -1,0 +1,21 @@
+version: '3'
+
+tasks:
+  default:
+    desc: run system update
+    cmds:
+      - sudo pacman -Syu
+    silent: true
+  daily:
+    desc: run daily maintenance script
+    cmds:
+      - $HOME/projects/archinstall-midgard/scripts/daily.sh
+      - $HOME/projects/archinstall-midgard/scripts/cleanup_packages.sh
+    silent: true
+  clean:
+    desc: run clean up scripts
+    cmds:
+      - sudo paccache -ruk0
+      - sudo paccache -rk1
+      - $HOME/projects/archinstall-midgard/scripts/cleanup_packages.sh
+    silent: true
