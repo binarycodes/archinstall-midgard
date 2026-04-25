@@ -67,8 +67,6 @@ dev_packages:
   - dbeaver
   - delve #go debugger
   - direnv
-  - docker
-  - docker-compose
   - git
   - go
   - golangci-lint
@@ -78,6 +76,7 @@ dev_packages:
   - maven
   - opentofu
   - packer
+  - podman
   - python
   - uv # python package installer
   - terraform
@@ -159,7 +158,6 @@ aur_packages:
 
 system_services:
   - bluetooth
-  - docker
   - greetd
   - iptables
   - iwd
