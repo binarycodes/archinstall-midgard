@@ -110,7 +110,7 @@ window#waybar {
 }
 
 #clock {
-    color: #F8F8F2;
+    color: @color14;
 }
 
 #custom-weather {
