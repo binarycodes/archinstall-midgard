@@ -66,7 +66,7 @@ window#waybar {
 #memory,
 #clock,
 #custom-weather {
-    padding: 0 10px;
+    padding: 0 8px;
 }
 
 #network {
