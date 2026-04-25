@@ -432,6 +432,64 @@
    (prog-mode . completion-preview-mode) ; show inline completion preview
    ))
 
+(use-package reformatter
+  :ensure t)
+
+(use-package treesit
+  :ensure nil
+  :config
+  (setopt treesit-font-lock-level 3)
+  ;; Define grammar sources
+  (setq treesit-language-source-alist
+        '((css . ("https://github.com/tree-sitter/tree-sitter-css" "v0.20.0"))
+          (html . ("https://github.com/tree-sitter/tree-sitter-html" "v0.20.1"))
+          (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "v0.20.1" "src"))
+          (json . ("https://github.com/tree-sitter/tree-sitter-json" "v0.20.2"))
+          (python . ("https://github.com/tree-sitter/tree-sitter-python" "v0.20.4"))
+          (toml . ("https://github.com/tree-sitter/tree-sitter-toml" "v0.5.1"))
+          (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.20.3" "tsx/src"))
+          (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "v0.20.3" "typescript/src"))
+          (yaml . ("https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0"))
+          (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+          (gomod . ("https://github.com/camdencheek/tree-sitter-go-mod"))
+
+          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+          (bash "https://github.com/tree-sitter/tree-sitter-bash")
+          (cmake "https://github.com/uyha/tree-sitter-cmake")
+          (rust "https://github.com/tree-sitter/tree-sitter-rust")
+          (make "https://github.com/alemuller/tree-sitter-make")
+          (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+
+          (heex "https://github.com/phoenixframework/tree-sitter-heex")
+          (elixir "https://github.com/elixir-lang/tree-sitter-elixir")))
+  ;; Remap major modes to their tree-sitter counterparts
+  (dolist (mapping
+           '((python-mode . python-ts-mode)
+             (css-mode . css-ts-mode)
+             (typescript-mode . typescript-ts-mode)
+             (js2-mode . js-ts-mode)
+             (bash-mode . bash-ts-mode)
+             (conf-toml-mode . toml-ts-mode)
+             (go-mode . go-ts-mode)
+             (json-mode . json-ts-mode)
+             (js-json-mode . json-ts-mode)
+             (elixir-mode . elixir-ts-mode)))
+    (add-to-list 'major-mode-remap-alist mapping))
+  )
+
+(setq treesit--install-grammar-directory
+      (bc-emacs-cache-dir "treesitter"))
+
+(defun bc-treesitter-config-reinstall-grammars ()
+  "Force reinstallation of all grammars in `treesit-language-source-alist'.
+  Use this to update grammars to their latest versions."
+  (interactive)
+  (dolist (lang-source treesit-language-source-alist)
+    (let ((lang (car lang-source)))
+      (message "Treesitter: Reinstalling grammar for %s..." lang)
+      (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t)))
+        (treesit-install-language-grammar lang)))))
+
 (use-package eglot
   :ensure nil
   :functions (eglot-ensure)
@@ -462,8 +520,6 @@
 
 (use-package go-ts-mode
   :init
-  (add-to-list 'treesit-language-source-alist '(go "https://github.com/tree-sitter/tree-sitter-go"))
-  (add-to-list 'treesit-language-source-alist '(gomod "https://github.com/camdencheek/tree-sitter-go-mod"))
   (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
   (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
   :hook
