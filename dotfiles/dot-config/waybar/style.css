@@ -14,6 +14,9 @@
 @define-color color13 #ebcb8b;
 @define-color color14 #a3be8c;
 @define-color color15 #ba8baf;
+@define-color color16 #11aa11;
+@define-color color17 #778877;
+@define-color color18 #77cc77;
 
 * {
     font-family: "JetBrainsMono Nerd Font";
@@ -115,4 +118,8 @@ window#waybar {
 
 #custom-weather {
     color: #F1FA8C;
+}
+
+tooltip {
+    background: @color00;
 }

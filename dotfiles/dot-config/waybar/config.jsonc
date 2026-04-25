@@ -61,8 +61,20 @@
     },
 
     "clock": {
-        "format": " {:%Y-%b-%d  %H:%M}",
-        "tooltip-format": "{:%A, %B %d, %Y}"
+        "format": " {:%d-%b-%Y  %H:%M}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+            "mode": "year",
+            "mode-mon-col": 4,
+            "weeks-pos": "left",
+            "format": {
+			        "months": "<span color='#11aa11'><b>{}</b></span>",
+					"days": "<span color='#778877'><b>{}</b></span>",
+  					"weeks": "<span color='#77cc77'><b>W{}</b></span>",
+					"weekdays": "<span color='#77cc77'><b>{}</b></span>",
+					"today": "<span color='#ffb86c'><b>{}</b></span>",
+			},
+        }
     },
 
     "custom/weather": {
