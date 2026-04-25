@@ -3,7 +3,7 @@
     "position": "top",
     "font": "JetBrainsMono Nerd Font 10",
 
-    "modules-left": ["sway/workspaces", "sway/window"],
+    "modules-left": ["sway/workspaces", "sway/window", "sway/mode"],
     "modules-center": [],
     "modules-right": ["network", "battery", "pulseaudio", "bluetooth", "cpu", "memory", "custom/weather", "clock"],
 

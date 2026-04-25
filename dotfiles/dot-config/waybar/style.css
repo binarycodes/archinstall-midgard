@@ -52,6 +52,12 @@ window#waybar {
     color: @color13;
 }
 
+#mode {
+    background: @color11;
+    color: @color06;
+    padding: 0 8px;
+}
+
 #network,
 #battery,
 #pulseaudio,
