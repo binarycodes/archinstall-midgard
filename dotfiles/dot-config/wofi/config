@@ -1,1 +1,4 @@
 run-always_parse_args=true
+allow_images=true
+layer=top
+show=run
