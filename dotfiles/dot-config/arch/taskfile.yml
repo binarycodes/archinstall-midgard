@@ -19,3 +19,8 @@ tasks:
       - sudo paccache -rk1
       - $HOME/projects/archinstall-midgard/scripts/cleanup_packages.sh
     silent: true
+  check:
+    desc: check for pacnew/pacsave files in /etc
+    cmds:
+      - sudo find /etc -name '*.pacnew' -o -name '*.pacsave'
+    silent: true
