@@ -72,7 +72,7 @@ install_aur_packages() {
 
     echo "Installing AUR $section..."
     # shellcheck disable=SC2086
-    yay -S --answerclean None --answerdiff None --noconfirm --needed $packages
+    yay -S --aur --answerclean None --answerdiff None --noconfirm --needed $packages
 }
 
 install_yay() {
@@ -128,3 +128,6 @@ sudo rsync -av --no-owner --no-group "$CONFIG_DIR"/ /
 
 enable_services "system_services" "true"
 enable_services "user_services" "false"
+
+# update aur packages -- this needs to be done after yay is installed
+yay -Syu --aur
