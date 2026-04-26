@@ -3,22 +3,27 @@
 VARS_FILE="$(dirname "$0")/manifest.yml"
 
 PACKAGE_SECTIONS=(
+    "applications"
+    "aur_helpers"
+    "aur_packages"
+    "basic_packages"
+    "dev_packages"
+    "essential_drivers"
+    "fonts"
+    "language_servers"
     "pacstrap"
     "post_chroot"
-    "basic_packages"
-    "essential_drivers"
-    "dev_packages"
-    "language_servers"
-    "fonts"
-    "applications"
     "wayland"
-    "aur_packages"
 )
 
 managed_packages() {
-    for section in "${PACKAGE_SECTIONS[@]}"; do
-        yq -r ".${section}[]" "$VARS_FILE"
-    done | sort -u
+    {
+        for section in "${PACKAGE_SECTIONS[@]}"; do
+            yq -r ".${section}[]" "$VARS_FILE"
+        done;
+
+        yq -r '.url_packages[].name' "$VARS_FILE";
+    } | sort -u
 }
 
 orphaned=$(comm -23 <(pacman -Qqe | sort) <(managed_packages))
@@ -36,5 +41,5 @@ read -rp "Remove these packages? [y/N] " confirm
 
 if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
     # shellcheck disable=SC2086
-    sudo pacman -Rns $orphaned
+    sudo pacman -Rcns $orphaned
 fi

@@ -147,7 +147,8 @@ pacman_keys:
     server: keyserver.ubuntu.com
 
 url_packages:
-  - https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
+  - name: ssh-keysign
+    url: https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
 
 aur_packages:
   - brother-mfc-l2860dwe
@@ -174,3 +175,8 @@ user_services:
 
 git_repos:
   - https://github.com/binarycodes/archinstall-midgard.git
+
+# just for tracking installated packages
+aur_helpers:
+  - yay-bin
+  - yay-bin-debug

@@ -47,17 +47,22 @@ import_pacman_keys() {
 }
 
 install_url_packages() {
-    local urls
-    urls=$(parse_packages "url_packages")
+    local count
+    count=$(yq '.url_packages | length' "$VARS_FILE")
 
-    if [ -z "$urls" ]; then
+    if [ "$count" -eq 0 ]; then
         echo "No URL packages found"
         return
     fi
 
-    echo "Installing URL packages..."
-    # shellcheck disable=SC2086
-    sudo pacman --noconfirm --needed -U $urls
+    for i in $(seq 0 $((count - 1))); do
+        local name url
+        name=$(yq -r ".url_packages[$i].name" "$VARS_FILE")
+        url=$(yq -r ".url_packages[$i].url" "$VARS_FILE")
+        echo "Installing URL package - ${name} ..."
+        # shellcheck disable=SC2086
+        sudo pacman --noconfirm --needed -U "$url"
+    done
 }
 
 install_aur_packages() {
