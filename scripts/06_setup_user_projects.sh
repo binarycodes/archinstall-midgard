@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+if [ "$EUID" -eq 0 ]; then
+    echo "Error: Do not run this script as root."
+    exit 1
+fi
+
 # shellcheck source-path=SCRIPTDIR
 source "$(dirname "$0")/config.sh"
 

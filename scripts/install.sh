@@ -27,6 +27,9 @@ arch-chroot /mnt runuser -u "$USERNAME" -- /opt/archinstall-midgard/scripts/05_p
 echo "==> Setting up user projects..."
 arch-chroot /mnt runuser -u "$USERNAME" -- /opt/archinstall-midgard/scripts/06_setup_user_projects.sh
 
+echo "==> Running user customizations..."
+arch-chroot /mnt runuser -u "$USERNAME" -- /opt/archinstall-midgard/scripts/07_user_customizations.sh
+
 # clean up
 rm -rf /mnt/opt/archinstall-midgard
 

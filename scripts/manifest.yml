@@ -123,10 +123,12 @@ applications:
 wayland:
   - brightnessctl
   - foot
+  - gnome-themes-extra # need the Adwaita-dark theme
   - greetd
   - greetd-tuigreet
   - grim
   - mako
+  - papirus-icon-theme
   - slurp
   - sway
   - swaybg

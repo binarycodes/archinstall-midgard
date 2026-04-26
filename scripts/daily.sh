@@ -8,3 +8,6 @@ echo "==> Updating packages..."
 
 echo "==> Setting up user projects..."
 "$SCRIPT_DIR"/06_setup_user_projects.sh
+
+echo "==> Running user customizations..."
+"$SCRIPT_DIR"/07_user_customizations.sh
