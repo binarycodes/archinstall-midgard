@@ -114,13 +114,7 @@ enable_services() {
 
 sudo pacman -Syu --noconfirm
 
-install_packages "basic_packages"
-install_packages "essential_drivers"
-install_packages "dev_packages"
-install_packages "language_servers"
-install_packages "fonts"
-install_packages "applications"
-install_packages "wayland"
+install_packages "packages"
 
 install_yay
 install_aur_packages "aur_packages"

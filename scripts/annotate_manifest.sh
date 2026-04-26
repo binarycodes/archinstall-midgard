@@ -9,13 +9,7 @@ manifest="$1"
 mapfile -t pkgs < <(yq -r '
     .pacstrap[],
     .post_chroot[],
-    .basic_packages[],
-    .essential_drivers[],
-    .dev_packages[],
-    .language_servers[],
-    .fonts[],
-    .applications[],
-    .wayland[],
+    .packages[],
     .aur_packages[],
     .aur_helpers[]
 ' "$manifest" | sort -u)

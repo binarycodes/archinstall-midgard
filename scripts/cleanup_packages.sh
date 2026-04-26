@@ -2,28 +2,15 @@
 
 VARS_FILE="$(dirname "$0")/manifest.yml"
 
-PACKAGE_SECTIONS=(
-    "applications"
-    "aur_helpers"
-    "aur_packages"
-    "basic_packages"
-    "dev_packages"
-    "essential_drivers"
-    "fonts"
-    "language_servers"
-    "pacstrap"
-    "post_chroot"
-    "wayland"
-)
-
 managed_packages() {
-    {
-        for section in "${PACKAGE_SECTIONS[@]}"; do
-            yq -r ".${section}[]" "$VARS_FILE"
-        done;
-
-        yq -r '.url_packages[].name' "$VARS_FILE";
-    } | sort -u
+    yq -r '
+        .pacstrap[],
+        .post_chroot[],
+        .packages[],
+        .aur_packages[],
+        .aur_helpers[],
+        .url_packages[].name
+    ' "$VARS_FILE" | sort -u
 }
 
 orphaned=$(comm -23 <(pacman -Qqe | sort) <(managed_packages))
