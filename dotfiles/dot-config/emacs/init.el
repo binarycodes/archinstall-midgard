@@ -379,7 +379,7 @@
 
 (use-package project
   :init
-  (setq project-vc-extra-root-markers '("Cargo.toml" "pyproject.toml" "requirements.txt" "go.mod" "main.tf" "Makefile"))
+  (setq project-vc-extra-root-markers '("Cargo.toml" "pyproject.toml" "requirements.txt" "go.mod"))
   :config
   (setopt project-list-file (bc-emacs-cache-dir "projects.el")))
 
