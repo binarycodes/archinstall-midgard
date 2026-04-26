@@ -239,8 +239,8 @@
 ;; search" (as opposed to the basic C-s or C-r keys).
 (use-package consult
   :ensure t
-  :bind (("M-s M-g" . consult-grep) ; a recursive grep
-         ("M-s M-f" . consult-find) ; search for files names recursively
+  :bind (("M-s M-g" . consult-ripgrep) ; a recursive grep
+         ("M-s M-f" . consult-fd) ; search for files names recursively
          ("M-s M-o" . consult-outline) ; search through the outline (headings) of the file
          ("M-s M-l" . consult-line) ; search the current buffer
          ("M-s M-b" . consult-buffer) ; switch to another buffer, or bookmarked file, or recently opened file.
@@ -560,15 +560,15 @@
 
 (use-package elfeed
   :ensure t
+  :bind
+  (("C-c r e" . elfeed))
   :config
   (setq elfeed-db-directory (bc-emacs-cache-dir "elfeed-db")
         elfeed-feeds
-        '(
-          ("https://karthinks.com/index.xml" dev emacs)
+        '(("https://karthinks.com/index.xml" dev emacs)
           ("https://feeds.feedburner.com/TheHackersNews" security cyber tech news)
           ("https://feed.itsfoss.com/" linux tech news)
-          )
-        ))
+          ("https://www.apalrd.net/index.xml" tech blog))))
 
 (use-package eww
   :ensure nil
@@ -579,3 +579,5 @@
   :config
   (setopt eww-auto-rename-buffer 'title
           browse-url-browser-function 'eww-browse-url))
+
+(use-package olivetti)

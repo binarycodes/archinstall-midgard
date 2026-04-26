@@ -26,6 +26,7 @@ post_chroot:
 
 basic_packages:
   - emacs-wayland
+  - fd # improved find
   - go-task # taskfile - task runner
   - iperf3
   - ipmitool
