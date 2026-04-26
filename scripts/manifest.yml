@@ -1,146 +1,146 @@
 ---
 pacstrap:
-  - base
-  - base-devel
-  - btrfs-progs
-  - git
-  - intel-ucode
-  - iptables
-  - less
-  - linux
-  - linux-firmware
-  - linux-headers
-  - mkinitcpio
-  - rsync
-  - vim
-  - yq
+  - base # Minimal package set to define a basic Arch Linux installation
+  - base-devel # Basic tools to build Arch Linux packages
+  - btrfs-progs # Btrfs filesystem utilities
+  - git # the fast distributed version control system
+  - intel-ucode # Microcode update files for Intel CPUs
+  - iptables # Linux kernel packet control tool (using nft interface)
+  - less # A terminal based program for viewing text files
+  - linux # The Linux kernel and modules
+  - linux-firmware # Firmware files for Linux - Default set
+  - linux-headers # Headers and scripts for building modules for the Linux kernel
+  - mkinitcpio # Modular initramfs image creation utility
+  - rsync # A fast and versatile file copying tool for remote and local files
+  - vim # Vi Improved, a highly configurable, improved version of the vi text editor
+  - yq # Command-line YAML, XML, TOML processor - jq wrapper for YAML/XML/TOML documents
 
 post_chroot:
-  - efibootmgr
-  - iwd
-  - linux-lts
-  - linux-lts-headers
-  - openssh
-  - sudo
-  - zsh
+  - efibootmgr # Linux user-space application to modify the EFI Boot Manager
+  - iwd # Internet Wireless Daemon
+  - linux-lts # The LTS Linux kernel and modules
+  - linux-lts-headers # Headers and scripts for building modules for the LTS Linux kernel
+  - openssh # SSH protocol implementation for remote login, command execution and file transfer
+  - sudo # Give certain users the ability to run some commands as root
+  - zsh # A very advanced and programmable command interpreter (shell) for UNIX
 
 basic_packages:
-  - emacs-wayland
-  - fd # improved find
-  - go-task # taskfile - task runner
-  - iperf3
-  - ipmitool
-  - man-db
-  - man-pages
-  - nfs-utils
-  - openbsd-netcat
-  - openssh
-  - pacman-contrib
-  - pkgfile
-  - ripgrep
-  - rsync
-  - stow
-  - texinfo
-  - tree
-  - unzip
-  - vim
-  - zsh
-  - zsh-autosuggestions
+  - emacs-wayland # The extensible, customizable, self-documenting real-time display editor with PGTK enabled
+  - fd # Simple, fast and user-friendly alternative to find
+  - go-task # A task runner written in Go
+  - iperf3 # TCP, UDP, and SCTP network bandwidth measurement tool
+  - ipmitool # Command-line interface to IPMI-enabled devices
+  - man-db # A utility for reading man pages
+  - man-pages # Linux man pages
+  - nfs-utils # Support programs for Network File Systems
+  - openbsd-netcat # TCP/IP swiss army knife. OpenBSD variant
+  - openssh # SSH protocol implementation for remote login, command execution and file transfer
+  - pacman-contrib # Contributed scripts and tools for pacman systems
+  - pkgfile # A tool to search for files in official repository packages
+  - ripgrep # A search tool that combines the usability of ag with the raw speed of grep
+  - rsync # A fast and versatile file copying tool for remote and local files
+  - stow # Manage installation of multiple softwares in the same directory tree
+  - texinfo # GNU documentation system for on-line information and printed output
+  - tree # A directory listing program displaying a depth indented list of files
+  - unzip # For extracting and viewing files in .zip archives
+  - vim # Vi Improved, a highly configurable, improved version of the vi text editor
+  - zsh # A very advanced and programmable command interpreter (shell) for UNIX
+  - zsh-autosuggestions # Fish-like autosuggestions for zsh
 
 essential_drivers:
-  - bluez
-  - bluez-utils
-  - inxi
-  - pavucontrol
-  - pipewire
-  - pipewire-alsa
-  - pipewire-jack
-  - pipewire-pulse
-  - rtkit
-  - sof-firmware
-  - solaar
+  - bluez # Daemons for the bluetooth protocol stack
+  - bluez-utils # Development and debugging utilities for the bluetooth protocol stack
+  - inxi # Full featured CLI system information tool
+  - pavucontrol # PulseAudio Volume Control
+  - pipewire # Low-latency audio/video router and processor
+  - pipewire-alsa # Low-latency audio/video router and processor - ALSA configuration
+  - pipewire-jack # Low-latency audio/video router and processor - JACK replacement
+  - pipewire-pulse # Low-latency audio/video router and processor - PulseAudio replacement
+  - rtkit # Realtime Policy and Watchdog Daemon
+  - sof-firmware # Sound Open Firmware
+  - solaar # Linux device manager for a wide range of Logitech devices
 
 dev_packages:
-  - age
-  - ansible
-  - ansible-lint
-  - cmake # required to build emacs vterm-module
-  - dbeaver
-  - delve #go debugger
-  - direnv
-  - git
-  - go
-  - golangci-lint
-  - intellij-idea-community-edition
-  - jdk21-openjdk
-  - jq
-  - maven
-  - opentofu
-  - packer
-  - podman
-  - python
-  - uv # python package installer
-  - terraform
-  - tflint
-  - yq
+  - age # A simple, modern and secure file encryption tool
+  - ansible # Official assortment of Ansible collections
+  - ansible-lint # Checks playbooks for practices and behaviour that could potentially be improved
+  - cmake # A cross-platform open-source make system
+  - dbeaver # Free universal SQL Client for developers and database administrators (community edition)
+  - delve # A debugger for the Go programming language
+  - direnv # A shell extension that manages your environment
+  - git # the fast distributed version control system
+  - go # Core compiler tools for the Go programming language
+  - golangci-lint # Fast linters runner for Go
+  - intellij-idea-community-edition # IDE for Java, Groovy and other programming languages with advanced refactoring features
+  - jdk21-openjdk # OpenJDK Java 21 development kit
+  - jq # Command-line JSON processor
+  - maven # Java project management and project comprehension tool
+  - opentofu # Lets you declaratively manage your cloud infrastructure
+  - packer # tool for creating machine images for platforms from a single source configuration
+  - podman # Tool and library for running OCI-based containers in pods
+  - python # The Python programming language
+  - uv # An extremely fast Python package installer and resolver written in Rust
+  - terraform # HashiCorp tool for building and updating infrastructure as code idempotently
+  - tflint # A linter for Terraform code
+  - yq # Command-line YAML, XML, TOML processor - jq wrapper for YAML/XML/TOML documents
 
 language_servers:
-  - bash-language-server
-  - gopls
+  - bash-language-server # Bash language server implementation based on Tree Sitter and its grammar for Bash
+  - gopls # Language server for Go programming language
 
 fonts:
-  - freetype2
-  - noto-fonts
-  - otf-libertinus
-  - otf-overpass
-  - tex-gyre-fonts
-  - ttf-bitstream-vera
-  - ttf-caladea
-  - ttf-carlito
-  - ttf-dejavu
+  - freetype2 # Font rasterization library
+  - noto-fonts # Google Noto TTF fonts
+  - otf-libertinus # Fonts based on Linux Libertine/Biolinum, with extended math support
+  - otf-overpass # Open source web font family (Open Type Font)
+  - tex-gyre-fonts # Substitute PostScript fonts in OpenType format
+  - ttf-bitstream-vera # Bitstream Vera fonts
+  - ttf-caladea # A serif font family metric-compatible with Cambria font family
+  - ttf-carlito # Google's Carlito font
+  - ttf-dejavu # Font family based on the Bitstream Vera Fonts with a wider range of characters
   - ttf-freefont
-  - ttf-jetbrains-mono
-  - ttf-jetbrains-mono-nerd
-  - ttf-liberation
-  - ttf-libertinus
-  - ttf-nerd-fonts-symbols
-  - ttf-opensans
-  - ttf-roboto
-  - ttf-ubuntu-font-family
+  - ttf-jetbrains-mono # Typeface for developers, by JetBrains
+  - ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
+  - ttf-liberation # Font family which aims at metric compatibility with Arial, Times New Roman, and Courier New
+  - ttf-libertinus # Fonts based on Linux Libertine/Biolinum, with extended math support
+  - ttf-nerd-fonts-symbols # High number of extra glyphs from popular 'iconic fonts'
+  - ttf-opensans # Sans-serif typeface commissioned by Google
+  - ttf-roboto # Google's signature family of fonts
+  - ttf-ubuntu-font-family # Ubuntu font family
 
 applications:
-  - bitwarden
-  - btop
-  - cups
-  - cups-pdf
-  - cyme
-  - fastfetch
-  - mpv
-  - qutebrowser
-  - usbutils
-  - yt-dlp
+  - bitwarden # A secure and free password manager for all of your devices
+  - btop # A monitor of system resources, bpytop ported to C++
+  - cups # OpenPrinting CUPS - daemon package
+  - cups-pdf # PDF printer for cups
+  - cyme # List system USB buses and devices; a lib and modern cross-platform lsusb
+  - fastfetch # A feature-rich and performance oriented neofetch like system information tool
+  - mpv # a free, open source, and cross-platform media player
+  - qutebrowser # A keyboard-driven, vim-like browser based on Python and Qt
+  - usbutils # A collection of USB tools to query connected USB devices
+  - yt-dlp # A youtube-dl fork with additional features and fixes
 
 wayland:
-  - brightnessctl
-  - foot
-  - gnome-themes-extra # need the Adwaita-dark theme
-  - greetd
-  - greetd-tuigreet
-  - grim
-  - mako
-  - papirus-icon-theme
-  - slurp
-  - sway
-  - swaybg
-  - swayidle
-  - swaylock
-  - waybar
-  - wayland
-  - wev
-  - wl-clipboard
-  - wofi
-  - xdg-desktop-portal-wlr
-  - xorg-xwayland
+  - brightnessctl # Lightweight brightness control tool
+  - foot # Fast, lightweight, and minimalistic Wayland terminal emulator
+  - gnome-themes-extra # Extra GNOME themes (legacy HighContrast icon theme and index files for Adwaita)
+  - greetd # Generic greeter daemon
+  - greetd-tuigreet # A console UI greeter for greetd
+  - grim # Screenshot utility for Wayland
+  - mako # Lightweight notification daemon for Wayland
+  - papirus-icon-theme # Papirus icon theme
+  - slurp # Select a region in a Wayland compositor
+  - sway # Tiling Wayland compositor and replacement for the i3 window manager
+  - swaybg # Wallpaper tool for Wayland compositors
+  - swayidle # Idle management daemon for Wayland
+  - swaylock # Screen locker for Wayland
+  - waybar # Highly customizable Wayland bar for Sway and Wlroots based compositors
+  - wayland # A computer display server protocol
+  - wev # A tool for debugging wayland events on a Wayland window, analagous to the X11 tool xev
+  - wl-clipboard # Command-line copy/paste utilities for Wayland
+  - wofi # launcher for wlroots-based wayland compositors
+  - xdg-desktop-portal-wlr # xdg-desktop-portal backend for wlroots
+  - xorg-xwayland # run X clients under wayland
 
 pacman_keys:
   - key: B929081F184DE398E1487552FF8D24F0A3FC59A6
@@ -151,25 +151,25 @@ url_packages:
     url: https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
 
 aur_packages:
-  - brother-mfc-l2860dwe
-  - infisical-bin
+  - brother-mfc-l2860dwe # LPR and CUPS driver for the Brother MFC-L2880DW
+  - infisical-bin # The official Infisical CLI
   - jdtls
-  - terraform-ls-bin
-  - ttf-monaco
-  - ttf-ms-fonts
-  - winbox
-  - zen-browser-bin
+  - terraform-ls-bin # Terraform Language Server
+  - ttf-monaco # The Monaco monospaced sans-serif typeface with special characters added
+  - ttf-ms-fonts # Core TTF Fonts from Microsoft
+  - winbox # Mikrotik RouterOS GUI Configurator
+  - zen-browser-bin # Performance oriented Firefox-based web browser
 
 system_services:
   - bluetooth
-  - greetd
-  - iptables
-  - iwd
+  - greetd # Generic greeter daemon
+  - iptables # Linux kernel packet control tool (using nft interface)
+  - iwd # Internet Wireless Daemon
   - rtkit-daemon
 
 user_services:
-  - pipewire
-  - pipewire-pulse
+  - pipewire # Low-latency audio/video router and processor
+  - pipewire-pulse # Low-latency audio/video router and processor - PulseAudio replacement
   - wireplumber
   - emacs
 
