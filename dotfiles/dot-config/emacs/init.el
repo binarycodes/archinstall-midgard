@@ -390,6 +390,9 @@
 
 ;; ace-window (switch between windows and frames)
 (global-set-key (kbd "M-o") 'ace-window)
+(global-set-key (kbd "M-u") 'upcase-dwim)
+(global-set-key (kbd "M-l") 'downcase-dwim)
+(global-set-key (kbd "M-c") 'capitalize-dwim)
 
 (use-package which-key
   :ensure t

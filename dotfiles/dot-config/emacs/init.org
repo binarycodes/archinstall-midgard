@@ -576,6 +576,10 @@ All emacs cache stuff like elpa caches, savehist files, backups, etc should idea
 
   ;; ace-window (switch between windows and frames)
   (global-set-key (kbd "M-o") 'ace-window)
+  (global-set-key (kbd "M-u") 'upcase-dwim)
+  (global-set-key (kbd "M-l") 'downcase-dwim)
+  (global-set-key (kbd "M-c") 'capitalize-dwim)
+
 #+end_src
 ** Which-Key
 Shows available key bindings when a partial/prefix keybinding is invoked
