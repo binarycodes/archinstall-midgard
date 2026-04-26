@@ -1,0 +1,40 @@
+function claude() {
+    local stack="${1}"
+    local workspace="${2}"
+
+    # read two args, the rest are forwarded to the docker container
+    shift 2
+
+    local workspace_abs
+    local image
+    local -a cmd
+
+    if [[ ! -d "$workspace" ]]; then
+        printf 'error: workspace must be an existing directory: %s\n' "$workspace" >&2
+        return 1
+    fi
+
+    workspace_abs="$(cd "$workspace" && pwd -P)" || return 1
+    image="docker.io/binarycodes/claude-local:${stack}"
+
+    if [[ ! -f "/tmp/claude/claude.json" ]]; then
+        mkdir -p /tmp/claude
+        touch /tmp/claude/claude.json
+    fi
+
+    cmd=(
+        podman run
+        --rm
+        -it
+        --pull always
+        -v claude_config:/home/agent/.claude
+        -v /tmp/claude/claude.json:/home/agent/.claude.json
+        -v "${workspace_abs}:/workspace"
+        -w /workspace
+        --name "claude-${stack}-$(date +%s)"
+        "$image"
+        "$@" # forward extra args
+    )
+
+    "${cmd[@]}"
+}
