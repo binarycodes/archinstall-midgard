@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-if [[ $1 == post ]]; then
-    sudo rmmod psmouse
-    sudo modprobe psmouse
+has_touchpad() {
+  grep -qi touchpad /proc/bus/input/devices
+}
+
+if [[ "${1:-}" == post ]] && has_touchpad; then
+    rmmod psmouse
+    modprobe psmouse
 fi
