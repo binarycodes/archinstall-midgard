@@ -694,6 +694,18 @@ Shows available key bindings when a partial/prefix keybinding is invoked
           (treesit-install-language-grammar lang)))))
 
 #+end_src
+** Ediff
+#+begin_src emacs-lisp
+  (use-package ediff
+    :ensure nil
+    :config
+    (setopt ediff-split-window-function 'split-window-horizontally
+            ediff-window-setup-function 'ediff-setup-windows-plain
+            ediff-keep-variants nil
+            ediff-make-buffers-readonly-at-startup nil
+            ediff-show-clashes-only t))
+#+end_src
+
 ** Language server (eglot)
 #+begin_src emacs-lisp
   (use-package eglot

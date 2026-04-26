@@ -490,6 +490,15 @@
       (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t)))
         (treesit-install-language-grammar lang)))))
 
+(use-package ediff
+  :ensure nil
+  :config
+  (setopt ediff-split-window-function 'split-window-horizontally
+          ediff-window-setup-function 'ediff-setup-windows-plain
+          ediff-keep-variants nil
+          ediff-make-buffers-readonly-at-startup nil
+          ediff-show-clashes-only t))
+
 (use-package eglot
   :ensure nil
   :functions (eglot-ensure)
