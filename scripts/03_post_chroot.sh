@@ -40,7 +40,9 @@ create_user() {
     echo "set password for root"
     passwd
 
-    useradd -m -G wheel -s /usr/bin/zsh "$USERNAME"
+    # wheel - sudo access
+    # lp - printer access
+    useradd -m -G wheel,lp -s /usr/bin/zsh "$USERNAME"
     echo "set password for - $USERNAME"
     passwd "$USERNAME"
 }
