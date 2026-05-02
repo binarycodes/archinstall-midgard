@@ -85,6 +85,7 @@ packages:
   - podman # Tool and library for running OCI-based containers in pods
   - python # The Python programming language
   - qutebrowser # A keyboard-driven, vim-like browser based on Python and Qt
+  - reflector # A Python 3 module and script to retrieve and filter the latest Pacman mirror list
   - ripgrep # A search tool that combines the usability of ag with the raw speed of grep
   - rsync # A fast and versatile file copying tool for remote and local files
   - rtkit # Realtime Policy and Watchdog Daemon
@@ -141,7 +142,7 @@ url_packages:
 aur_packages:
   - brother-mfc-l2860dwe # LPR and CUPS driver for the Brother MFC-L2880DW
   - infisical-bin # The official Infisical CLI
-  - jdtls
+  - jdtls # Eclipse Java language server
   - terraform-ls-bin # Terraform Language Server
   - ttf-monaco # The Monaco monospaced sans-serif typeface with special characters added
   - ttf-ms-fonts # Core TTF Fonts from Microsoft
@@ -153,6 +154,7 @@ system_services:
   - greetd
   - iptables
   - iwd
+  - reflector
   - rtkit-daemon
 
 user_services:
