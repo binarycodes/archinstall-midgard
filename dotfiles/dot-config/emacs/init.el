@@ -33,8 +33,13 @@
         transient-values-file (bc-emacs-cache-dir "transient/values.el")
         transient-history-file (bc-emacs-cache-dir "transient/history.el"))
 
-(setopt tramp-persistency-file-name (bc-emacs-cache-dir "tramp/persist")
-        tramp-histfile-override (bc-emacs-cache-dir "tramp/history"))
+(use-package tramp
+  :ensure nil
+  :config
+  (setopt tramp-persistency-file-name (bc-emacs-cache-dir "tramp/persist")
+          tramp-histfile-override (bc-emacs-cache-dir "tramp/history"))
+  (make-directory (file-name-directory tramp-persistency-file-name) t)
+  (make-directory (file-name-directory tramp-histfile-override) t))
 
 (setopt svg-lib-icons-dir (bc-emacs-cache-dir "svg-lib"))
 
