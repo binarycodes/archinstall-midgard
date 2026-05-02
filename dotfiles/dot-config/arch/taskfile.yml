@@ -5,6 +5,7 @@ tasks:
     desc: run system update
     cmds:
       - sudo pacman -Syu
+      - yay -Syu --aur
       - notify-send -t 5000 "update complete"
     silent: true
   daily:
