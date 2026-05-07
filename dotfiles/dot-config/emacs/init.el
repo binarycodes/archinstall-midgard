@@ -446,7 +446,8 @@
 (use-package treesit
   :ensure nil
   :config
-  (setopt treesit-font-lock-level 3)
+  (setopt treesit-font-lock-level 3
+          treesit-extra-load-path `(,(bc-emacs-cache-dir "treesitter")))
   ;; Define grammar sources
   (setq treesit-language-source-alist
         '((css . ("https://github.com/tree-sitter/tree-sitter-css" "v0.20.0"))
@@ -485,9 +486,6 @@
     (add-to-list 'major-mode-remap-alist mapping))
   )
 
-(setq treesit--install-grammar-directory
-      (bc-emacs-cache-dir "treesitter"))
-
 (defun bc-treesitter-config-reinstall-grammars ()
   "Force reinstallation of all grammars in `treesit-language-source-alist'.
   Use this to update grammars to their latest versions."
@@ -496,7 +494,7 @@
     (let ((lang (car lang-source)))
       (message "Treesitter: Reinstalling grammar for %s..." lang)
       (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t)))
-        (treesit-install-language-grammar lang)))))
+        (treesit-install-language-grammar lang (bc-emacs-cache-dir "treesitter"))))))
 
 (use-package ediff
   :ensure nil
