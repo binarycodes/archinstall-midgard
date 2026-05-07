@@ -193,6 +193,26 @@
   (setq markdown-fontify-code-blocks-natively t)
   )
 
+(use-package flyspell
+  :hook
+  ((text-mode . flyspell-mode)
+   (org-mode . flyspell-mode)
+   (prog-mode . flyspell-prog-mode))
+  :config
+  (setopt ispell-program-name "aspell"
+          ispell-dictionary "en_GB"
+          ispell-extra-args '("--sug-mode=ultra" "--lang=en_GB")))
+
+(use-package flyspell-correct
+  :after flyspell
+  :bind (:map flyspell-mode-map
+              ("C-c $" . flyspell-correct-wrapper)))
+
+(use-package langtool
+  :config
+  (setopt langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*"
+          langtool-default-language "en-GB"))
+
 (setopt help-window-select t)
 
 (use-package ace-window

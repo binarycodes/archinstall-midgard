@@ -28,6 +28,8 @@ packages:
   - age # A simple, modern and secure file encryption tool
   - ansible # Official assortment of Ansible collections
   - ansible-lint # Checks playbooks for practices and behaviour that could potentially be improved
+  - aspell # A spell checker designed to eventually replace Ispell
+  - aspell-en # English dictionary for aspell
   - bash-language-server # Bash language server implementation based on Tree Sitter and its grammar for Bash
   - bitwarden # A secure and free password manager for all of your devices
   - bluez # Daemons for the bluetooth protocol stack
@@ -61,6 +63,7 @@ packages:
   - ipmitool # Command-line interface to IPMI-enabled devices
   - jdk21-openjdk # OpenJDK Java 21 development kit
   - jq # Command-line JSON processor
+  - languagetool # An open source language checker
   - mako # Lightweight notification daemon for Wayland
   - man-db # A utility for reading man pages
   - man-pages # Linux man pages
