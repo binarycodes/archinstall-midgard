@@ -1,0 +1,47 @@
+font=JetBrainsMono Nerd Font 12
+width=420
+height=300
+margin=15
+padding=15
+border-size=2
+border-radius=8
+
+icons=1
+max-icon-size=48
+markup=1
+actions=1
+history=1
+
+default-timeout=5000
+ignore-timeout=0
+
+anchor=top-right
+layer=overlay
+
+background-color=#111111ff
+text-color=#e5e5e5
+border-color=#A3BE8Cff
+progress-color=over #5e81acff
+
+# group duplicates
+group-by=summary
+
+# smooth sorting
+sort=-time
+
+# hidden until hovered
+outer-margin=0
+
+# urgency styling
+[urgency=low]
+border-color=#666666ff
+default-timeout=3000
+
+[urgency=normal]
+border-color=#A3BE8Cff
+
+[urgency=high]
+background-color=#3b0d0cff
+text-color=#ffffff
+border-color=#bf616aff
+default-timeout=0
