@@ -129,4 +129,4 @@ enable_services "system_services" "true"
 enable_services "user_services" "false"
 
 # update aur packages -- this needs to be done after yay is installed
-yay -Syu --aur
+yay -Syu --aur --answerclean None --answerdiff None --noconfirm --needed

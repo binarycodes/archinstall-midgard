@@ -1,19 +1,22 @@
 version: '3'
 
+vars:
+  NOTIFY_TITLE: System Maintenance
+
 tasks:
   default:
     desc: run system update
     cmds:
       - sudo pacman -Syu
-      - yay -Syu --aur
-      - notify-send -t 5000 "update complete"
+      - yay -Syu --aur --answerclean None --answerdiff None --noconfirm --needed
+      - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Update complete"
     silent: true
   daily:
     desc: run daily maintenance script
     cmds:
       - $HOME/projects/archinstall-midgard/scripts/daily.sh
       - $HOME/projects/archinstall-midgard/scripts/cleanup_packages.sh
-      - notify-send -t 5000 "daily maintenance complete"
+      - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Daily maintenance complete"
     silent: true
   clean:
     desc: run clean up scripts
@@ -21,10 +24,11 @@ tasks:
       - sudo paccache -ruk0
       - sudo paccache -rk1
       - $HOME/projects/archinstall-midgard/scripts/cleanup_packages.sh
-      - notify-send -t 5000 "clean-up complete"
+      - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Package clean-up complete"
     silent: true
   check:
     desc: check for pacnew/pacsave files in /etc
     cmds:
       - sudo find /etc -name '*.pacnew' -o -name '*.pacsave'
+      - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Check for .pacsave, .pacnew complete"
     silent: true
