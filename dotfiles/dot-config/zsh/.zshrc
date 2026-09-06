@@ -1,9 +1,3 @@
-# --- Paths for autoloading ---
-fpath=(
-  ~/.zsh/functions
-  $fpath
-)
-
 # load modules
 zmodload zsh/complist
 autoload -Uz compinit && compinit -d ${XDG_CACHE_HOME}/zcompdump
@@ -11,7 +5,9 @@ autoload -Uz colors && colors
 autoload -Uz edit-command-line
 
 # load custom functions/widgets
-autoload -Uz ${ZDOTDIR}/functions/*
+for file in ${ZDOTDIR}/functions/*.zsh; do
+    [[ -r "$file" ]] && source "$file"
+done
 
 # cmp opts
 zstyle ':completion::complete:*' cache-path ${XDG_CACHE_HOME}/zcompcache
