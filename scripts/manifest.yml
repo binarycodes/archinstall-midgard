@@ -30,6 +30,7 @@ packages:
   - ansible-lint # Checks playbooks for practices and behaviour that could potentially be improved
   - aspell # A spell checker designed to eventually replace Ispell
   - aspell-en # English dictionary for aspell
+  - avahi # Service Discovery for Linux using mDNS/DNS-SD (compatible with Bonjour)
   - bash-language-server # Bash language server implementation based on Tree Sitter and its grammar for Bash
   - bitwarden # A secure and free password manager for all of your devices
   - bluez # Daemons for the bluetooth protocol stack
@@ -84,8 +85,9 @@ packages:
   - pipewire-alsa # Low-latency audio/video router and processor - ALSA configuration
   - pipewire-jack # Low-latency audio/video router and processor - JACK replacement
   - pipewire-pulse # Low-latency audio/video router and processor - PulseAudio replacement
+  - pipewire-zeroconf # Low-latency audio/video router and processor - Zeroconf support
   - pkgfile # A tool to search for files in official repository packages
-  - podman # Tool and library for running OCI-based containers in pods
+  - podman # A tool for managing OCI containers and pods
   - python # The Python programming language
   - qutebrowser # A keyboard-driven, vim-like browser based on Python and Qt
   - reflector # A Python 3 module and script to retrieve and filter the latest Pacman mirror list
@@ -125,6 +127,7 @@ packages:
   - waybar # Highly customizable Wayland bar for Sway and Wlroots based compositors
   - wayland # A computer display server protocol
   - wev # A tool for debugging wayland events on a Wayland window, analagous to the X11 tool xev
+  - wireplumber # Session / policy manager implementation for PipeWire
   - wl-clipboard # Command-line copy/paste utilities for Wayland
   - wofi # launcher for wlroots-based wayland compositors
   - xdg-desktop-portal-wlr # xdg-desktop-portal backend for wlroots
@@ -150,9 +153,10 @@ aur_packages:
   - ttf-monaco # The Monaco monospaced sans-serif typeface with special characters added
   - ttf-ms-fonts # Core TTF Fonts from Microsoft
   - winbox # Mikrotik RouterOS GUI Configurator
-  - zen-browser-bin # Performance oriented Firefox-based web browser
+  - zen-browser-bin # Official package for Zen, a privacy-focused, feature packed Firefox-based web browser
 
 system_services:
+  - avahi-daemon
   - bluetooth
   - greetd
   - iptables
