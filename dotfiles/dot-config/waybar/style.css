@@ -61,6 +61,7 @@ window#waybar {
     padding: 0 8px;
 }
 
+#custom-wifi,
 #network,
 #battery,
 #pulseaudio,
@@ -74,6 +75,18 @@ window#waybar {
 
 #network {
     color: #8BE9FD;
+}
+
+#network.disconnected {
+    color: #6272A4;
+}
+
+#custom-wifi.disabled {
+    color: #FF5555;
+}
+
+#custom-wifi.hard-blocked {
+    color: #F1FA8C;
 }
 
 #battery {

@@ -5,7 +5,7 @@
 
     "modules-left": ["sway/workspaces", "sway/window", "sway/mode"],
     "modules-center": [],
-    "modules-right": ["network", "battery", "pulseaudio", "bluetooth", "cpu", "memory", "custom/weather", "clock"],
+    "modules-right": ["custom/wifi", "network", "battery", "pulseaudio", "bluetooth", "cpu", "memory", "custom/weather", "clock"],
 
     "sway/workspaces": {
         "disable-scroll": true
@@ -15,12 +15,23 @@
         "max-length": 50
     },
 
+    "custom/wifi": {
+        "exec": "~/.config/scripts/wifi-status.sh",
+        "return-type": "json",
+        "restart-interval": 5,
+        "hide-empty-text": true,
+        "on-click": "~/.config/scripts/wifi-toggle.sh",
+        "on-click-right": "~/.config/scripts/wifi-toggle.sh"
+    },
+
     "network": {
         "format-wifi": "󰤨 {ipaddr}",
         "format-ethernet": "󰈀 {ipaddr}",
         "format-disconnected": "󰤭 disconnected",
-        "tooltip-format-wifi": "{essid} ({signalStrength}%)",
-        "tooltip-format-ethernet": "{ifname}"
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)\nright-click to turn wifi off",
+        "tooltip-format-ethernet": "{ifname}\nright-click to toggle wifi",
+        "tooltip-format-disconnected": "right-click to toggle wifi",
+        "on-click-right": "~/.config/scripts/wifi-toggle.sh"
     },
 
     "battery": {
