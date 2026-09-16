@@ -31,6 +31,7 @@ packages:
   - aspell # A spell checker designed to eventually replace Ispell
   - aspell-en # English dictionary for aspell
   - avahi # Service Discovery for Linux using mDNS/DNS-SD (compatible with Bonjour)
+  - awww # An Answer to your Wayland Wallpaper Woes
   - bash-language-server # Bash language server implementation based on Tree Sitter and its grammar for Bash
   - bitwarden # A secure and free password manager for all of your devices
   - bluez # Daemons for the bluetooth protocol stack
@@ -58,6 +59,7 @@ packages:
   - greetd # Generic greeter daemon
   - greetd-tuigreet # A console UI greeter for greetd
   - grim # Screenshot utility for Wayland
+  - imv # Image viewer for Wayland and X11
   - intellij-idea-community-edition # IDE for Java, Groovy and other programming languages with advanced refactoring features
   - inxi # Full featured CLI system information tool
   - iperf3 # TCP, UDP, and SCTP network bandwidth measurement tool
@@ -175,5 +177,5 @@ git_repos:
 
 # just for tracking installed packages
 aur_helpers:
-  - yay-bin
-  - yay-bin-debug
+  - yay-bin # Yet another yogurt. Pacman wrapper and AUR helper written in go. Pre-compiled
+  - yay-bin-debug # Detached debugging symbols for yay-bin

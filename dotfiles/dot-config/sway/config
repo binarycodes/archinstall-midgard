@@ -21,9 +21,6 @@ client.focused_inactive #4C566A #4C566A #E5E9F0 #4C566A   #4C566A
 client.unfocused        #4C566A #4C566A #E5E9F0 #4C566A   #4C566A
 client.urgent           #D08770 #D08770 #E5E9F0 #D08770   #D08770
 
-# wallpaper
-output * bg $HOME/wallpapers/current.jpg fill
-
 # input
 input type:touchpad {
     tap enabled
@@ -133,6 +130,8 @@ exec swayidle -w \
     before-sleep "swaylock -f -i $HOME/wallpapers/current.jpg"
 # set keyboard backlight
 exec  brightnessctl -d tpacpi::kbd_backlight s 1
+# wallpaper
+exec awww-daemon
 
 # window rules
 for_window {
