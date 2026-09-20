@@ -1,0 +1,190 @@
+---
+username: sujoy
+hostname: midgard
+timezone: Europe/Helsinki
+locale: en_US.UTF-8
+keymap: us
+install_repo: archinstall-midgard
+disk: /dev/nvme0n1
+swap_size: 32G
+ucode: intel-ucode
+
+pacstrap:
+  - base # Minimal package set to define a basic Arch Linux installation
+  - base-devel # Basic tools to build Arch Linux packages
+  - btrfs-progs # Btrfs filesystem utilities
+  - git # the fast distributed version control system
+  - intel-ucode # Microcode update files for Intel CPUs
+  - iptables # Linux kernel packet control tool (using nft interface)
+  - less # A terminal based program for viewing text files
+  - linux # The Linux kernel and modules
+  - linux-firmware # Firmware files for Linux - Default set
+  - linux-headers # Headers and scripts for building modules for the Linux kernel
+  - mkinitcpio # Modular initramfs image creation utility
+  - python # The Python programming language
+  - rsync # A fast and versatile file copying tool for remote and local files
+  - uv # An extremely fast Python package installer and resolver written in Rust
+  - vim # Vi Improved, a highly configurable, improved version of the vi text editor
+
+post_chroot:
+  - efibootmgr # Linux user-space application to modify the EFI Boot Manager
+  - iwd # Internet Wireless Daemon
+  - linux-lts # The LTS Linux kernel and modules
+  - linux-lts-headers # Headers and scripts for building modules for the LTS Linux kernel
+  - openssh # SSH protocol implementation for remote login, command execution and file transfer
+  - sudo # Give certain users the ability to run some commands as root
+  - zsh # A very advanced and programmable command interpreter (shell) for UNIX
+
+packages:
+  - age # A simple, modern and secure file encryption tool
+  - ansible # Official assortment of Ansible collections
+  - ansible-lint # Checks playbooks for practices and behaviour that could potentially be improved
+  - aspell # A spell checker designed to eventually replace Ispell
+  - aspell-en # English dictionary for aspell
+  - avahi # Service Discovery for Linux using mDNS/DNS-SD (compatible with Bonjour)
+  - awww # An Answer to your Wayland Wallpaper Woes
+  - bash-language-server # Bash language server implementation based on Tree Sitter and its grammar for Bash
+  - bitwarden # A secure and free password manager for all of your devices
+  - bluez # Daemons for the bluetooth protocol stack
+  - bluez-utils # Development and debugging utilities for the bluetooth protocol stack
+  - brightnessctl # Lightweight brightness control tool
+  - btop # A monitor of system resources, bpytop ported to C++
+  - cmake # A cross-platform open-source make system
+  - cups # OpenPrinting CUPS - daemon package
+  - cups-pdf # PDF printer for cups
+  - cyme # List system USB buses and devices; a lib and modern cross-platform lsusb
+  - dbeaver # Free universal SQL Client for developers and database administrators (community edition)
+  - delve # A debugger for the Go programming language
+  - direnv # A shell extension that manages your environment
+  - emacs-wayland # The extensible, customizable, self-documenting real-time display editor with PGTK enabled
+  - fastfetch # A feature-rich and performance oriented neofetch like system information tool
+  - fd # Simple, fast and user-friendly alternative to find
+  - foot # Fast, lightweight, and minimalistic Wayland terminal emulator
+  - freetype2 # Font rasterization library
+  - git # the fast distributed version control system
+  - gnome-themes-extra # Extra GNOME themes (legacy HighContrast icon theme and index files for Adwaita)
+  - go # Core compiler tools for the Go programming language
+  - go-task # A task runner written in Go
+  - golangci-lint # Fast linters runner for Go
+  - gopls # Language server for Go programming language
+  - greetd # Generic greeter daemon
+  - greetd-tuigreet # A console UI greeter for greetd
+  - grim # Screenshot utility for Wayland
+  - imv # Image viewer for Wayland and X11
+  - intellij-idea-community-edition # IDE for Java, Groovy and other programming languages with advanced refactoring features
+  - inxi # Full featured CLI system information tool
+  - iperf3 # TCP, UDP, and SCTP network bandwidth measurement tool
+  - ipmitool # Command-line interface to IPMI-enabled devices
+  - jdk21-openjdk # OpenJDK Java 21 development kit
+  - jq # Command-line JSON processor
+  - languagetool # An open source language checker
+  - mako # Lightweight notification daemon for Wayland
+  - man-db # A utility for reading man pages
+  - man-pages # Linux man pages
+  - maven # Java project management and project comprehension tool
+  - mpv # a free, open source, and cross-platform media player
+  - nfs-utils # Support programs for Network File Systems
+  - noto-fonts # Google Noto TTF fonts
+  - openbsd-netcat # TCP/IP swiss army knife. OpenBSD variant
+  - openssh # SSH protocol implementation for remote login, command execution and file transfer
+  - opentofu # Lets you declaratively manage your cloud infrastructure
+  - otf-libertinus # Fonts based on Linux Libertine/Biolinum, with extended math support
+  - otf-overpass # Open source web font family (Open Type Font)
+  - packer # tool for creating machine images for platforms from a single source configuration
+  - pacman-contrib # Contributed scripts and tools for pacman systems
+  - papirus-icon-theme # Papirus icon theme
+  - pavucontrol # PulseAudio Volume Control
+  - pipewire # Low-latency audio/video router and processor
+  - pipewire-alsa # Low-latency audio/video router and processor - ALSA configuration
+  - pipewire-jack # Low-latency audio/video router and processor - JACK replacement
+  - pipewire-pulse # Low-latency audio/video router and processor - PulseAudio replacement
+  - pipewire-zeroconf # Low-latency audio/video router and processor - Zeroconf support
+  - pkgfile # A tool to search for files in official repository packages
+  - podman # A tool for managing OCI containers and pods
+  - qutebrowser # A keyboard-driven, vim-like browser based on Python and Qt
+  - reflector # A Python 3 module and script to retrieve and filter the latest Pacman mirror list
+  - ripgrep # A search tool that combines the usability of ag with the raw speed of grep
+  - rsync # A fast and versatile file copying tool for remote and local files
+  - rtkit # Realtime Policy and Watchdog Daemon
+  - slurp # Select a region in a Wayland compositor
+  - sof-firmware # Sound Open Firmware
+  - solaar # Linux device manager for a wide range of Logitech devices
+  - stow # Manage installation of multiple softwares in the same directory tree
+  - sway # Tiling Wayland compositor and replacement for the i3 window manager
+  - swaybg # Wallpaper tool for Wayland compositors
+  - swayidle # Idle management daemon for Wayland
+  - swaylock # Screen locker for Wayland
+  - terraform # HashiCorp tool for building and updating infrastructure as code idempotently
+  - tex-gyre-fonts # Substitute PostScript fonts in OpenType format
+  - texinfo # GNU documentation system for on-line information and printed output
+  - tflint # A linter for Terraform code
+  - tree # A directory listing program displaying a depth indented list of files
+  - ttf-bitstream-vera # Bitstream Vera fonts
+  - ttf-caladea # A serif font family metric-compatible with Cambria font family
+  - ttf-carlito # Google's Carlito font
+  - ttf-dejavu # Font family based on the Bitstream Vera Fonts with a wider range of characters
+  - ttf-freefont
+  - ttf-jetbrains-mono # Typeface for developers, by JetBrains
+  - ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
+  - ttf-liberation # Font family which aims at metric compatibility with Arial, Times New Roman, and Courier New
+  - ttf-libertinus # Fonts based on Linux Libertine/Biolinum, with extended math support
+  - ttf-nerd-fonts-symbols # High number of extra glyphs from popular 'iconic fonts'
+  - ttf-opensans # Sans-serif typeface commissioned by Google
+  - ttf-roboto # Google's signature family of fonts
+  - ttf-ubuntu-font-family # Ubuntu font family
+  - unzip # For extracting and viewing files in .zip archives
+  - usbutils # A collection of USB tools to query connected USB devices
+  - vim # Vi Improved, a highly configurable, improved version of the vi text editor
+  - waybar # Highly customizable Wayland bar for Sway and Wlroots based compositors
+  - wayland # A computer display server protocol
+  - wev # A tool for debugging wayland events on a Wayland window, analagous to the X11 tool xev
+  - wireplumber # Session / policy manager implementation for PipeWire
+  - wl-clipboard # Command-line copy/paste utilities for Wayland
+  - wofi # launcher for wlroots-based wayland compositors
+  - xdg-desktop-portal-wlr # xdg-desktop-portal backend for wlroots
+  - xorg-xwayland # run X clients under wayland
+  - yq # Command-line YAML, XML, TOML processor - jq wrapper for YAML/XML/TOML documents
+  - yt-dlp # A youtube-dl fork with additional features and fixes
+  - zsh # A very advanced and programmable command interpreter (shell) for UNIX
+  - zsh-autosuggestions # Fish-like autosuggestions for zsh
+
+pacman_keys:
+  - key: B929081F184DE398E1487552FF8D24F0A3FC59A6
+    server: keyserver.ubuntu.com
+
+url_packages:
+  - name: ssh-keysign
+    url: https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
+
+aur_packages:
+  - brother-mfc-l2860dwe # LPR and CUPS driver for the Brother MFC-L2880DW
+  - infisical-bin # The official Infisical CLI
+  - jdtls # Eclipse Java language server
+  - terraform-ls-bin # Terraform Language Server
+  - ttf-monaco # The Monaco monospaced sans-serif typeface with special characters added
+  - ttf-ms-fonts # Core TTF Fonts from Microsoft
+  - winbox # Mikrotik RouterOS GUI Configurator
+  - zen-browser-bin # Official package for Zen, a privacy-focused, feature packed Firefox-based web browser
+
+system_services:
+  - avahi-daemon
+  - bluetooth
+  - greetd
+  - iptables
+  - iwd
+  - reflector
+  - rtkit-daemon
+
+user_services:
+  - pipewire
+  - pipewire-pulse
+  - wireplumber
+  - emacs
+
+git_repos:
+  - https://github.com/binarycodes/archinstall-midgard.git
+
+# just for tracking installed packages
+aur_helpers:
+  - yay-bin # Yet another yogurt. Pacman wrapper and AUR helper written in go. Pre-compiled
+  - yay-bin-debug # Detached debugging symbols for yay-bin

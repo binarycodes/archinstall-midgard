@@ -4,9 +4,19 @@ on:
   push:
     paths:
       - "scripts/**/*.sh"
+      - "installer/**"
+      - "tests/**"
+      - "manifest.yml"
+      - "pyproject.toml"
+      - "uv.lock"
   pull_request:
     paths:
       - "scripts/**/*.sh"
+      - "installer/**"
+      - "tests/**"
+      - "manifest.yml"
+      - "pyproject.toml"
+      - "uv.lock"
 
 jobs:
   shellcheck:
@@ -16,3 +26,19 @@ jobs:
 
       - name: run shellcheck
         run: shellcheck -x scripts/*.sh
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: install
+        run: uv sync --frozen
+
+      - name: lint
+        run: uv run ruff check
+
+      - name: test
+        run: uv run pytest
