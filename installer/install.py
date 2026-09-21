@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from installer import paths
@@ -13,10 +14,23 @@ def install(cfg: Config, data: dict) -> None:
     chroot_repo = Path("/opt") / cfg.install_repo
     target = Path(MNT + str(chroot_repo))
     uv = ("uv", "--directory", str(chroot_repo))
+    # the outer `uv run` exports VIRTUAL_ENV, which the inner uv would warn about
+    env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
 
     def chroot(step: str, user: str | None = None) -> None:
         as_user = ("runuser", "-u", user, "--") if user else ()
-        run("arch-chroot", MNT, *as_user, *uv, "run", "--frozen", "--no-sync", "installer", step)
+        run(
+            "arch-chroot",
+            MNT,
+            *as_user,
+            *uv,
+            "run",
+            "--frozen",
+            "--no-sync",
+            "installer",
+            step,
+            env=env,
+        )
 
     echo("==> Creating partitions...")
     create_partitions(cfg)
@@ -28,7 +42,7 @@ def install(cfg: Config, data: dict) -> None:
     run("cp", "-r", str(paths.REPO_ROOT), str(target))
     # the venv from the live ISO is rebuilt against the pacstrapped Python
     run("rm", "-rf", str(target / ".venv"))
-    run("arch-chroot", MNT, *uv, "sync", "--frozen")
+    run("arch-chroot", MNT, *uv, "sync", "--frozen", env=env)
 
     echo("==> Running post-chroot setup...")
     chroot("post-chroot")
