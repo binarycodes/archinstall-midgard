@@ -25,14 +25,20 @@ class Config:
             raise ConfigError("manifest is missing config keys: " + ", ".join(missing))
         return cls(**{name: str(data[name]) for name in names})
 
+    def partition(self, number: int) -> str:
+        # The kernel inserts "p" only when the disk name ends in a digit
+        # (nvme0n1p1, mmcblk0p1), never otherwise (sda1, vda1).
+        separator = "p" if self.disk[-1].isdigit() else ""
+        return f"{self.disk}{separator}{number}"
+
     @property
     def efi(self) -> str:
-        return f"{self.disk}p1"
+        return self.partition(1)
 
     @property
     def swap(self) -> str:
-        return f"{self.disk}p2"
+        return self.partition(2)
 
     @property
     def root(self) -> str:
-        return f"{self.disk}p3"
+        return self.partition(3)
