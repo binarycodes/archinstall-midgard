@@ -181,6 +181,13 @@ user_services:
   - wireplumber
   - emacs
 
+gsettings:
+  org.gnome.desktop.interface:
+    color-scheme: prefer-dark
+    gtk-theme: Adwaita-dark
+    icon-theme: Papirus
+    font-name: Roboto 12
+
 git_repos:
   - https://github.com/binarycodes/archinstall-midgard.git
 

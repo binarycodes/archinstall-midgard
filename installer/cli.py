@@ -31,7 +31,7 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("post-chroot", help="install step: system configuration (root, in chroot)")
     sub.add_parser("boot-entries", help="install step: EFI boot entries (root, in chroot)")
     sub.add_parser("user-projects", help="install step: clone repos and stow dotfiles")
-    sub.add_parser("customize", help="install step: gsettings")
+    sub.add_parser("customize", help="install step: apply the gsettings section of the manifest")
 
     args = parser.parse_args(argv)
     data = manifest.load(paths.MANIFEST)
@@ -55,7 +55,7 @@ def main(argv: list[str] | None = None) -> None:
             user_projects(cfg, data)
         case "customize":
             require_user()
-            customize()
+            customize(data)
         case "daily":
             require_user()
             daily(cfg, data)

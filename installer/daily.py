@@ -13,4 +13,4 @@ def daily(cfg: Config, data: dict) -> None:
     user_projects(cfg, data)
 
     echo("==> Running user customisations...")
-    customize()
+    customize(data)
