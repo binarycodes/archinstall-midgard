@@ -2,11 +2,7 @@ name: validate
 
 on:
   push:
-    paths:
-      - "scripts/**/*.sh"
   pull_request:
-    paths:
-      - "scripts/**/*.sh"
 
 jobs:
   shellcheck:
@@ -14,5 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            scripts:
+              - "scripts/**/*.sh"
+
       - name: run shellcheck
+        if: steps.changes.outputs.scripts == 'true'
         run: shellcheck -x scripts/*.sh
