@@ -2,11 +2,7 @@ name: validate
 
 on:
   push:
-    paths:
-      - "scripts/**/*.sh"
   pull_request:
-    paths:
-      - "scripts/**/*.sh"
 
 jobs:
   shellcheck:
