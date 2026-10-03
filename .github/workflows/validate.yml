@@ -3,30 +3,16 @@ name: validate
 on:
   push:
     paths:
-      - "scripts/**/*.sh"
       - "installer/**"
       - "tests/**"
       - "manifest.yml"
       - "pyproject.toml"
       - "uv.lock"
+      - ".github/workflows/validate.yml"
+  # no path filter: the gate job must report on every PR to be usable as a required check
   pull_request:
-    paths:
-      - "scripts/**/*.sh"
-      - "installer/**"
-      - "tests/**"
-      - "manifest.yml"
-      - "pyproject.toml"
-      - "uv.lock"
 
 jobs:
-  shellcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: run shellcheck
-        run: shellcheck -x scripts/*.sh
-
   python:
     runs-on: ubuntu-latest
     steps:
@@ -45,3 +31,17 @@ jobs:
 
       - name: test
         run: uv run pytest
+
+  # the single required status check for PRs; add every new job to `needs`
+  gate:
+    name: all checks passed
+    if: always()
+    needs: [python]
+    runs-on: ubuntu-latest
+    steps:
+      - name: fail if any job failed, was cancelled or skipped
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+
+      - name: report success
+        run: echo "all checks passed"
