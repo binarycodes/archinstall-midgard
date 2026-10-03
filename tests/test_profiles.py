@@ -75,10 +75,3 @@ def test_empty_profile_file_loads_as_nothing(tmp_path):
     path = tmp_path / "p.yml"
     path.write_text("")
     assert profiles.load(path) == {}
-
-
-def test_saved_profile_round_trip(monkeypatch, tmp_path):
-    monkeypatch.setattr(profiles, "write_file", lambda path, text: path.write_text(text))
-    profiles.save("gaming", str(tmp_path))
-    saved = tmp_path / "etc" / "installer" / "profile"
-    assert saved.read_text() == "gaming\n"

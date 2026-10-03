@@ -7,7 +7,7 @@ order, then the profile chain; later wins.
 from dataclasses import dataclass
 from pathlib import Path
 
-from installer import manifest, profiles
+from installer import manifest, metadata, profiles
 from installer.config import Config
 from installer.hardware import FEATURES
 from installer.profiles import ProfileError
@@ -185,13 +185,15 @@ def load(profile: str, manifest_path: Path, features: list[str]) -> Machine:
 
 
 def load_saved(manifest_path: Path, saved: Path, features: list[str]) -> Machine:
-    """load() for the profile this system was installed with."""
+    """load() for the profile recorded in the metadata when this system was installed."""
     available = profiles.names(profiles.directory(manifest_path))
+    listing = profiles.listing(available)
     try:
-        profile = saved.read_text().strip()
+        profile = metadata.read(saved).get("PROFILE")
     except OSError as e:
-        listing = profiles.listing(available)
         raise MachineError([f"{saved}: cannot read: {e.strerror}; {listing}"]) from None
+    if profile is None:
+        raise MachineError([f"{saved}: no PROFILE recorded; {listing}"])
     if profile not in available:
         raise MachineError([f"{saved}: {profiles.unknown(profile, available)}"])
     return load(profile, manifest_path, features)

@@ -197,9 +197,9 @@ def test_validate_packages_runs_lookups(monkeypatch):
 
 @pytest.fixture
 def saved(monkeypatch, tmp_path):
-    """The saved profile file; cleanup runs with its guard off and records its data."""
-    path = tmp_path / "saved"
-    monkeypatch.setattr(cli, "SAVED_PROFILE", path)
+    """The metadata file; cleanup runs with its guard off and records its data."""
+    path = tmp_path / "os-midgard-metadata"
+    monkeypatch.setattr(cli, "METADATA", path)
     monkeypatch.setattr(cli.hardware, "detect_features", list)
     monkeypatch.setattr(cli.cleanup_cmd, "guard", lambda: None)
     return path
@@ -207,7 +207,7 @@ def saved(monkeypatch, tmp_path):
 
 def test_steps_stop_on_an_invalid_manifest(monkeypatch, tmp_path, saved):
     path = write_manifest(tmp_path, "username: u\n")
-    saved.write_text("p\n")
+    saved.write_text('PROFILE="p"\n')
     monkeypatch.setattr(cli.paths, "MANIFEST", path)
     monkeypatch.setattr(cli, "cleanup", lambda data: pytest.fail("ran on an invalid manifest"))
     result = CliRunner().invoke(cli.app, ["cleanup"])
@@ -218,7 +218,7 @@ def test_steps_stop_on_an_invalid_manifest(monkeypatch, tmp_path, saved):
 def test_steps_use_the_saved_profile(monkeypatch, tmp_path, saved):
     seen = []
     path = write_manifest(tmp_path, VALID, a="keymap: fi\n", b="")
-    saved.write_text("a\n")
+    saved.write_text('PROFILE="a"\nFEATURES="wifi"\n')
     monkeypatch.setattr(cli.paths, "MANIFEST", path)
     monkeypatch.setattr(cli, "cleanup", seen.append)
     result = CliRunner().invoke(cli.app, ["cleanup"])
@@ -239,7 +239,7 @@ def test_steps_stop_without_a_saved_profile(monkeypatch, tmp_path, saved):
 
 def test_steps_stop_on_an_unknown_saved_profile(monkeypatch, tmp_path, saved):
     path = write_manifest(tmp_path, VALID, a="")
-    saved.write_text("gone\n")
+    saved.write_text('PROFILE="gone"\n')
     monkeypatch.setattr(cli.paths, "MANIFEST", path)
     monkeypatch.setattr(cli, "cleanup", lambda data: pytest.fail("ran on an unknown profile"))
     result = CliRunner().invoke(cli.app, ["cleanup"])

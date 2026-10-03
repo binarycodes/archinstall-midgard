@@ -142,9 +142,11 @@ def test_chain_errors(repo):
 
 def test_saved_profile_round_trip(repo, tmp_path, monkeypatch):
     path = repo(gaming="keymap: fi\n", workstation="")
-    monkeypatch.setattr(machine.profiles, "write_file", lambda p, text: p.write_text(text))
-    machine.profiles.save("gaming", str(tmp_path / "mnt"))
-    saved = tmp_path / "mnt" / "etc" / "installer" / "profile"
+    monkeypatch.setattr(machine.metadata, "write_file", lambda p, text: p.write_text(text))
+    (tmp_path / "mnt" / "etc").mkdir(parents=True)
+    recorded = machine.metadata.Metadata("gaming", ["wifi"], "url", "sha", "date")
+    machine.metadata.write(recorded, str(tmp_path / "mnt"))
+    saved = tmp_path / "mnt" / "etc" / "os-midgard-metadata"
     loaded = machine.load_saved(path, saved, [])
     assert loaded.profile == "gaming"
     assert loaded.cfg.keymap == "fi"
@@ -163,7 +165,7 @@ def test_missing_saved_profile(repo, tmp_path):
 def test_unknown_saved_profile(repo, tmp_path):
     path = repo(a="")
     saved = tmp_path / "saved"
-    saved.write_text("gone\n")
+    saved.write_text('PROFILE="gone"\n')
     with pytest.raises(MachineError) as e:
         machine.load_saved(path, saved, [])
     assert e.value.problems == [f"{saved}: unknown profile 'gone'; profiles in profiles/: a"]
@@ -241,3 +243,12 @@ def test_repo_services_and_managed_packages_follow_features(detected):
     assert ("iwd" in managed) is wifi
     assert ("bluetooth" in services) is bluetooth
     assert ("bluez" in managed, "bluez-utils" in managed) == (bluetooth, bluetooth)
+
+
+def test_metadata_without_a_profile(repo, tmp_path):
+    path = repo(a="")
+    saved = tmp_path / "saved"
+    saved.write_text('FEATURES="wifi"\n')
+    with pytest.raises(MachineError) as e:
+        machine.load_saved(path, saved, [])
+    assert e.value.problems == [f"{saved}: no PROFILE recorded; profiles in profiles/: a"]

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from rich.markup import escape
 
-from installer import hardware, machine, memory, paths, profiles
+from installer import hardware, machine, memory, metadata, paths
 from installer import hostname as hostnames
 from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK
 from installer.disk import DiskError, select_disk
@@ -31,6 +31,11 @@ def preflight(hostname: str, profile: str) -> list[str]:
         problems.append(problem)
     # the profile exists and the manifest it merges to is valid
     problems += machine.check(machine.read(paths.MANIFEST), profile)
+    # recorded in the metadata of the new system
+    try:
+        metadata.git_source(paths.REPO_ROOT)
+    except metadata.MetadataError as e:
+        problems.append(str(e))
     if not EFI_VARS.is_dir():
         problems.append("not booted in UEFI mode; boot entries are created with EFISTUB")
     if not network_reachable():
@@ -48,6 +53,7 @@ def install(hostname: str, profile: str) -> None:
         sys.exit(1)
 
     loaded = machine.load(profile, paths.MANIFEST, hardware.detect_features())
+    git_repo_url, git_commit_sha = metadata.git_source(paths.REPO_ROOT)
     cfg, data = loaded.cfg, loaded.data
     console.print(
         f"Installing as [bold]{hostname}[/] with profile [bold]{escape(loaded.describe())}[/]"
@@ -87,7 +93,10 @@ def install(hostname: str, profile: str) -> None:
 
     echo("==> Installing base system...")
     pacstrap(cfg, data)
-    profiles.save(profile, MNT)
+    installed = metadata.Metadata(
+        profile, loaded.features, git_repo_url, git_commit_sha, metadata.now()
+    )
+    metadata.write(installed, MNT)
 
     # /tmp is avoided because arch-chroot mounts a tmpfs over it
     run("cp", "-r", str(paths.REPO_ROOT), str(target))

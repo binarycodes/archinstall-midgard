@@ -23,7 +23,17 @@ packages:
   - steam
 ```
 
-The installer saves the profile on the new system in `/etc/installer/profile`.
+The installer records what the system was installed from in `/etc/os-midgard-metadata`, in the same format as `/etc/os-release`:
+
+```sh
+PROFILE="gaming"
+FEATURES="battery backlight wifi bluetooth gpu_intel"
+GIT_REPO_URL="https://github.com/binarycodes/archinstall-midgard.git"
+GIT_COMMIT_SHA="0611c08aa0d6a0e9a8bd31c0e5e7c4b8f2d7e3a1"
+INSTALL_DATE="2026-10-03T12:00:00Z"
+```
+
+`packages`, `daily`, `cleanup` and the install steps read the profile from this file.
 
 > [!NOTE]
 > A profile cannot be changed later.

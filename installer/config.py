@@ -34,8 +34,9 @@ BASE_SERVICES = ("systemd-networkd", "systemd-resolved", "sshd")
 USER_GROUPS = ("wheel", "lp")  # wheel: sudo access, lp: printer access
 USER_SHELL = "/usr/bin/zsh"
 PROJECTS_DIR = "projects"  # under the user's home; the install repo is cloned here
-# The profile chosen at install; every later command reads it, and it never changes
-SAVED_PROFILE = Path("/etc/installer/profile")
+# What the system was installed from: profile, detected features, repo and commit, date.
+# Later commands read the profile from here; it never changes.
+METADATA = Path("/etc/os-midgard-metadata")
 
 
 @dataclass(frozen=True)

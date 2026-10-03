@@ -1,8 +1,6 @@
 from pathlib import Path
 
 from installer import manifest
-from installer.config import SAVED_PROFILE
-from installer.shell import write_file
 
 DIR_NAME = "profiles"  # next to the manifest, one <name>.yml per profile
 
@@ -83,10 +81,3 @@ def chain(name: str, profiles: dict[str, dict]) -> list[str]:
 
 def describe(chain: list[str]) -> str:
     return " → ".join(["base", *chain])
-
-
-def save(name: str, root: str) -> None:
-    """Record the profile on the system installed under root."""
-    path = Path(root + str(SAVED_PROFILE))
-    path.parent.mkdir(parents=True, exist_ok=True)
-    write_file(path, f"{name}\n")

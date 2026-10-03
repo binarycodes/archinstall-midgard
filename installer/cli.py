@@ -11,7 +11,7 @@ from installer import hostname as hostnames
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
 from installer.cleanup import cleanup
-from installer.config import SAVED_PROFILE, Config
+from installer.config import METADATA, Config
 from installer.customize import customize
 from installer.daily import daily
 from installer.install import install
@@ -71,7 +71,7 @@ def check_files(path: Path, profile: str | None = None) -> machine.Files:
 def load() -> tuple[Config, dict]:
     """The manifest for the profile this system was installed with, or exit."""
     try:
-        loaded = machine.load_saved(paths.MANIFEST, SAVED_PROFILE, hardware.detect_features())
+        loaded = machine.load_saved(paths.MANIFEST, METADATA, hardware.detect_features())
     except machine.MachineError as e:
         fail(e.problems)
     return loaded.cfg, loaded.data

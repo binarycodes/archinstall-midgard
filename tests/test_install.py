@@ -5,6 +5,9 @@ from installer.config import Config
 from installer.disk import DiskError
 from installer.machine import Machine
 
+URL = "https://github.com/me/install.git"
+SHA = "0611c08aa0d6a0e9a8bd31c0e5e7c4b8f2d7e3a1"
+
 MACHINE = Machine(
     "gaming", ["gaming"], ["wifi"], Config("u", "UTC", "en_US.UTF-8", "us", "repo"), {}
 )
@@ -14,6 +17,7 @@ MACHINE = Machine(
 def ready(monkeypatch, tmp_path):
     monkeypatch.setattr(install, "EFI_VARS", tmp_path)
     monkeypatch.setattr(install, "network_reachable", lambda: True)
+    monkeypatch.setattr(install.metadata, "git_source", lambda repo: ("url", "sha"))
 
 
 @pytest.fixture
@@ -21,6 +25,8 @@ def loads(monkeypatch):
     monkeypatch.setattr(install, "preflight", lambda hostname, profile: [])
     monkeypatch.setattr(install.machine, "load", lambda profile, path, features: MACHINE)
     monkeypatch.setattr(install.hardware, "detect_features", lambda: ["wifi"])
+    monkeypatch.setattr(install.metadata, "git_source", lambda repo: (URL, SHA))
+    monkeypatch.setattr(install.metadata, "now", lambda: "2026-10-03T12:00:00Z")
     monkeypatch.setattr(install.memory, "total_gib", lambda: 16.0)
 
 
@@ -100,7 +106,7 @@ def steps(loads, monkeypatch):
     monkeypatch.setattr(install, "select_disk", lambda swap: "disk")
     monkeypatch.setattr(install, "create_partitions", lambda *args: seen.append("partitions"))
     monkeypatch.setattr(install, "pacstrap", lambda *args: seen.append("pacstrap"))
-    monkeypatch.setattr(install.profiles, "save", lambda name, root: seen.append(("save", name)))
+    monkeypatch.setattr(install.metadata, "write", lambda data, root: seen.append(("save", data)))
     monkeypatch.setattr(install, "run", lambda *args, **kwargs: seen.append(args))
     return seen
 
@@ -139,8 +145,19 @@ def test_install_merges_the_detected_features(steps, monkeypatch):
     assert seen == [["wifi"]]
 
 
-def test_install_saves_the_profile_after_pacstrap_before_the_chroot(steps):
+def test_install_records_metadata_after_pacstrap_before_the_chroot(steps):
     install.install("midgard", "gaming")
+    saved = install.metadata.Metadata("gaming", ["wifi"], URL, SHA, "2026-10-03T12:00:00Z")
     first_chroot = next(i for i, s in enumerate(steps) if s[0] == "arch-chroot")
-    assert steps.index("pacstrap") + 1 == steps.index(("save", "gaming"))
-    assert steps.index(("save", "gaming")) < first_chroot
+    assert steps.index("pacstrap") + 1 == steps.index(("save", saved))
+    assert steps.index(("save", saved)) < first_chroot
+
+
+def test_preflight_needs_the_git_source(ready, monkeypatch):
+    def fail(repo):
+        raise install.metadata.MetadataError("cannot read the git origin and commit of /r: boom")
+
+    monkeypatch.setattr(install.metadata, "git_source", fail)
+    assert install.preflight("midgard", "workstation") == [
+        "cannot read the git origin and commit of /r: boom"
+    ]
