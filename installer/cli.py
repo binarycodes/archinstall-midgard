@@ -183,6 +183,9 @@ def check_cmd(
     features: Annotated[
         bool, typer.Option("-f", "--features", help="every known hardware feature, detected or not")
     ] = False,
+    list_profiles: Annotated[
+        bool, typer.Option("-p", "--profiles", help="the profiles available to install")
+    ] = False,
     select_disk: Annotated[
         bool,
         typer.Option(
@@ -196,8 +199,10 @@ def check_cmd(
         ),
     ] = None,
 ) -> None:
-    if not (ucode or ram or swap or features or select_disk or chain):
-        raise typer.BadParameter("pass at least one check, e.g. -u, -r, -s, -f, -d or -c PROFILE")
+    if not (ucode or ram or swap or features or list_profiles or select_disk or chain):
+        raise typer.BadParameter(
+            "pass at least one check, e.g. -u, -r, -s, -f, -p, -d or -c PROFILE"
+        )
     if ucode:
         typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
     if ram:
@@ -208,6 +213,9 @@ def check_cmd(
         detected = hardware.detect_features()
         for name in hardware.FEATURES:
             typer.echo(f"{name}: {'yes' if name in detected else 'no'}")
+    if list_profiles:
+        available = profiles.names(profiles.directory(paths.MANIFEST))
+        typer.echo("\n".join(available) or f"none (no files in {profiles.DIR_NAME}/)")
     if select_disk:
         swap_gib = memory.swap_gib(memory.total_gib())
         try:

@@ -6,6 +6,8 @@ on:
       - "installer/**"
       - "tests/**"
       - "manifest.yml"
+      - "profiles/**"
+      - "features/**"
       - "pyproject.toml"
       - "uv.lock"
       - ".github/workflows/validate.yml"

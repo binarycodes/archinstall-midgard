@@ -340,6 +340,26 @@ def test_post_chroot_rejects_invalid_hostname(monkeypatch):
     assert "is not valid" in result.output
 
 
+def test_check_p_lists_the_profiles(monkeypatch, tmp_path):
+    path = write_manifest(tmp_path, VALID, workstation="", gaming="extends: workstation\n")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    monkeypatch.setattr(cli.machine, "load_saved", lambda *a: pytest.fail("read saved profile"))
+    result = CliRunner().invoke(cli.app, ["check", "-p"])
+    assert result.exit_code == 0, result.output
+    assert result.output == "gaming\nworkstation\n"
+
+
+def test_check_p_without_profiles(monkeypatch, tmp_path):
+    monkeypatch.setattr(cli.paths, "MANIFEST", tmp_path / "m.yml")
+    result = CliRunner().invoke(cli.app, ["check", "--profiles"])
+    assert result.output == "none (no files in profiles/)\n"
+
+
+def test_check_p_for_the_repo():
+    result = CliRunner().invoke(cli.app, ["check", "-p"])
+    assert result.output == "gaming\nworkstation\n"
+
+
 def test_check_f_lists_every_feature(monkeypatch):
     monkeypatch.setattr(cli.hardware, "detect_features", lambda: ["wifi", "gpu_amd"])
     result = CliRunner().invoke(cli.app, ["check", "-f"])
