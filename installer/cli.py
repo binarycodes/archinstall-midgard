@@ -1,6 +1,9 @@
-import argparse
+import functools
 from collections.abc import Callable
 from pathlib import Path
+from typing import Annotated
+
+import typer
 
 from installer import manifest, paths
 from installer.annotate import annotate
@@ -15,94 +18,79 @@ from installer.post_chroot import post_chroot
 from installer.projects import user_projects
 from installer.shell import require_root, require_user
 
-Step = Callable[[Config, dict, argparse.Namespace], None]
+app = typer.Typer(
+    name="installer",
+    help="Arch Linux install and maintenance",
+    no_args_is_help=True,
+    add_completion=False,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
 
-def add_command(
-    sub: argparse._SubParsersAction, name: str, help: str, *, root: bool, step: Step
-) -> argparse.ArgumentParser:
-    p = sub.add_parser(name, help=help)
-    p.set_defaults(guard=require_root if root else require_user, step=step)
-    return p
+def command(name: str, help: str, *, root: bool) -> Callable[[Callable], Callable]:
+    """Register a command that runs its privilege guard before doing anything else."""
+
+    def register(f: Callable) -> Callable:
+        @functools.wraps(f)
+        def run(*args, **kwargs):
+            run.guard()
+            return f(*args, **kwargs)
+
+        run.guard = require_root if root else require_user
+        return app.command(name, help=help)(run)
+
+    return register
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="installer", description="Arch Linux install and maintenance"
-    )
-    sub = parser.add_subparsers(dest="command", required=True)
-
-    add_command(
-        sub,
-        "install",
-        "full install from the live ISO (root)",
-        root=True,
-        step=lambda c, d, a: install(c, d),
-    )
-    add_command(
-        sub,
-        "packages",
-        "install packages, restore configs, enable services",
-        root=False,
-        step=lambda c, d, a: packages(d),
-    )
-    add_command(
-        sub,
-        "daily",
-        "packages, user projects and customizations",
-        root=False,
-        step=lambda c, d, a: daily(c, d),
-    )
-    add_command(
-        sub,
-        "cleanup",
-        "remove explicitly installed packages not in the manifest",
-        root=False,
-        step=lambda c, d, a: cleanup(d),
-    )
-    p = add_command(
-        sub,
-        "annotate",
-        "rewrite package descriptions into the manifest",
-        root=False,
-        step=lambda c, d, a: annotate(a.manifest),
-    )
-    p.add_argument("manifest", nargs="?", type=Path, default=paths.MANIFEST)
-
-    add_command(
-        sub,
-        "post-chroot",
-        "install step: system configuration (root, in chroot)",
-        root=True,
-        step=lambda c, d, a: post_chroot(c, d),
-    )
-    add_command(
-        sub,
-        "boot-entries",
-        "install step: EFI boot entries (root, in chroot)",
-        root=True,
-        step=lambda c, d, a: create_boot_entries(c),
-    )
-    add_command(
-        sub,
-        "user-projects",
-        "install step: clone repos and stow dotfiles",
-        root=False,
-        step=lambda c, d, a: user_projects(c, d),
-    )
-    add_command(
-        sub,
-        "customize",
-        "install step: apply the gsettings section of the manifest",
-        root=False,
-        step=lambda c, d, a: customize(d),
-    )
-    return parser
-
-
-def main(argv: list[str] | None = None) -> None:
-    args = build_parser().parse_args(argv)
+def load() -> tuple[Config, dict]:
     data = manifest.load(paths.MANIFEST)
-    cfg = Config.from_manifest(data)
-    args.guard()
-    args.step(cfg, data, args)
+    return Config.from_manifest(data), data
+
+
+@command("install", "full install from the live ISO (root)", root=True)
+def install_cmd() -> None:
+    install(*load())
+
+
+@command("packages", "install packages, restore configs, enable services", root=False)
+def packages_cmd() -> None:
+    packages(load()[1])
+
+
+@command("daily", "packages, user projects and customizations", root=False)
+def daily_cmd() -> None:
+    daily(*load())
+
+
+@command("cleanup", "remove explicitly installed packages not in the manifest", root=False)
+def cleanup_cmd() -> None:
+    cleanup(load()[1])
+
+
+@command("annotate", "rewrite package descriptions into the manifest", root=False)
+def annotate_cmd(manifest: Annotated[Path, typer.Argument()] = paths.MANIFEST) -> None:
+    annotate(manifest)
+
+
+@command("post-chroot", "install step: system configuration (root, in chroot)", root=True)
+def post_chroot_cmd() -> None:
+    post_chroot(*load())
+
+
+@command("boot-entries", "install step: EFI boot entries (root, in chroot)", root=True)
+def boot_entries_cmd() -> None:
+    create_boot_entries(load()[0])
+
+
+@command("user-projects", "install step: clone repos and stow dotfiles", root=False)
+def user_projects_cmd() -> None:
+    user_projects(*load())
+
+
+@command("customize", "install step: apply the gsettings section of the manifest", root=False)
+def customize_cmd() -> None:
+    customize(load()[1])
+
+
+def main() -> None:
+    app()

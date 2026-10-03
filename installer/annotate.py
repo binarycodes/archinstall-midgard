@@ -4,7 +4,7 @@ from pathlib import Path
 
 from installer import manifest
 from installer.manifest import PACKAGE_SECTIONS
-from installer.shell import output
+from installer.shell import echo, output
 
 SECTION = re.compile(r"^(?P<name>[A-Za-z_][A-Za-z0-9_]*):")
 LIST_ITEM = re.compile(r"^(?P<prefix>\s+- )(?P<pkg>[^\s#]+)")
@@ -44,13 +44,16 @@ def describe(packages: list[str]) -> dict[str, str]:
     env = {**os.environ, "LC_ALL": "C"}
     text = ""
     for flag in ("-Si", "-Qi"):
-        text += output("pacman", flag, *packages, check=False, env=env)
+        # the argument list is every package in the manifest, too long to be worth echoing
+        text += output("pacman", flag, *packages, check=False, quiet=True, env=env)
     return parse_descriptions(text)
 
 
 def annotate(path: Path) -> None:
     data = manifest.load(path)
     packages = sorted({pkg for name in PACKAGE_SECTIONS for pkg in manifest.section(data, name)})
+    echo(f"Looking up descriptions for {len(packages)} packages")
     descriptions = describe(packages)
     lines = path.read_text().split("\n")
     path.write_text("\n".join(annotate_lines(lines, descriptions)))
+    echo(f"Annotated {len(descriptions)} of {len(packages)} packages in {path}")

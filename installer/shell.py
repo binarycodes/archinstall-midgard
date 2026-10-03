@@ -10,14 +10,15 @@ def echo(message: str) -> None:
 
 
 def run(
-    *args: str, check: bool = True, capture: bool = False, **kwargs
+    *args: str, check: bool = True, capture: bool = False, quiet: bool = False, **kwargs
 ) -> subprocess.CompletedProcess:
-    print("+", shlex.join(args), file=sys.stderr, flush=True)
+    if not quiet:
+        print("+", shlex.join(args), file=sys.stderr, flush=True)
     return subprocess.run(args, check=check, text=True, capture_output=capture, **kwargs)
 
 
-def output(*args: str, check: bool = True, **kwargs) -> str:
-    return run(*args, check=check, capture=True, **kwargs).stdout
+def output(*args: str, check: bool = True, quiet: bool = False, **kwargs) -> str:
+    return run(*args, check=check, capture=True, quiet=quiet, **kwargs).stdout
 
 
 def write_file(path: Path | str, text: str) -> None:
