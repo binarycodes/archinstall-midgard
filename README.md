@@ -70,7 +70,11 @@ uv run installer install --hostname <name> --profile <profile>
 
 To list the available profiles, run `uv run installer check -p`.
 
-The installer first checks the hostname, the profile and its merged manifest, and that the machine is booted in UEFI mode and online. It then shows the hostname, the profile with its chain and the detected features, lists the disks, and asks which one to install to. For the chosen disk it shows the current contents and the new layout, and erases the disk once you confirm by typing its name. After that it partitions the disk, installs the base system, saves the profile, and copies the repository into the new system. From a chroot it then configures the system, creates boot entries, installs all packages, clones your projects and stows the dotfiles. You will be asked to set passwords for root and your user along the way.
+The install runs in three stages, and all input is collected before anything on the machine changes:
+
+1. Checks. The installer checks the hostname, the profile and its merged manifest, that the machine is booted in UEFI mode and online, that every package exists in the repos or on the AUR, and that every repository in `git_repos` can be cloned without a prompt.
+2. Input. It shows the hostname, the profile with its chain and the detected features. It then lists the disks and asks which one to install to, shows the current contents and the new layout of the chosen disk, and asks you to confirm by typing the disk name. Finally it asks for the root password and your user's password, each typed twice.
+3. Install. From here the installer runs on its own, so you can leave the machine. It partitions the disk, installs the base system, records the metadata, copies the repository into the new system, and from a chroot configures the system, sets the passwords, creates boot entries, installs all packages, clones your projects and stows the dotfiles.
 
 The disk is always chosen interactively during install. To try the selection without changing anything, run `uv run installer check -d`.
 

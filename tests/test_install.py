@@ -1,9 +1,11 @@
+import subprocess
+
 import pytest
 
 from installer import install
 from installer.config import Config
-from installer.disk import DiskError
 from installer.machine import Machine
+from installer.user_inputs import InputError, UserInputs
 
 URL = "https://github.com/me/install.git"
 SHA = "0611c08aa0d6a0e9a8bd31c0e5e7c4b8f2d7e3a1"
@@ -18,6 +20,10 @@ def ready(monkeypatch, tmp_path):
     monkeypatch.setattr(install, "EFI_VARS", tmp_path)
     monkeypatch.setattr(install, "network_reachable", lambda: True)
     monkeypatch.setattr(install.metadata, "git_source", lambda repo: ("url", "sha"))
+    monkeypatch.setattr(install.hardware, "detect_features", list)
+    monkeypatch.setattr(install, "check_repo_packages", lambda data: [])
+    monkeypatch.setattr(install, "check_aur_packages", lambda data: [])
+    monkeypatch.setattr(install, "unreachable_repos", lambda data: [])
 
 
 @pytest.fixture
@@ -58,18 +64,18 @@ def test_network_reachable_handles_errors(monkeypatch):
 
 def test_install_stops_before_disk_selection_when_preflight_fails(monkeypatch, capsys):
     monkeypatch.setattr(install, "preflight", lambda hostname, profile: ["no network"])
-    monkeypatch.setattr(install, "select_disk", lambda swap: pytest.fail("disk offered"))
+    monkeypatch.setattr(install, "collect", lambda *a: pytest.fail("input asked"))
     with pytest.raises(SystemExit) as exit:
         install.install("midgard", "gaming")
     assert exit.value.code == 1
     assert capsys.readouterr().err == "Cannot install:\n  no network\n"
 
 
-def test_install_stops_when_disk_selection_aborts(loads, monkeypatch, capsys):
-    def abort(swap):
-        raise DiskError("not confirmed")
+def test_install_stops_when_input_is_aborted(loads, monkeypatch, capsys):
+    def abort(swap, username):
+        raise InputError("not confirmed")
 
-    monkeypatch.setattr(install, "select_disk", abort)
+    monkeypatch.setattr(install, "collect", abort)
     monkeypatch.setattr(install, "create_partitions", lambda *a: pytest.fail("partitioned"))
     with pytest.raises(SystemExit) as exit:
         install.install("midgard", "gaming")
@@ -79,7 +85,7 @@ def test_install_stops_when_disk_selection_aborts(loads, monkeypatch, capsys):
 
 def test_install_partitions_the_selected_disk(loads, monkeypatch):
     seen = []
-    monkeypatch.setattr(install, "select_disk", lambda swap: ("disk", swap))
+    monkeypatch.setattr(install, "collect", lambda swap, user: UserInputs(("disk", swap), {}))
     monkeypatch.setattr(install, "create_partitions", lambda *args: seen.append(args))
 
     class Stop(Exception):
@@ -103,19 +109,79 @@ def test_preflight_checks_hostname(ready):
 def steps(loads, monkeypatch):
     """Every step install takes, in order, with nothing actually run."""
     seen = []
-    monkeypatch.setattr(install, "select_disk", lambda swap: "disk")
+    passwords = {"root": "r00t", "u": "s3cret"}
+
+    def collect(swap, username):
+        seen.append(("inputs", username))
+        return UserInputs("disk", passwords)
+
+    monkeypatch.setattr(install, "collect", collect)
     monkeypatch.setattr(install, "create_partitions", lambda *args: seen.append("partitions"))
     monkeypatch.setattr(install, "pacstrap", lambda *args: seen.append("pacstrap"))
     monkeypatch.setattr(install.metadata, "write", lambda data, root: seen.append(("save", data)))
-    monkeypatch.setattr(install, "run", lambda *args, **kwargs: seen.append(args))
+    monkeypatch.setattr(install, "run", lambda *args, **kwargs: seen.append((*args, kwargs)))
     return seen
+
+
+def test_install_collects_every_input_before_changing_anything(steps):
+    install.install("midgard", "gaming")
+    assert steps.index(("inputs", "u")) + 1 == steps.index("partitions")
+
+
+def test_install_sets_the_passwords_after_post_chroot_through_stdin(steps):
+    install.install("midgard", "gaming")
+    post_chroot = next(i for i, s in enumerate(steps) if "post-chroot" in s)
+    chpasswd = steps[post_chroot + 1]
+    assert chpasswd[:3] == ("arch-chroot", "/mnt", "chpasswd")
+    assert chpasswd[3]["input"] == "root:r00t\nu:s3cret\n"
+    assert not any("s3cret" in str(arg) for step in steps for arg in step[:-1])
+
+
+def test_chroot_steps_never_wait_for_git(steps):
+    install.install("midgard", "gaming")
+    chroot_steps = [s for s in steps if s[0] == "arch-chroot" and "installer" in s]
+    assert chroot_steps
+    for step in chroot_steps:
+        assert step[-1]["env"]["GIT_TERMINAL_PROMPT"] == "0"
+        assert step[-1]["env"]["GIT_SSH_COMMAND"] == "ssh -o BatchMode=yes"
+
+
+def test_preflight_checks_packages_and_repos(ready, monkeypatch):
+    monkeypatch.setattr(install, "check_repo_packages", lambda data: ["packages: 'x' missing"])
+    monkeypatch.setattr(install, "check_aur_packages", lambda data: ["aur_packages: 'y' missing"])
+    monkeypatch.setattr(install, "unreachable_repos", lambda data: ["git_repos: cannot clone z"])
+    assert install.preflight("midgard", "workstation") == [
+        "packages: 'x' missing",
+        "aur_packages: 'y' missing",
+        "git_repos: cannot clone z",
+    ]
+
+
+def test_preflight_skips_lookups_when_the_manifest_is_invalid(ready, monkeypatch):
+    monkeypatch.setattr(install, "check_repo_packages", lambda data: pytest.fail("looked up"))
+    assert install.preflight("midgard", "missing")[0].startswith("unknown profile 'missing'")
+
+
+def test_unreachable_repos(monkeypatch):
+    calls = []
+
+    def run(*args, **kwargs):
+        calls.append((args, kwargs["env"]["GIT_TERMINAL_PROMPT"]))
+        return subprocess.CompletedProcess(args, 0 if "ok" in args[2] else 128)
+
+    monkeypatch.setattr(install, "run", run)
+    data = {"git_repos": ["https://example.com/ok.git", "git@example.com:me/private.git"]}
+    assert install.unreachable_repos(data) == [
+        "git_repos: cannot clone git@example.com:me/private.git without a prompt"
+    ]
+    assert [env for _, env in calls] == ["0", "0"]
 
 
 def test_install_shows_hostname_and_passes_it_to_post_chroot(steps, capsys):
     install.install("midgard", "gaming")
     assert "Installing as midgard" in capsys.readouterr().out
     post_chroot = next(s for s in steps if "post-chroot" in s)
-    assert post_chroot[-3:] == ("post-chroot", "--hostname", "midgard")
+    assert post_chroot[-4:-1] == ("post-chroot", "--hostname", "midgard")
 
 
 def test_preflight_checks_the_profile(ready, monkeypatch, tmp_path):

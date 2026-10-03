@@ -2,7 +2,7 @@ from pathlib import Path
 
 from installer import manifest, paths
 from installer.config import BASE_SERVICES, USER_GROUPS, USER_SHELL, Config
-from installer.shell import echo, run, write_file
+from installer.shell import run, write_file
 
 
 def copy_configs() -> None:
@@ -41,11 +41,8 @@ def enable_services() -> None:
 
 
 def create_user(cfg: Config) -> None:
-    echo("set password for root")
-    run("passwd")
+    # install sets the passwords collected up front once this step is done
     run("useradd", "-m", "-G", ",".join(USER_GROUPS), "-s", USER_SHELL, cfg.username)
-    echo(f"set password for - {cfg.username}")
-    run("passwd", cfg.username)
 
 
 def post_chroot(cfg: Config, data: dict, hostname: str) -> None:

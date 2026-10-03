@@ -5,15 +5,18 @@ from pathlib import Path
 
 from rich.markup import escape
 
-from installer import hardware, machine, memory, metadata, paths
+from installer import hardware, machine, manifest, memory, metadata, paths
 from installer import hostname as hostnames
 from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK
-from installer.disk import DiskError, select_disk
 from installer.pacstrap import pacstrap
 from installer.partitions import create_partitions
 from installer.shell import console, echo, err_console, run
+from installer.user_inputs import InputError, collect
+from installer.validate import check_aur_packages, check_repo_packages
 
 EFI_VARS = Path("/sys/firmware/efi")
+# git fails instead of asking for credentials or a host key, so the install never stops to wait
+NONINTERACTIVE_GIT = {"GIT_TERMINAL_PROMPT": "0", "GIT_SSH_COMMAND": "ssh -o BatchMode=yes"}
 
 
 def network_reachable() -> bool:
@@ -41,7 +44,32 @@ def preflight(hostname: str, profile: str) -> list[str]:
     if not network_reachable():
         host, port = NETWORK_CHECK
         problems.append(f"no network: cannot reach {host}:{port}, which pacstrap needs")
+    if problems:
+        return problems
+    # these need a valid manifest and the network
+    data = machine.load(profile, paths.MANIFEST, hardware.detect_features()).data
+    problems += check_repo_packages(data) + check_aur_packages(data)
+    problems += unreachable_repos(data)
     return problems
+
+
+def unreachable_repos(data: dict) -> list[str]:
+    """git_repos that can't be cloned without a prompt, so the install would fail on them."""
+    env = {**os.environ, **NONINTERACTIVE_GIT}
+    problems = []
+    for url in manifest.section(data, "git_repos"):
+        result = run(
+            "git", "ls-remote", url, "HEAD", check=False, capture=True, quiet=True, env=env
+        )
+        if result.returncode != 0:
+            problems.append(f"git_repos: cannot clone {url} without a prompt")
+    return problems
+
+
+def set_passwords(passwords: dict[str, str]) -> None:
+    # through stdin, so the passwords never show up in arguments, the environment or a file
+    text = "".join(f"{account}:{password}\n" for account, password in passwords.items())
+    run("arch-chroot", MNT, "chpasswd", input=text)
 
 
 def install(hostname: str, profile: str) -> None:
@@ -60,17 +88,19 @@ def install(hostname: str, profile: str) -> None:
     )
     console.print(f"Detected features: {', '.join(loaded.features) or 'none'}\n")
     swap_gib = memory.swap_gib(memory.total_gib())
+    # every input is collected before anything is changed, so the rest runs unattended
     try:
-        disk = select_disk(swap_gib)
-    except DiskError as e:
+        inputs = collect(swap_gib, cfg.username)
+    except InputError as e:
         err_console.print(f"\n[bold red]Install aborted:[/] {escape(str(e))}")
         sys.exit(1)
+    console.print("\n[bold green]All input collected.[/] The install now runs without you.\n")
 
     chroot_repo = CHROOT_REPO_DIR / cfg.install_repo
     target = Path(MNT + str(chroot_repo))
     uv = ("uv", "--directory", str(chroot_repo))
     # the outer `uv run` exports VIRTUAL_ENV, which the inner uv would warn about
-    env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
+    env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"} | NONINTERACTIVE_GIT
 
     def chroot(step: str, *args: str, user: str | None = None) -> None:
         as_user = ("runuser", "-u", user, "--") if user else ()
@@ -89,7 +119,7 @@ def install(hostname: str, profile: str) -> None:
         )
 
     echo("==> Creating partitions...")
-    create_partitions(disk, swap_gib)
+    create_partitions(inputs.disk, swap_gib)
 
     echo("==> Installing base system...")
     pacstrap(cfg, data)
@@ -106,6 +136,7 @@ def install(hostname: str, profile: str) -> None:
 
     echo("==> Running post-chroot setup...")
     chroot("post-chroot", "--hostname", hostname)
+    set_passwords(inputs.passwords)
 
     echo("==> Creating boot entries...")
     chroot("boot-entries")
