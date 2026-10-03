@@ -80,3 +80,10 @@ def test_check_prints_each_requested_check_in_order(monkeypatch):
     monkeypatch.setattr(cli.memory, "total_gib", lambda: 16.0)
     result = CliRunner().invoke(cli.app, ["check", "-r", "-u"])
     assert result.output == "intel-ucode\n16.0 GiB\n"
+
+
+def test_check_s_prints_swap_size(monkeypatch):
+    monkeypatch.setattr(cli.memory, "total_gib", lambda: 31.06)
+    result = CliRunner().invoke(cli.app, ["check", "-s"])
+    assert result.exit_code == 0, result.output
+    assert result.output == "33 GiB\n"

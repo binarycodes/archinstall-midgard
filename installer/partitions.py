@@ -1,3 +1,4 @@
+from installer import memory
 from installer.config import (
     EFI_PARTITION,
     EFI_SIZE,
@@ -17,10 +18,11 @@ def create_partitions(cfg: Config) -> None:
     run("swapoff", cfg.swap, check=False, capture=True)
     run("umount", "-R", MNT, check=False, capture=True)
 
+    swap_gib = memory.swap_gib(memory.total_gib())
     run("sgdisk", "--zap-all", cfg.disk)
     for number, size, type_code in (
         (EFI_PARTITION, f"+{EFI_SIZE}", EFI_TYPE),
-        (SWAP_PARTITION, f"+{cfg.swap_size}", SWAP_TYPE),
+        (SWAP_PARTITION, f"+{swap_gib}G", SWAP_TYPE),
         (ROOT_PARTITION, "0", LINUX_TYPE),
     ):
         run("sgdisk", "-n", f"{number}:0:{size}", "-t", f"{number}:{type_code}", cfg.disk)

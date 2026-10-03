@@ -105,13 +105,18 @@ def check_cmd(
         bool, typer.Option("-u", "--ucode", help="detected microcode package")
     ] = False,
     ram: Annotated[bool, typer.Option("-r", "--ram", help="detected RAM in GiB")] = False,
+    swap: Annotated[
+        bool, typer.Option("-s", "--swap", help="swap size for the detected RAM, in GiB")
+    ] = False,
 ) -> None:
-    if not (ucode or ram):
-        raise typer.BadParameter("pass at least one check, e.g. -u or -r")
+    if not (ucode or ram or swap):
+        raise typer.BadParameter("pass at least one check, e.g. -u, -r or -s")
     if ucode:
         typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
     if ram:
         typer.echo(f"{memory.total_gib():.1f} GiB")
+    if swap:
+        typer.echo(f"{memory.swap_gib(memory.total_gib())} GiB")
 
 
 def main() -> None:

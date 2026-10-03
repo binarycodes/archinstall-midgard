@@ -7,6 +7,7 @@ SWAP_PARTITION = 2
 ROOT_PARTITION = 3
 
 EFI_SIZE = "1G"  # mounted at /boot, so it holds the kernels and initramfs images
+SWAP_SPARE_GIB = 1  # swap is RAM plus this, so a full RAM image fits when hibernating
 
 EFI_TYPE = "ef00"
 SWAP_TYPE = "8200"
@@ -41,7 +42,6 @@ class Config:
     keymap: str
     install_repo: str
     disk: str
-    swap_size: str
 
     @classmethod
     def from_manifest(cls, data: dict) -> "Config":

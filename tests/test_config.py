@@ -5,7 +5,7 @@ from installer.config import Config, ConfigError
 
 
 def test_missing_keys_are_named():
-    with pytest.raises(ConfigError, match="disk, swap_size"):
+    with pytest.raises(ConfigError, match="disk"):
         Config.from_manifest(
             {
                 "username": "u",
@@ -45,6 +45,5 @@ def test_partition_separator_follows_kernel_naming(disk, expected):
         keymap="k",
         install_repo="r",
         disk=disk,
-        swap_size="1G",
     )
     assert cfg.partition(1) == expected
