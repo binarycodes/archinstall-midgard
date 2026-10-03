@@ -106,6 +106,7 @@ packages:
   - ripgrep # A search tool that combines the usability of ag with the raw speed of grep
   - rsync # A fast and versatile file copying tool for remote and local files
   - rtkit # Realtime Policy and Watchdog Daemon
+  - shellcheck # Shell script analysis tool
   - slurp # Select a region in a Wayland compositor
   - sof-firmware # Sound Open Firmware
   - solaar # Linux device manager for a wide range of Logitech devices
