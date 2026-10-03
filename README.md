@@ -13,7 +13,7 @@ Custom Arch Linux installation. Installation is based on the manifest, the hardw
 
 ## Profiles
 
-A machine can use one profile, chosen at install with `--profile`. Without a profile, the machine is installed from the base manifest and its detected features. A profile uses the same sections as `manifest.yml`. Every section is optional, so an empty profile is valid.
+A profile can be selected during installation with `--profile`. Without a profile, the machine is installed from the base manifest and its detected features. A profile uses the same sections as `manifest.yml`. Every section is optional, so an empty profile is valid.
 
 A profile can extend other profiles, given as a single name or a list:
 
@@ -23,7 +23,7 @@ packages:
   - steam
 ```
 
-The installer records what the system was installed from in `/etc/os-midgard-metadata`, in the same format as `/etc/os-release`:
+The installer records what the system was installed from in `/etc/os-midgard-metadata`:
 
 ```sh
 PROFILE="gaming"
@@ -33,10 +33,10 @@ GIT_COMMIT_SHA="0611c08aa0d6a0e9a8bd31c0e5e7c4b8f2d7e3a1"
 INSTALL_DATE="2026-10-03T12:00:00Z"
 ```
 
-`packages`, `daily`, `cleanup` and the install steps read the profile from this file. A machine installed without a profile has an empty `PROFILE`.
+A machine installed without a profile has an empty `PROFILE`.
 
 > [!NOTE]
-> A profile cannot be changed later.
+> A profile cannot be changed after installation
 
 ## Hardware features
 
@@ -70,13 +70,6 @@ uv run installer install --hostname <name> [--profile <profile>]
 
 `--hostname` is required. `--profile` is optional; to list the available profiles, run `uv run installer check -p`.
 
-The install runs in three stages, and all input is collected before anything on the machine changes:
-
-1. Checks. The installer checks the hostname, the profile if one is given, the merged manifest, that the machine is booted in UEFI mode and online, that every package exists in the repos or on the AUR, and that every repository in `git_repos` can be cloned without a prompt.
-2. Input. It shows the hostname, the profile with its chain if one is given, and the detected features. It then lists the disks and asks which one to install to, shows the current contents and the new layout of the chosen disk, and asks you to confirm by typing the disk name. Finally it asks for the root password and your user's password, each typed twice.
-3. Install. From here the installer runs on its own, so you can leave the machine. It partitions the disk, installs the base system, records the metadata, copies the repository into the new system, and from a chroot configures the system, sets the passwords, creates boot entries, installs all packages, clones your projects and stows the dotfiles.
-
-The disk is always chosen interactively during install. To try the selection without changing anything, run `uv run installer check -d`.
 
 ## Maintenance
 
