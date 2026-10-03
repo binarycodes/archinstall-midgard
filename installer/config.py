@@ -15,7 +15,6 @@ class Config:
     install_repo: str
     disk: str
     swap_size: str
-    ucode: str
 
     @classmethod
     def from_manifest(cls, data: dict) -> "Config":

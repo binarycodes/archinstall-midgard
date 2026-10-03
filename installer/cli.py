@@ -5,7 +5,7 @@ from typing import Annotated
 
 import typer
 
-from installer import manifest, paths
+from installer import cpu, manifest, paths
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
 from installer.cleanup import cleanup
@@ -27,8 +27,15 @@ app = typer.Typer(
 )
 
 
-def command(name: str, help: str, *, root: bool) -> Callable[[Callable], Callable]:
-    """Register a command that runs its privilege guard before doing anything else."""
+def allow_any() -> None:
+    pass
+
+
+def command(name: str, help: str, *, root: bool | None) -> Callable[[Callable], Callable]:
+    """Register a command that runs its privilege guard before doing anything else.
+
+    root=None is for read-only commands that are safe as root or a regular user.
+    """
 
     def register(f: Callable) -> Callable:
         @functools.wraps(f)
@@ -36,7 +43,7 @@ def command(name: str, help: str, *, root: bool) -> Callable[[Callable], Callabl
             run.guard()
             return f(*args, **kwargs)
 
-        run.guard = require_root if root else require_user
+        run.guard = allow_any if root is None else require_root if root else require_user
         return app.command(name, help=help)(run)
 
     return register
@@ -90,6 +97,17 @@ def user_projects_cmd() -> None:
 @command("customize", "install step: apply the gsettings section of the manifest", root=False)
 def customize_cmd() -> None:
     customize(load()[1])
+
+
+@command("check", "print what the installer detects on this machine", root=None)
+def check_cmd(
+    ucode: Annotated[
+        bool, typer.Option("-u", "--ucode", help="detected microcode package")
+    ] = False,
+) -> None:
+    if not ucode:
+        raise typer.BadParameter("pass at least one check, e.g. -u")
+    typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
 
 
 def main() -> None:

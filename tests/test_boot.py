@@ -32,3 +32,13 @@ def test_kernel_options_match_the_script():
 
 def test_boot_files_use_ucode():
     assert "/boot/amd-ucode.img" in boot.boot_files("amd-ucode")
+
+
+def test_kernel_options_without_ucode():
+    assert boot.kernel_options(None, "linux", "abcd") == (
+        "initrd=\\initramfs-linux.img root=UUID=abcd rw quiet loglevel=3"
+    )
+
+
+def test_boot_files_without_ucode():
+    assert not [f for f in boot.boot_files(None) if "ucode" in f]

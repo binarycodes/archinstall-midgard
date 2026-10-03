@@ -7,14 +7,12 @@ keymap: us
 install_repo: archinstall-midgard
 disk: /dev/nvme0n1
 swap_size: 32G
-ucode: intel-ucode
 
 pacstrap:
   - base # Minimal package set to define a basic Arch Linux installation
   - base-devel # Basic tools to build Arch Linux packages
   - btrfs-progs # Btrfs filesystem utilities
   - git # the fast distributed version control system
-  - intel-ucode # Microcode update files for Intel CPUs
   - iptables # Linux kernel packet control tool (using nft interface)
   - less # A terminal based program for viewing text files
   - linux # The Linux kernel and modules

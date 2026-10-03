@@ -1,13 +1,13 @@
-from installer import manifest
+from installer import cpu, manifest
 from installer.shell import echo, output, run
 
 
-def orphaned_packages(installed: str, data: dict) -> list[str]:
-    return sorted(set(installed.split()) - set(manifest.managed_packages(data)))
+def orphaned_packages(installed: str, data: dict, ucode: str | None = None) -> list[str]:
+    return sorted(set(installed.split()) - set(manifest.managed_packages(data, ucode)))
 
 
 def cleanup(data: dict) -> None:
-    orphaned = orphaned_packages(output("pacman", "-Qqe"), data)
+    orphaned = orphaned_packages(output("pacman", "-Qqe"), data, cpu.ucode())
     if not orphaned:
         echo("No orphaned packages found.")
         return

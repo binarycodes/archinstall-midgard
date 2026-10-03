@@ -20,7 +20,9 @@ def mappings(data: dict, name: str) -> list[dict]:
     return [dict(item) for item in data.get(name) or []]
 
 
-def managed_packages(data: dict) -> list[str]:
+def managed_packages(data: dict, ucode: str | None = None) -> list[str]:
     names = {pkg for name in PACKAGE_SECTIONS for pkg in section(data, name)}
+    if ucode:
+        names.add(ucode)
     names.update(item["name"] for item in mappings(data, "url_packages"))
     return sorted(names)

@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+from installer import cpu
 from installer.config import Config
 from installer.shell import echo, output, run
 
@@ -29,22 +30,22 @@ def boot_order(entries: list[tuple[str, str]]) -> list[str]:
     return regular + lts + other
 
 
-def kernel_options(ucode: str, kernel: str, root_uuid: str) -> str:
-    return (
-        f"initrd=\\{ucode}.img initrd=\\initramfs-{kernel}.img "
-        f"root=UUID={root_uuid} rw quiet loglevel=3"
-    )
+def kernel_options(ucode: str | None, kernel: str, root_uuid: str) -> str:
+    initrds = ([f"initrd=\\{ucode}.img"] if ucode else []) + [f"initrd=\\initramfs-{kernel}.img"]
+    return " ".join(initrds) + f" root=UUID={root_uuid} rw quiet loglevel=3"
 
 
-def boot_files(ucode: str) -> list[str]:
+def boot_files(ucode: str | None) -> list[str]:
     files = [f"/boot/vmlinuz-{kernel}" for _, kernel in KERNELS]
     files += [f"/boot/initramfs-{kernel}.img" for _, kernel in KERNELS]
-    files.append(f"/boot/{ucode}.img")
+    if ucode:
+        files.append(f"/boot/{ucode}.img")
     return files
 
 
 def create_boot_entries(cfg: Config) -> None:
     root_uuid = output("blkid", cfg.root, "-s", "UUID", "-o", "value").strip()
+    ucode = cpu.ucode()
 
     for num in arch_entries(parse_entries(output("efibootmgr"))):
         run("efibootmgr", "--delete-bootnum", "--bootnum", num)
@@ -62,13 +63,13 @@ def create_boot_entries(cfg: Config) -> None:
             "--loader",
             f"/vmlinuz-{kernel}",
             "--unicode",
-            kernel_options(cfg.ucode, kernel, root_uuid),
+            kernel_options(ucode, kernel, root_uuid),
         )
 
     entries = parse_entries(output("efibootmgr"))
     run("efibootmgr", "-o", ",".join(boot_order(entries)))
 
-    for file in boot_files(cfg.ucode):
+    for file in boot_files(ucode):
         if not Path(file).is_file():
             echo(f"WARNING: {file} not found")
 
