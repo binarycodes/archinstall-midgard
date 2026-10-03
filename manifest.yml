@@ -10,7 +10,7 @@ pacstrap:
   - base-devel # Basic tools to build Arch Linux packages
   - btrfs-progs # Btrfs filesystem utilities
   - git # the fast distributed version control system
-  - iptables # Linux kernel packet control tool (using nft interface)
+  - nftables # Netfilter tables userspace tools
   - less # A terminal based program for viewing text files
   - linux # The Linux kernel and modules
   - linux-firmware # Firmware files for Linux - Default set
@@ -61,7 +61,6 @@ packages:
   - greetd-tuigreet # A console UI greeter for greetd
   - grim # Screenshot utility for Wayland
   - imv # Image viewer for Wayland and X11
-  - intellij-idea-community-edition # IDE for Java, Groovy and other programming languages with advanced refactoring features
   - inxi # Full featured CLI system information tool
   - iperf3 # TCP, UDP, and SCTP network bandwidth measurement tool
   - ipmitool # Command-line interface to IPMI-enabled devices
@@ -143,7 +142,6 @@ url_packages:
     url: https://github.com/binarycodes/ssh-key-signer/releases/download/v0.0.10/ssh-keysign-0.0.10-1-x86_64.pkg.tar.zst
 
 aur_packages:
-  - brother-mfc-l2860dwe # LPR and CUPS driver for the Brother MFC-L2880DW
   - infisical-bin # The official Infisical CLI
   - jdtls # Eclipse Java language server
   - terraform-ls-bin # Terraform Language Server
