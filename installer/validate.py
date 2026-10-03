@@ -6,7 +6,7 @@ import urllib.request
 from dataclasses import fields
 from pathlib import Path
 
-from installer import manifest
+from installer import manifest, profiles
 from installer.annotate import describe
 from installer.config import Config
 from installer.manifest import AUR_SECTIONS, PACKAGE_SECTIONS, REPO_SECTIONS
@@ -22,6 +22,7 @@ KNOWN_KEYS = (
     "gsettings",
     "git_repos",
 )
+PROFILE_KEYS = (*KNOWN_KEYS, "extends")
 
 # Arch package naming rules: lowercase alphanumerics and @._+-, not starting with - or .
 PACKAGE_NAME = re.compile(r"^[a-z0-9@_+][a-z0-9@._+-]*$")
@@ -35,15 +36,32 @@ AUR_RPC = "https://aur.archlinux.org/rpc/v5/info"
 
 def validate(data: dict) -> list[str]:
     """Every problem in the manifest, as "key.path: message"; empty when it is valid."""
-    problems: list[str] = []
-    problems += [f"{key}: unknown key" for key in data if key not in KNOWN_KEYS]
-    problems += check_config(data)
+    problems = unknown_keys(data, KNOWN_KEYS)
+    return problems + check_sections(data, complete=True)
+
+
+def validate_profile(data: dict, available: list[str]) -> list[str]:
+    """Every problem in one profile file on its own; available is every profile name.
+
+    Every key is optional: a profile only overrides or adds to the self-sufficient base.
+    """
+    problems = unknown_keys(data, PROFILE_KEYS)
+    problems += check_extends(data, available)
+    return problems + check_sections(data, complete=False)
+
+
+def unknown_keys(data: dict, known: tuple[str, ...]) -> list[str]:
+    return [f"{key}: unknown key" for key in data if key not in known]
+
+
+def check_sections(data: dict, complete: bool) -> list[str]:
+    problems = check_config(data, complete)
     problems += check_packages(data)
     problems += check_services(data)
     problems += check_url_packages(data)
     problems += check_pacman_keys(data)
     problems += check_gsettings(data)
-    problems += check_git_repos(data)
+    problems += check_git_repos(data, complete)
     problems += check_system(data)
     return problems
 
@@ -89,12 +107,27 @@ def mapping_list(data: dict, key: str) -> tuple[list[tuple[str, dict]], list[str
     return items, problems
 
 
-def check_config(data: dict) -> list[str]:
+def check_extends(data: dict, available: list[str]) -> list[str]:
+    value = data.get("extends")
+    if isinstance(value, str) and value:
+        items, problems = [("extends", value)], []
+    elif value is None or isinstance(value, list):
+        items, problems = string_list(data, "extends")
+    else:
+        return ["extends: must be a profile name or a list of profile names"]
+    for path, name in items:
+        if name not in available:
+            problems.append(f"{path}: {profiles.unknown(name, available)}")
+    return problems
+
+
+def check_config(data: dict, complete: bool = True) -> list[str]:
     problems = []
     for key in CONFIG_KEYS:
         value = data.get(key)
         if value is None:
-            problems.append(f"{key}: missing")
+            if complete:
+                problems.append(f"{key}: missing")
         elif not isinstance(value, str) or not value:
             problems.append(f"{key}: must be a non-empty string")
     return problems
@@ -183,14 +216,14 @@ def check_gsettings(data: dict) -> list[str]:
     return problems
 
 
-def check_git_repos(data: dict) -> list[str]:
+def check_git_repos(data: dict, complete: bool = True) -> list[str]:
     items, problems = string_list(data, "git_repos")
     for path, url in items:
         if not GIT_URL.match(url):
             problems.append(f"{path}: {url!r} is not a git URL (https://, ssh:// or git@)")
     install_repo = data.get("install_repo")
     names = {manifest.repo_name(url) for _, url in items}
-    if isinstance(install_repo, str) and install_repo and install_repo not in names:
+    if complete and isinstance(install_repo, str) and install_repo and install_repo not in names:
         problems.append(f"git_repos: must include the install_repo {install_repo!r}")
     return problems
 

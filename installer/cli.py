@@ -6,12 +6,12 @@ from typing import Annotated
 import typer
 from rich.markup import escape
 
-from installer import cpu, disk, manifest, memory, paths
+from installer import cpu, disk, machine, memory, paths, profiles
 from installer import hostname as hostnames
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
 from installer.cleanup import cleanup
-from installer.config import Config
+from installer.config import SAVED_PROFILE, Config
 from installer.customize import customize
 from installer.daily import daily
 from installer.install import install
@@ -19,7 +19,7 @@ from installer.packages import packages
 from installer.post_chroot import post_chroot
 from installer.projects import user_projects
 from installer.shell import console, err_console, require_root, require_user
-from installer.validate import check_aur_packages, check_repo_packages, skipped_checks, validate
+from installer.validate import check_aur_packages, check_repo_packages, skipped_checks
 
 app = typer.Typer(
     name="installer",
@@ -52,36 +52,40 @@ def command(name: str, help: str, *, root: bool | None) -> Callable[[Callable], 
     return register
 
 
-def fail(path: Path, problems: list[str]) -> None:
-    typer.echo(f"{path}: {len(problems)} problem(s)", err=True)
+def fail(problems: list[str]) -> None:
+    typer.echo(f"{len(problems)} problem(s):", err=True)
     for problem in problems:
         typer.echo(f"  {problem}", err=True)
     raise typer.Exit(1)
 
 
-def load_manifest(path: Path) -> dict:
-    """The manifest at path, or exit listing every problem with it."""
-    try:
-        data = manifest.load(path)
-    except manifest.ManifestError as e:
-        fail(path, [str(e)])
-    problems = validate(data)
+def check_files(path: Path, profile: str | None = None) -> machine.Files:
+    """The manifest at path and its profiles, or exit listing every problem with them."""
+    files = machine.read(path)
+    problems = machine.check(files, profile)
     if problems:
-        fail(path, problems)
-    return data
+        fail(problems)
+    return files
 
 
 def load() -> tuple[Config, dict]:
-    data = load_manifest(paths.MANIFEST)
-    return Config.from_manifest(data), data
+    """The manifest for the profile this system was installed with, or exit."""
+    try:
+        loaded = machine.load_saved(paths.MANIFEST, SAVED_PROFILE)
+    except machine.MachineError as e:
+        fail(e.problems)
+    return loaded.cfg, loaded.data
 
 
 HostnameOption = Annotated[str, typer.Option("--hostname", help="hostname of the new system")]
+ProfileOption = Annotated[
+    str, typer.Option("--profile", help="profile in profiles/ to install; can't be changed later")
+]
 
 
 @command("install", "full install from the live ISO (root)", root=True)
-def install_cmd(hostname: HostnameOption) -> None:
-    install(*load(), hostname)
+def install_cmd(hostname: HostnameOption, profile: ProfileOption) -> None:
+    install(hostname, profile)
 
 
 @command("packages", "install packages, restore configs, enable services", root=False)
@@ -101,13 +105,17 @@ def cleanup_cmd() -> None:
 
 @command("annotate", "rewrite package descriptions into the manifest", root=False)
 def annotate_cmd(manifest: Annotated[Path, typer.Argument()] = paths.MANIFEST) -> None:
-    load_manifest(manifest)
-    annotate(manifest)
+    files = check_files(manifest)
+    directory = profiles.directory(manifest)
+    annotate([manifest, *(directory / f"{name}.yml" for name in files.available)])
 
 
-@command("validate", "check the manifest for mistakes", root=None)
+@command("validate", "check the manifest and every profile for mistakes", root=None)
 def validate_cmd(
     manifest: Annotated[Path, typer.Argument()] = paths.MANIFEST,
+    profile: Annotated[
+        str | None, typer.Option("--profile", help="check only this profile")
+    ] = None,
     packages: Annotated[
         bool,
         typer.Option(
@@ -117,14 +125,20 @@ def validate_cmd(
         ),
     ] = False,
 ) -> None:
-    data = load_manifest(manifest)
+    files = check_files(manifest, profile)
     for note in skipped_checks():
         typer.echo(f"note: {note}", err=True)
+    names = machine.targets(files, profile)
+    chains = {name: profiles.chain(name, files.profiles) for name in names}
     if packages:
+        # every package any of these profiles can install, looked up once
+        data = machine.merged(files, machine.reachable(files, names))
         problems = check_repo_packages(data) + check_aur_packages(data)
         if problems:
-            fail(manifest, problems)
-    typer.echo(f"{manifest}: ok")
+            fail(problems)
+    typer.echo(f"{files.base_label}: ok")
+    for name, chain in chains.items():
+        typer.echo(f"{machine.label(name, chain)}: ok")
 
 
 @command("post-chroot", "install step: system configuration (root, in chroot)", root=True)
@@ -165,9 +179,15 @@ def check_cmd(
             "-d", "--disk", help="dry run of the install's disk selection; changes nothing"
         ),
     ] = False,
+    chain: Annotated[
+        str | None,
+        typer.Option(
+            "-c", "--chain", metavar="PROFILE", help="the profile chain PROFILE resolves to"
+        ),
+    ] = None,
 ) -> None:
-    if not (ucode or ram or swap or select_disk):
-        raise typer.BadParameter("pass at least one check, e.g. -u, -r, -s or -d")
+    if not (ucode or ram or swap or select_disk or chain):
+        raise typer.BadParameter("pass at least one check, e.g. -u, -r, -s, -d or -c PROFILE")
     if ucode:
         typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
     if ram:
@@ -185,6 +205,11 @@ def check_cmd(
             f"\n[bold green]Dry run:[/] install would erase {chosen.path} as shown above. "
             "Nothing was changed."
         )
+    if chain:
+        try:
+            typer.echo(profiles.describe(machine.chain(chain, paths.MANIFEST)))
+        except machine.MachineError as e:
+            fail(e.problems)
 
 
 def main() -> None:

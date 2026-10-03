@@ -2,6 +2,7 @@ import pytest
 from typer.testing import CliRunner
 
 from installer import cli
+from installer.machine import Files, Machine
 from installer.shell import require_root, require_user
 
 ROOT_COMMANDS = {"install", "post-chroot", "boot-entries"}
@@ -21,9 +22,8 @@ def test_every_command_declares_a_guard():
 
 def test_command_runs_guard_before_step(monkeypatch):
     order = []
-    monkeypatch.setattr(cli.manifest, "load", lambda path: {})
-    monkeypatch.setattr(cli, "validate", lambda data: [])
-    monkeypatch.setattr(cli.Config, "from_manifest", classmethod(lambda cls, d: "cfg"))
+    loaded = Machine("p", ["p"], "cfg", {})
+    monkeypatch.setattr(cli.machine, "load_saved", lambda path, saved: loaded)
     monkeypatch.setattr(cli, "cleanup", lambda data: order.append(("cleanup", data)))
     monkeypatch.setattr(cli.cleanup_cmd, "guard", lambda: order.append("guard"))
 
@@ -43,13 +43,23 @@ def test_h_is_short_for_help():
 def test_annotate_takes_an_optional_manifest_path(monkeypatch, tmp_path):
     seen = []
     monkeypatch.setattr(cli, "annotate", seen.append)
-    monkeypatch.setattr(cli, "load_manifest", lambda path: {})
+    monkeypatch.setattr(cli, "check_files", lambda path: Files("m", {}, None, {}, {}, []))
     monkeypatch.setattr(cli.annotate_cmd, "guard", lambda: None)
 
     CliRunner().invoke(cli.app, ["annotate"])
     CliRunner().invoke(cli.app, ["annotate", str(tmp_path / "m.yml")])
 
-    assert seen == [cli.paths.MANIFEST, tmp_path / "m.yml"]
+    assert seen == [[cli.paths.MANIFEST], [tmp_path / "m.yml"]]
+
+
+def test_annotate_includes_every_profile(monkeypatch, tmp_path):
+    seen = []
+    path = write_manifest(tmp_path, VALID, b="", a="")
+    monkeypatch.setattr(cli, "annotate", seen.append)
+    monkeypatch.setattr(cli.annotate_cmd, "guard", lambda: None)
+    result = CliRunner().invoke(cli.app, ["annotate", str(path)])
+    assert result.exit_code == 0, result.output
+    assert seen == [[path, tmp_path / "profiles" / "a.yml", tmp_path / "profiles" / "b.yml"]]
 
 
 def test_check_u_prints_detected_ucode(monkeypatch):
@@ -92,9 +102,23 @@ def test_check_s_prints_swap_size(monkeypatch):
     assert result.output == "33 GiB\n"
 
 
-def write_manifest(tmp_path, text: str):
+VALID = """\
+username: u
+timezone: UTC
+locale: en_US.UTF-8
+keymap: us
+install_repo: dots
+git_repos: [https://example.com/dots.git]
+"""
+
+
+def write_manifest(tmp_path, text: str, **profiles: str):
+    """m.yml with text, and profiles/<name>.yml for each keyword; one empty profile if none."""
     path = tmp_path / "m.yml"
     path.write_text(text)
+    (tmp_path / "profiles").mkdir()
+    for name, profile in (profiles or {"p": ""}).items():
+        (tmp_path / "profiles" / f"{name}.yml").write_text(profile)
     return path
 
 
@@ -102,22 +126,59 @@ def test_validate_ok_for_repo_manifest(monkeypatch):
     monkeypatch.setattr(cli, "skipped_checks", list)
     result = CliRunner().invoke(cli.app, ["validate"])
     assert result.exit_code == 0, result.output
-    assert result.output == f"{cli.paths.MANIFEST}: ok\n"
+    assert result.output == (
+        "manifest.yml: ok\ngaming (base → gaming): ok\nworkstation (base → workstation): ok\n"
+    )
 
 
 def test_validate_lists_every_problem(tmp_path):
-    path = write_manifest(tmp_path, "username: u\nbogus: 1\n")
+    path = write_manifest(tmp_path, VALID + "bogus: 1\n", p="disk: x\nmore: 1\n")
     result = CliRunner().invoke(cli.app, ["validate", str(path)])
     assert result.exit_code == 1
-    assert "bogus: unknown key" in result.output
-    assert "timezone: missing" in result.output
+    assert result.output == (
+        "3 problem(s):\n"
+        "  m.yml: bogus: unknown key\n"
+        "  profiles/p.yml: disk: unknown key\n"
+        "  profiles/p.yml: more: unknown key\n"
+    )
+
+
+def test_validate_needs_a_complete_base(tmp_path):
+    path = write_manifest(tmp_path, "username: u\n", p="timezone: UTC\n")
+    result = CliRunner().invoke(cli.app, ["validate", str(path)])
+    assert result.exit_code == 1
+    assert "  m.yml: timezone: missing\n" in result.output
+
+
+def test_validate_checks_the_merged_result(tmp_path):
+    path = write_manifest(tmp_path, VALID + "packages: [foot]\n", p="post_chroot: [foot]\n")
+    result = CliRunner().invoke(cli.app, ["validate", str(path)])
+    assert result.exit_code == 1
+    assert "  p (base → p): packages[0]: 'foot' is already listed at post_chroot[0]\n" in (
+        result.output
+    )
 
 
 def test_validate_reports_load_errors(tmp_path):
     path = write_manifest(tmp_path, "username: a\nusername: b\n")
     result = CliRunner().invoke(cli.app, ["validate", str(path)])
     assert result.exit_code == 1
-    assert "duplicate key 'username'" in result.output
+    assert "m.yml: line 2: duplicate key 'username'" in result.output
+
+
+def test_validate_profile_checks_just_that_one(monkeypatch, tmp_path):
+    monkeypatch.setattr(cli, "skipped_checks", list)
+    path = write_manifest(tmp_path, VALID, a="extends: b\n", b="", c="bogus: 1\n")
+    result = CliRunner().invoke(cli.app, ["validate", str(path), "--profile", "a"])
+    assert result.exit_code == 0, result.output
+    assert result.output == "m.yml: ok\na (base → b → a): ok\n"
+
+
+def test_validate_unknown_profile(tmp_path):
+    path = write_manifest(tmp_path, VALID, a="", b="")
+    result = CliRunner().invoke(cli.app, ["validate", str(path), "--profile", "x"])
+    assert result.exit_code == 1
+    assert "unknown profile 'x'; profiles in profiles/: a, b" in result.output
 
 
 def test_validate_packages_runs_lookups(monkeypatch):
@@ -131,14 +192,86 @@ def test_validate_packages_runs_lookups(monkeypatch):
     assert "packages: 'x' not found" in checked.output
 
 
-def test_steps_stop_on_an_invalid_manifest(monkeypatch, tmp_path):
-    path = write_manifest(tmp_path, "username: u\n")
-    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+@pytest.fixture
+def saved(monkeypatch, tmp_path):
+    """The saved profile file; cleanup runs with its guard off and records its data."""
+    path = tmp_path / "saved"
+    monkeypatch.setattr(cli, "SAVED_PROFILE", path)
     monkeypatch.setattr(cli.cleanup_cmd, "guard", lambda: None)
+    return path
+
+
+def test_steps_stop_on_an_invalid_manifest(monkeypatch, tmp_path, saved):
+    path = write_manifest(tmp_path, "username: u\n")
+    saved.write_text("p\n")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
     monkeypatch.setattr(cli, "cleanup", lambda data: pytest.fail("ran on an invalid manifest"))
     result = CliRunner().invoke(cli.app, ["cleanup"])
     assert result.exit_code == 1
-    assert "timezone: missing" in result.output
+    assert "m.yml: timezone: missing" in result.output
+
+
+def test_steps_use_the_saved_profile(monkeypatch, tmp_path, saved):
+    seen = []
+    path = write_manifest(tmp_path, VALID, a="keymap: fi\n", b="")
+    saved.write_text("a\n")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    monkeypatch.setattr(cli, "cleanup", seen.append)
+    result = CliRunner().invoke(cli.app, ["cleanup"])
+    assert result.exit_code == 0, result.output
+    assert [data["keymap"] for data in seen] == ["fi"]
+
+
+def test_steps_stop_without_a_saved_profile(monkeypatch, tmp_path, saved):
+    path = write_manifest(tmp_path, VALID, a="", b="")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    monkeypatch.setattr(cli, "cleanup", lambda data: pytest.fail("ran without a profile"))
+    result = CliRunner().invoke(cli.app, ["cleanup"])
+    assert result.exit_code == 1
+    assert f"{saved}: cannot read: No such file or directory; profiles in profiles/: a, b" in (
+        result.output
+    )
+
+
+def test_steps_stop_on_an_unknown_saved_profile(monkeypatch, tmp_path, saved):
+    path = write_manifest(tmp_path, VALID, a="")
+    saved.write_text("gone\n")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    monkeypatch.setattr(cli, "cleanup", lambda data: pytest.fail("ran on an unknown profile"))
+    result = CliRunner().invoke(cli.app, ["cleanup"])
+    assert result.exit_code == 1
+    assert f"{saved}: unknown profile 'gone'; profiles in profiles/: a" in result.output
+
+
+@pytest.mark.parametrize("step", ["packages", "daily", "cleanup", "customize", "boot-entries"])
+def test_steps_take_no_profile_option(step):
+    result = CliRunner().invoke(cli.app, [step, "--profile", "a"])
+    assert result.exit_code == 2
+    assert "No such option" in result.output
+
+
+def test_check_c_prints_the_chain(monkeypatch, tmp_path):
+    path = write_manifest(tmp_path, VALID, a="extends: [c, b]\n", b="extends: c\n", c="")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    result = CliRunner().invoke(cli.app, ["check", "-c", "a"])
+    assert result.exit_code == 0, result.output
+    assert result.output == "base → c → b → a\n"
+
+
+def test_check_c_never_reads_the_saved_profile(monkeypatch, tmp_path):
+    path = write_manifest(tmp_path, VALID, a="")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    monkeypatch.setattr(cli.machine, "load_saved", lambda *a: pytest.fail("read saved profile"))
+    result = CliRunner().invoke(cli.app, ["check", "--chain", "a"])
+    assert result.output == "base → a\n"
+
+
+def test_check_c_unknown_profile(monkeypatch, tmp_path):
+    path = write_manifest(tmp_path, VALID, a="", b="")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    result = CliRunner().invoke(cli.app, ["check", "-c", "x"])
+    assert result.exit_code == 1
+    assert "unknown profile 'x'; profiles in profiles/: a, b" in result.output
 
 
 def test_check_d_is_a_dry_run(monkeypatch):
@@ -168,22 +301,31 @@ def test_check_d_reports_abort(monkeypatch):
     assert "Disk selection aborted: not confirmed" in result.output
 
 
-@pytest.mark.parametrize("step", ["install", "post-chroot"])
-def test_hostname_is_required(monkeypatch, step):
+@pytest.mark.parametrize(
+    ("args", "missing"),
+    [
+        (["install", "--profile", "gaming"], "--hostname"),
+        (["post-chroot"], "--hostname"),
+        (["install", "--hostname", "midgard"], "--profile"),
+    ],
+)
+def test_hostname_and_profile_are_required(monkeypatch, args, missing):
     monkeypatch.setattr(cli, "install", lambda *a: pytest.fail("ran"))
     monkeypatch.setattr(cli, "post_chroot", lambda *a: pytest.fail("ran"))
-    result = CliRunner().invoke(cli.app, [step])
+    result = CliRunner().invoke(cli.app, args)
     assert result.exit_code == 2
-    assert "--hostname" in result.output
+    assert f"Missing option '{missing}'" in result.output
 
 
-def test_install_passes_hostname(monkeypatch):
+def test_install_passes_hostname_and_profile(monkeypatch):
     seen = []
     monkeypatch.setattr(cli.install_cmd, "guard", lambda: None)
-    monkeypatch.setattr(cli, "install", lambda cfg, data, name: seen.append(name))
-    result = CliRunner().invoke(cli.app, ["install", "--hostname", "midgard"])
+    monkeypatch.setattr(cli, "install", lambda *args: seen.append(args))
+    result = CliRunner().invoke(
+        cli.app, ["install", "--hostname", "midgard", "--profile", "gaming"]
+    )
     assert result.exit_code == 0, result.output
-    assert seen == ["midgard"]
+    assert seen == [("midgard", "gaming")]
 
 
 def test_post_chroot_rejects_invalid_hostname(monkeypatch):

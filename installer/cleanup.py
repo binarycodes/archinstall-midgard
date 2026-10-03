@@ -12,7 +12,7 @@ def cleanup(data: dict) -> None:
         echo("No orphaned packages found.")
         return
 
-    echo("Explicitly installed packages not in manifest.yml:\n")
+    echo("Explicitly installed packages not in the manifest or this machine's profile:\n")
     echo("\n".join(orphaned))
     echo("")
     if input("Remove these packages? [y/N] ").strip().lower() == "y":

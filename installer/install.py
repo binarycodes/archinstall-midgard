@@ -6,8 +6,8 @@ from pathlib import Path
 from rich.markup import escape
 
 from installer import hostname as hostnames
-from installer import memory, paths
-from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK, Config
+from installer import machine, memory, paths, profiles
+from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK
 from installer.disk import DiskError, select_disk
 from installer.pacstrap import pacstrap
 from installer.partitions import create_partitions
@@ -24,11 +24,13 @@ def network_reachable() -> bool:
     return True
 
 
-def preflight(hostname: str) -> list[str]:
+def preflight(hostname: str, profile: str) -> list[str]:
     """Reasons the install can't start; checked before a disk is even offered."""
     problems = []
     if problem := hostnames.problem(hostname):
         problems.append(problem)
+    # the profile exists and the manifest it merges to is valid
+    problems += machine.check(machine.read(paths.MANIFEST), profile)
     if not EFI_VARS.is_dir():
         problems.append("not booted in UEFI mode; boot entries are created with EFISTUB")
     if not network_reachable():
@@ -37,16 +39,19 @@ def preflight(hostname: str) -> list[str]:
     return problems
 
 
-def install(cfg: Config, data: dict, hostname: str) -> None:
-    # the manifest was validated when it was loaded
-    problems = preflight(hostname)
+def install(hostname: str, profile: str) -> None:
+    problems = preflight(hostname, profile)
     if problems:
         err_console.print("[bold red]Cannot install:[/]")
         for problem in problems:
             err_console.print(f"  {escape(problem)}")
         sys.exit(1)
 
-    console.print(f"Installing as [bold]{hostname}[/]\n")
+    loaded = machine.load(profile, paths.MANIFEST)
+    cfg, data = loaded.cfg, loaded.data
+    console.print(
+        f"Installing as [bold]{hostname}[/] with profile [bold]{escape(loaded.describe())}[/]\n"
+    )
     swap_gib = memory.swap_gib(memory.total_gib())
     try:
         disk = select_disk(swap_gib)
@@ -81,6 +86,7 @@ def install(cfg: Config, data: dict, hostname: str) -> None:
 
     echo("==> Installing base system...")
     pacstrap(cfg, data)
+    profiles.save(profile, MNT)
 
     # /tmp is avoided because arch-chroot mounts a tmpfs over it
     run("cp", "-r", str(paths.REPO_ROOT), str(target))

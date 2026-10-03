@@ -232,3 +232,41 @@ def test_repo_packages_need_pacman(monkeypatch):
     assert validate.check_repo_packages(VALID) == [
         "packages not checked against the repos: pacman not found"
     ]
+
+
+def test_empty_profile_is_valid():
+    assert validate.validate_profile({}, ["a"]) == []
+
+
+@pytest.mark.parametrize("key", ["hostname", "disk", "bogus"])
+def test_profile_unknown_keys(key):
+    assert validate.validate_profile({key: "x"}, ["a"]) == [f"{key}: unknown key"]
+
+
+def test_profile_needs_no_required_keys():
+    assert validate.validate_profile({"keymap": "fi", "install_repo": "other"}, []) == []
+
+
+def test_profile_sections_are_checked():
+    assert validate.validate_profile({"packages": ["Bad"]}, []) == [
+        "packages[0]: 'Bad' is not a valid package name"
+    ]
+
+
+@pytest.mark.parametrize("value", ["b", ["b"], ["b", "c"], None])
+def test_profile_extends_known_profiles(value):
+    assert validate.validate_profile({"extends": value}, ["a", "b", "c"]) == []
+
+
+@pytest.mark.parametrize(
+    ("value", "problem"),
+    [
+        ("x", "extends: unknown profile 'x'; profiles in profiles/: a, b"),
+        (["b", "x"], "extends[1]: unknown profile 'x'; profiles in profiles/: a, b"),
+        ([1], "extends[0]: must be a non-empty string"),
+        ("", "extends: must be a profile name or a list of profile names"),
+        ({"b": 1}, "extends: must be a profile name or a list of profile names"),
+    ],
+)
+def test_profile_extends_problems(value, problem):
+    assert validate.validate_profile({"extends": value}, ["a", "b"]) == [problem]

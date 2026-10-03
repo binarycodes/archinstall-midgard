@@ -72,3 +72,70 @@ def test_load_reports_yaml_error_line(tmp_path):
     path.write_text("a: 1\nb: [\n")
     with pytest.raises(manifest.ManifestError, match="line 3: invalid YAML"):
         manifest.load(path)
+
+
+BASE = {
+    "keymap": "us",
+    "packages": ["foot", "sway"],
+    "aur_helpers": None,
+    "gsettings": {"iface": {"theme": "dark", "font": "Roboto"}},
+}
+
+
+def test_merge_with_an_empty_profile_is_exactly_the_base():
+    assert manifest.merge(BASE, {}) == BASE
+
+
+def test_merge_without_layers_is_the_base():
+    assert manifest.merge(BASE) == BASE
+
+
+def test_merge_later_single_value_wins():
+    assert manifest.merge(BASE, {"keymap": "de"}, {"keymap": "fi"})["keymap"] == "fi"
+
+
+def test_merge_mappings_key_by_key():
+    merged = manifest.merge(BASE, {"gsettings": {"iface": {"font": "Noto"}, "other": {"k": 1}}})
+    assert merged["gsettings"] == {
+        "iface": {"theme": "dark", "font": "Noto"},
+        "other": {"k": 1},
+    }
+
+
+def test_merge_lists_are_combined_without_duplicates():
+    merged = manifest.merge(BASE, {"packages": ["vim", "foot"]}, {"packages": ["mpv", "vim"]})
+    assert merged["packages"] == ["foot", "sway", "vim", "mpv"]
+
+
+def test_merge_lists_of_mappings_drop_duplicates():
+    key = {"key": "A" * 40, "server": "s"}
+    merged = manifest.merge({"pacman_keys": [key]}, {"pacman_keys": [dict(key)]})
+    assert merged["pacman_keys"] == [key]
+
+
+def test_merge_empty_value_adds_nothing():
+    assert manifest.merge(BASE, {"packages": None, "keymap": None}) == BASE
+
+
+def test_merge_adds_new_sections():
+    assert manifest.merge(BASE, {"aur_helpers": ["yay-bin"]})["aur_helpers"] == ["yay-bin"]
+
+
+def test_merge_leaves_its_inputs_unchanged():
+    profile = {"packages": ["vim"], "gsettings": {"iface": {"font": "Noto"}}}
+    manifest.merge(BASE, profile)
+    assert BASE["packages"] == ["foot", "sway"]
+    assert BASE["gsettings"]["iface"]["font"] == "Roboto"
+
+
+def test_load_allows_an_empty_file_only_when_asked(tmp_path):
+    path = tmp_path / "p.yml"
+    path.write_text("---\n")
+    assert manifest.load(path, allow_empty=True) == {}
+    with pytest.raises(manifest.ManifestError):
+        manifest.load(path)
+
+
+def test_repo_profiles_are_empty():
+    for name in ("gaming", "workstation"):
+        assert manifest.load(paths.REPO_ROOT / "profiles" / f"{name}.yml", allow_empty=True) == {}

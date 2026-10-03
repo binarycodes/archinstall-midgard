@@ -1,3 +1,5 @@
+import pytest
+
 from installer import annotate
 
 PACMAN_OUTPUT = """\
@@ -47,3 +49,34 @@ def test_annotate_rewrites_only_package_sections():
         "  - sshd",
         "",
     ]
+
+
+def test_annotate_rewrites_every_file_with_one_lookup(monkeypatch, tmp_path):
+    base = tmp_path / "manifest.yml"
+    base.write_text("packages:\n  - vim\n")
+    profile = tmp_path / "gaming.yml"
+    profile.write_text("extends: [a]\naur_packages:\n  - iwd # old\n")
+    empty = tmp_path / "empty.yml"
+    empty.write_text("")
+    lookups = []
+
+    def describe(packages):
+        lookups.append(packages)
+        return {"vim": "Vi Improved", "iwd": "Internet Wireless Daemon"}
+
+    monkeypatch.setattr(annotate, "describe", describe)
+    annotate.annotate([base, profile, empty])
+
+    assert lookups == [["iwd", "vim"]]
+    assert base.read_text() == "packages:\n  - vim # Vi Improved\n"
+    assert (
+        profile.read_text() == "extends: [a]\naur_packages:\n  - iwd # Internet Wireless Daemon\n"
+    )
+    assert empty.read_text() == ""
+
+
+def test_annotate_skips_the_lookup_without_packages(monkeypatch, tmp_path):
+    empty = tmp_path / "empty.yml"
+    empty.write_text("")
+    monkeypatch.setattr(annotate, "describe", lambda packages: pytest.fail("looked up"))
+    annotate.annotate([empty])

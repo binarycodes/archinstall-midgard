@@ -34,6 +34,8 @@ BASE_SERVICES = ("systemd-networkd", "systemd-resolved", "iwd", "sshd")
 USER_GROUPS = ("wheel", "lp")  # wheel: sudo access, lp: printer access
 USER_SHELL = "/usr/bin/zsh"
 PROJECTS_DIR = "projects"  # under the user's home; the install repo is cloned here
+# The profile chosen at install; every later command reads it, and it never changes
+SAVED_PROFILE = Path("/etc/installer/profile")
 
 
 @dataclass(frozen=True)

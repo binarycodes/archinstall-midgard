@@ -49,11 +49,21 @@ def describe(packages: list[str], flags: tuple[str, ...] = ("-Si", "-Qi")) -> di
     return parse_descriptions(text)
 
 
-def annotate(path: Path) -> None:
-    data = manifest.load(path)
-    packages = sorted({pkg for name in PACKAGE_SECTIONS for pkg in manifest.section(data, name)})
-    echo(f"Looking up descriptions for {len(packages)} packages")
-    descriptions = describe(packages)
-    lines = path.read_text().split("\n")
-    path.write_text("\n".join(annotate_lines(lines, descriptions)))
-    echo(f"Annotated {len(descriptions)} of {len(packages)} packages in {path}")
+def file_packages(path: Path) -> set[str]:
+    # profiles can be empty
+    data = manifest.load(path, allow_empty=True)
+    return {pkg for name in PACKAGE_SECTIONS for pkg in manifest.section(data, name)}
+
+
+def annotate(paths: list[Path]) -> None:
+    """Rewrite the package descriptions in each file, looked up once for all of them."""
+    packages = {path: file_packages(path) for path in paths}
+    wanted = sorted(set().union(*packages.values()))
+    echo(f"Looking up descriptions for {len(wanted)} packages")
+    # pacman with no package arguments would list every package in the repos
+    descriptions = describe(wanted) if wanted else {}
+    for path in paths:
+        lines = path.read_text().split("\n")
+        path.write_text("\n".join(annotate_lines(lines, descriptions)))
+        found = len(packages[path] & descriptions.keys())
+        echo(f"Annotated {found} of {len(packages[path])} packages in {path}")
