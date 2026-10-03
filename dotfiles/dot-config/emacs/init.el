@@ -118,9 +118,8 @@
 
 (use-package spacious-padding
   :ensure t
-  :custom
-  (spacious-padding-subtle-mode-line t)
-  (spacious-padding-widths '(
+  :config
+  (setq spacious-padding-widths '(
                              :internal-border-width 5
                              :header-line-width 4
                              :mode-line-width 6
@@ -128,8 +127,8 @@
                              :tab-width 4
                              :right-divider-width 1
                              :scroll-bar-width 8
-                             :fringe-width 8))
-  :config
+                             :fringe-width 8)
+        spacious-padding-subtle-frame-lines nil)
   (spacious-padding-mode 1))
 
 (use-package server
