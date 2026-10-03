@@ -38,23 +38,23 @@ class Files:
 
 @dataclass(frozen=True)
 class Machine:
-    profile: str
+    profile: str | None  # None: the base manifest and the detected features only
     chain: list[str]
     features: list[str]  # detected on this machine
     cfg: Config
     data: dict
 
     def describe(self) -> str:
-        return label(self.profile, self.chain)
+        return label(self.profile, self.chain) if self.profile else "base"
 
 
 def label(profile: str, chain: list[str]) -> str:
     return f"{profile} ({profiles.describe(chain)})"
 
 
-def checked_label(profile: str, chain: list[str]) -> str:
+def checked_label(profile: str | None, chain: list[str]) -> str:
     """label() for the merged result validate checks, which includes every feature file."""
-    return f"{profile} ({' → '.join(['base', 'features', *chain])})"
+    return f"{profile or 'base'} ({' → '.join(['base', 'features', *chain])})"
 
 
 def feature_label(name: str) -> str:
@@ -86,10 +86,6 @@ def read(manifest_path: Path) -> Files:
     )
 
 
-def targets(files: Files, only: str | None) -> list[str]:
-    return [only] if only is not None else files.available
-
-
 def reachable(files: Files, names: list[str]) -> list[str]:
     """names and every profile they extend, directly or not; tolerates broken extends."""
     seen: set[str] = set()
@@ -105,7 +101,7 @@ def reachable(files: Files, names: list[str]) -> list[str]:
     return sorted(seen)
 
 
-def file_problems(files: Files, only: str | None) -> list[str]:
+def file_problems(files: Files, names: list[str]) -> list[str]:
     """Problems in the base manifest, every feature file and each profile file involved."""
     if files.base is None:
         problems = [f"{files.base_label}: {files.base_error}"]
@@ -115,7 +111,7 @@ def file_problems(files: Files, only: str | None) -> list[str]:
         problems.append(f"{feature_label(name)}: {error}")
     for name, data in files.features.items():
         problems += [f"{feature_label(name)}: {p}" for p in validate_feature(name, data)]
-    for name in reachable(files, targets(files, only)):
+    for name in reachable(files, names):
         if name in files.errors:
             problems.append(f"{profiles.label(name)}: {files.errors[name]}")
         elif name in files.profiles:
@@ -136,21 +132,24 @@ def merged(files: Files, chain: list[str], features: list[str]) -> dict:
     return manifest.merge(files.base, *layers)
 
 
-def check(files: Files, only: str | None = None) -> list[str]:
-    """Every problem with the files and with the merged result of each profile (or only one).
+def check(files: Files, names: list[str]) -> list[str]:
+    """Every problem with the files, and with the merged result with no profile and each of names.
 
     The base manifest is complete on its own. The merged results are only checked once
     every file involved is valid on its own, and with every feature file merged in: lists
     only grow, so a machine with fewer features can't have a problem this misses.
     """
-    if only is not None and only not in files.available:
-        return [profiles.unknown(only, files.available)]
-    problems = file_problems(files, only)
+    unknown = [
+        profiles.unknown(name, files.available) for name in names if name not in files.available
+    ]
+    if unknown:
+        return unknown
+    problems = file_problems(files, names)
     if problems:
         return problems
-    for name in targets(files, only):
+    for name in [None, *names]:
         try:
-            chain = profiles.chain(name, files.profiles)
+            chain = profiles.chain(name, files.profiles) if name else []
         except ProfileError as e:
             problems.append(f"{profiles.label(name)}: {e}")
             continue
@@ -173,13 +172,16 @@ def chain(profile: str, manifest_path: Path) -> list[str]:
         raise MachineError([str(e)]) from None
 
 
-def load(profile: str, manifest_path: Path, features: list[str]) -> Machine:
-    """The base manifest with the detected features and profile's chain merged on, validated."""
+def load(profile: str | None, manifest_path: Path, features: list[str]) -> Machine:
+    """The base manifest with the detected features and profile's chain merged on, validated.
+
+    With no profile, the base manifest and the detected features only.
+    """
     files = read(manifest_path)
-    problems = check(files, profile)
+    problems = check(files, [profile] if profile else [])
     if problems:
         raise MachineError(problems)
-    profile_chain = profiles.chain(profile, files.profiles)
+    profile_chain = profiles.chain(profile, files.profiles) if profile else []
     data = merged(files, profile_chain, features)
     return Machine(profile, profile_chain, features, Config.from_manifest(data), data)
 
@@ -194,6 +196,7 @@ def load_saved(manifest_path: Path, saved: Path, features: list[str]) -> Machine
         raise MachineError([f"{saved}: cannot read: {e.strerror}; {listing}"]) from None
     if profile is None:
         raise MachineError([f"{saved}: no PROFILE recorded; {listing}"])
-    if profile not in available:
+    # an empty PROFILE: installed from the base manifest
+    if profile and profile not in available:
         raise MachineError([f"{saved}: {profiles.unknown(profile, available)}"])
-    return load(profile, manifest_path, features)
+    return load(profile or None, manifest_path, features)

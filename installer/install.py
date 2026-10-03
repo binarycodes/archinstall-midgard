@@ -27,13 +27,13 @@ def network_reachable() -> bool:
     return True
 
 
-def preflight(hostname: str, profile: str) -> list[str]:
+def preflight(hostname: str, profile: str | None) -> list[str]:
     """Reasons the install can't start; checked before a disk is even offered."""
     problems = []
     if problem := hostnames.problem(hostname):
         problems.append(problem)
     # the profile exists and the manifest it merges to is valid
-    problems += machine.check(machine.read(paths.MANIFEST), profile)
+    problems += machine.check(machine.read(paths.MANIFEST), [profile] if profile else [])
     # recorded in the metadata of the new system
     try:
         metadata.git_source(paths.REPO_ROOT)
@@ -72,7 +72,7 @@ def set_passwords(passwords: dict[str, str]) -> None:
     run("arch-chroot", MNT, "chpasswd", input=text)
 
 
-def install(hostname: str, profile: str) -> None:
+def install(hostname: str, profile: str | None) -> None:
     problems = preflight(hostname, profile)
     if problems:
         err_console.print("[bold red]Cannot install:[/]")
@@ -83,9 +83,11 @@ def install(hostname: str, profile: str) -> None:
     loaded = machine.load(profile, paths.MANIFEST, hardware.detect_features())
     git_repo_url, git_commit_sha = metadata.git_source(paths.REPO_ROOT)
     cfg, data = loaded.cfg, loaded.data
-    console.print(
-        f"Installing as [bold]{hostname}[/] with profile [bold]{escape(loaded.describe())}[/]"
-    )
+    if profile:
+        source = f"with profile [bold]{escape(loaded.describe())}[/]"
+    else:
+        source = "from the base manifest"
+    console.print(f"Installing as [bold]{hostname}[/] {source}")
     console.print(f"Detected features: {', '.join(loaded.features) or 'none'}\n")
     swap_gib = memory.swap_gib(memory.total_gib())
     # every input is collected before anything is changed, so the rest runs unattended
@@ -124,7 +126,7 @@ def install(hostname: str, profile: str) -> None:
     echo("==> Installing base system...")
     pacstrap(cfg, data)
     installed = metadata.Metadata(
-        profile, loaded.features, git_repo_url, git_commit_sha, metadata.now()
+        profile or "", loaded.features, git_repo_url, git_commit_sha, metadata.now()
     )
     metadata.write(installed, MNT)
 

@@ -127,7 +127,7 @@ def test_validate_ok_for_repo_manifest(monkeypatch):
     result = CliRunner().invoke(cli.app, ["validate"])
     assert result.exit_code == 0, result.output
     assert result.output == (
-        "manifest.yml: ok\n"
+        "base (base → features): ok\n"
         "gaming (base → features → gaming): ok\n"
         "workstation (base → features → workstation): ok\n"
     )
@@ -174,7 +174,7 @@ def test_validate_profile_checks_just_that_one(monkeypatch, tmp_path):
     path = write_manifest(tmp_path, VALID, a="extends: b\n", b="", c="bogus: 1\n")
     result = CliRunner().invoke(cli.app, ["validate", str(path), "--profile", "a"])
     assert result.exit_code == 0, result.output
-    assert result.output == "m.yml: ok\na (base → features → b → a): ok\n"
+    assert result.output == "base (base → features): ok\na (base → features → b → a): ok\n"
 
 
 def test_validate_unknown_profile(tmp_path):
@@ -305,20 +305,22 @@ def test_check_d_reports_abort(monkeypatch):
     assert "Disk selection aborted: not confirmed" in result.output
 
 
-@pytest.mark.parametrize(
-    ("args", "missing"),
-    [
-        (["install", "--profile", "gaming"], "--hostname"),
-        (["post-chroot"], "--hostname"),
-        (["install", "--hostname", "midgard"], "--profile"),
-    ],
-)
-def test_hostname_and_profile_are_required(monkeypatch, args, missing):
+@pytest.mark.parametrize("args", [["install", "--profile", "gaming"], ["post-chroot"]])
+def test_hostname_is_required(monkeypatch, args):
     monkeypatch.setattr(cli, "install", lambda *a: pytest.fail("ran"))
     monkeypatch.setattr(cli, "post_chroot", lambda *a: pytest.fail("ran"))
     result = CliRunner().invoke(cli.app, args)
     assert result.exit_code == 2
-    assert f"Missing option '{missing}'" in result.output
+    assert "Missing option '--hostname'" in result.output
+
+
+def test_install_without_a_profile(monkeypatch):
+    seen = []
+    monkeypatch.setattr(cli.install_cmd, "guard", lambda: None)
+    monkeypatch.setattr(cli, "install", lambda *args: seen.append(args))
+    result = CliRunner().invoke(cli.app, ["install", "--hostname", "midgard"])
+    assert result.exit_code == 0, result.output
+    assert seen == [("midgard", None)]
 
 
 def test_install_passes_hostname_and_profile(monkeypatch):

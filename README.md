@@ -1,6 +1,6 @@
 # archinstall-midgard
 
-Custom Arch Linux installation. Installation is based on the manifest, the hardware that the installer detects, and the profile chosen at install.
+Custom Arch Linux installation. Installation is based on the manifest, the hardware that the installer detects, and the profile chosen at install, if any.
 
 ## Structure
 
@@ -13,7 +13,7 @@ Custom Arch Linux installation. Installation is based on the manifest, the hardw
 
 ## Profiles
 
-Each machine uses one profile, chosen at install with `--profile`. A profile uses the same sections as `manifest.yml`. Every section is optional, so an empty profile is valid.
+A machine can use one profile, chosen at install with `--profile`. Without a profile, the machine is installed from the base manifest and its detected features. A profile uses the same sections as `manifest.yml`. Every section is optional, so an empty profile is valid.
 
 A profile can extend other profiles, given as a single name or a list:
 
@@ -33,7 +33,7 @@ GIT_COMMIT_SHA="0611c08aa0d6a0e9a8bd31c0e5e7c4b8f2d7e3a1"
 INSTALL_DATE="2026-10-03T12:00:00Z"
 ```
 
-`packages`, `daily`, `cleanup` and the install steps read the profile from this file.
+`packages`, `daily`, `cleanup` and the install steps read the profile from this file. A machine installed without a profile has an empty `PROFILE`.
 
 > [!NOTE]
 > A profile cannot be changed later.
@@ -65,15 +65,15 @@ cd /root/archinstall-midgard
 Edit the settings at the top of `manifest.yml` if needed, then run the installer as root:
 
 ```bash
-uv run installer install --hostname <name> --profile <profile>
+uv run installer install --hostname <name> [--profile <profile>]
 ```
 
-To list the available profiles, run `uv run installer check -p`.
+`--hostname` is required. `--profile` is optional; to list the available profiles, run `uv run installer check -p`.
 
 The install runs in three stages, and all input is collected before anything on the machine changes:
 
-1. Checks. The installer checks the hostname, the profile and its merged manifest, that the machine is booted in UEFI mode and online, that every package exists in the repos or on the AUR, and that every repository in `git_repos` can be cloned without a prompt.
-2. Input. It shows the hostname, the profile with its chain and the detected features. It then lists the disks and asks which one to install to, shows the current contents and the new layout of the chosen disk, and asks you to confirm by typing the disk name. Finally it asks for the root password and your user's password, each typed twice.
+1. Checks. The installer checks the hostname, the profile if one is given, the merged manifest, that the machine is booted in UEFI mode and online, that every package exists in the repos or on the AUR, and that every repository in `git_repos` can be cloned without a prompt.
+2. Input. It shows the hostname, the profile with its chain if one is given, and the detected features. It then lists the disks and asks which one to install to, shows the current contents and the new layout of the chosen disk, and asks you to confirm by typing the disk name. Finally it asks for the root password and your user's password, each typed twice.
 3. Install. From here the installer runs on its own, so you can leave the machine. It partitions the disk, installs the base system, records the metadata, copies the repository into the new system, and from a chroot configures the system, sets the passwords, creates boot entries, installs all packages, clones your projects and stows the dotfiles.
 
 The disk is always chosen interactively during install. To try the selection without changing anything, run `uv run installer check -d`.
@@ -91,7 +91,7 @@ uv run installer annotate   # refresh the package description comments in the ma
 uv run installer validate   # check the manifest, profiles and feature files for mistakes
 ```
 
-`validate` checks each file on its own, then the merged result of every profile with all feature files applied. Use `--profile <name>` to check a single profile, and `-p` to also look up every package in the repos and the AUR.
+`validate` checks each file on its own, then the merged result with all feature files applied, both without a profile and with each profile. Use `--profile <name>` to check a single profile, and `-p` to also look up every package in the repos and the AUR.
 
 `check` prints what the installer detects. It works anywhere, including on the live ISO:
 

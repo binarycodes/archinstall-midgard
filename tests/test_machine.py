@@ -33,7 +33,9 @@ def repo(tmp_path):
 
 
 def problems(path, only=None):
-    return machine.check(machine.read(path), only)
+    """What validate reports: every profile, or just only."""
+    files = machine.read(path)
+    return machine.check(files, [only] if only else files.available)
 
 
 def test_empty_profile_merges_to_exactly_the_base(repo):
@@ -252,3 +254,28 @@ def test_metadata_without_a_profile(repo, tmp_path):
     with pytest.raises(MachineError) as e:
         machine.load_saved(path, saved, [])
     assert e.value.problems == [f"{saved}: no PROFILE recorded; profiles in profiles/: a"]
+
+
+def test_load_without_a_profile_is_the_base_and_features(repo, features):
+    path = repo(a="keymap: fi\n")
+    features(wifi="packages: [iwd]\n")
+    loaded = machine.load(None, path, ["wifi"])
+    assert (loaded.profile, loaded.chain, loaded.describe()) == (None, [], "base")
+    assert loaded.data == manifest.merge(manifest.load(path), {"packages": ["iwd"]})
+
+
+def test_check_without_profiles_still_checks_base_and_features(repo, features):
+    path = repo(a="")
+    features(wifi="post_chroot: [foot]\n")
+    assert machine.check(machine.read(path), []) == [
+        "base (base → features): packages[0]: 'foot' is already listed at post_chroot[0]"
+    ]
+
+
+def test_saved_empty_profile_means_the_base(repo, tmp_path):
+    path = repo(a="keymap: fi\n")
+    saved = tmp_path / "saved"
+    saved.write_text('PROFILE=""\nFEATURES=""\n')
+    loaded = machine.load_saved(path, saved, [])
+    assert loaded.profile is None
+    assert loaded.cfg.keymap == "us"

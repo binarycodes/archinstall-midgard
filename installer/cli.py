@@ -60,9 +60,9 @@ def fail(problems: list[str]) -> None:
 
 
 def check_files(path: Path, profile: str | None = None) -> machine.Files:
-    """The manifest at path and its profiles, or exit listing every problem with them."""
+    """The manifest at path and its profiles (all, or just profile), or exit listing problems."""
     files = machine.read(path)
-    problems = machine.check(files, profile)
+    problems = machine.check(files, [profile] if profile else files.available)
     if problems:
         fail(problems)
     return files
@@ -79,12 +79,17 @@ def load() -> tuple[Config, dict]:
 
 HostnameOption = Annotated[str, typer.Option("--hostname", help="hostname of the new system")]
 ProfileOption = Annotated[
-    str, typer.Option("--profile", help="profile in profiles/ to install; can't be changed later")
+    str | None,
+    typer.Option(
+        "--profile",
+        help="profile in profiles/ to install, fixed for the life of the system; "
+        "without it, the base manifest is installed",
+    ),
 ]
 
 
 @command("install", "full install from the live ISO (root)", root=True)
-def install_cmd(hostname: HostnameOption, profile: ProfileOption) -> None:
+def install_cmd(hostname: HostnameOption, profile: ProfileOption = None) -> None:
     install(hostname, profile)
 
 
@@ -135,15 +140,14 @@ def validate_cmd(
     files = check_files(manifest, profile)
     for note in skipped_checks():
         typer.echo(f"note: {note}", err=True)
-    names = machine.targets(files, profile)
-    chains = {name: profiles.chain(name, files.profiles) for name in names}
+    names = [profile] if profile else files.available
+    chains = {None: [], **{name: profiles.chain(name, files.profiles) for name in names}}
     if packages:
         # every package any of these profiles can install on any machine, looked up once
         data = machine.merged(files, machine.reachable(files, names), list(hardware.FEATURES))
         problems = check_repo_packages(data) + check_aur_packages(data)
         if problems:
             fail(problems)
-    typer.echo(f"{files.base_label}: ok")
     for name, chain in chains.items():
         typer.echo(f"{machine.checked_label(name, chain)}: ok")
 

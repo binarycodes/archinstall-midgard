@@ -202,6 +202,15 @@ def test_install_shows_the_profile_chain(steps, monkeypatch, capsys):
     assert "Detected features: battery, wifi\n" in out
 
 
+def test_install_without_a_profile(steps, monkeypatch, capsys):
+    base = Machine(None, [], ["wifi"], MACHINE.cfg, {})
+    monkeypatch.setattr(install.machine, "load", lambda profile, path, features: base)
+    install.install("midgard", None)
+    assert "Installing as midgard from the base manifest\n" in capsys.readouterr().out
+    [saved] = [s[1] for s in steps if s[0] == "save"]
+    assert saved.profile == ""
+
+
 def test_install_merges_the_detected_features(steps, monkeypatch):
     seen = []
     monkeypatch.setattr(
