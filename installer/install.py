@@ -17,6 +17,7 @@ from installer.validate import check_aur_packages, check_repo_packages
 EFI_VARS = Path("/sys/firmware/efi")
 # git fails instead of asking for credentials or a host key, so the install never stops to wait
 NONINTERACTIVE_GIT = {"GIT_TERMINAL_PROMPT": "0", "GIT_SSH_COMMAND": "ssh -o BatchMode=yes"}
+ROOT_SESSION = ("DBUS_SESSION_BUS_ADDRESS", "XDG_RUNTIME_DIR")
 
 
 def network_reachable() -> bool:
@@ -106,6 +107,8 @@ def install(hostname: str, profile: str | None) -> None:
 
     def chroot(step: str, *args: str, user: str | None = None) -> None:
         as_user = ("runuser", "-u", user, "--") if user else ()
+        # runuser keeps root's session bus and /run/user/0; gsettings must not see either
+        step_env = {k: v for k, v in env.items() if k not in ROOT_SESSION} if user else env
         run(
             "arch-chroot",
             MNT,
@@ -117,7 +120,7 @@ def install(hostname: str, profile: str | None) -> None:
             "installer",
             step,
             *args,
-            env=env,
+            env=step_env,
         )
 
     echo("==> Creating partitions...")
