@@ -1,0 +1,4 @@
+---
+packages:
+  - vulkan-intel # Open-source Vulkan driver for Intel GPUs
+  - intel-media-driver # Intel Media Driver for VAAPI — Broadwell+ iGPUs
