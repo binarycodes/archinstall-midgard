@@ -25,8 +25,8 @@ packages:
 
 The installer saves the profile on the new system in `/etc/installer/profile`.
 
->[Note] A profile cannot be changed later
-
+> [!NOTE]
+> A profile cannot be changed later.
 
 ## Hardware features
 
@@ -58,7 +58,7 @@ Edit the settings at the top of `manifest.yml` if needed, then run the installer
 uv run installer install --hostname <name> --profile <profile>
 ```
 
-The profile is the name of a file in `profiles/`.
+To list the available profiles, run `uv run installer check -p`.
 
 The installer first checks the hostname, the profile and its merged manifest, and that the machine is booted in UEFI mode and online. It then shows the hostname, the profile with its chain and the detected features, lists the disks, and asks which one to install to. For the chosen disk it shows the current contents and the new layout, and erases the disk once you confirm by typing its name. After that it partitions the disk, installs the base system, saves the profile, and copies the repository into the new system. From a chroot it then configures the system, creates boot entries, installs all packages, clones your projects and stows the dotfiles. You will be asked to set passwords for root and your user along the way.
 
@@ -86,6 +86,7 @@ uv run installer check -u            # microcode package for this CPU
 uv run installer check -r            # RAM in GiB
 uv run installer check -s            # swap size for that RAM
 uv run installer check -f            # every hardware feature, detected or not
+uv run installer check -p            # the profiles available to install
 uv run installer check -d            # dry run of the install's disk selection
 uv run installer check -c <profile>  # the chain a profile resolves to
 ```
