@@ -1,4 +1,31 @@
 from dataclasses import dataclass, fields
+from pathlib import Path
+
+# Disk layout, created in this order on `disk`; root takes the rest of the disk
+EFI_PARTITION = 1
+SWAP_PARTITION = 2
+ROOT_PARTITION = 3
+
+EFI_SIZE = "1G"  # mounted at /boot, so it holds the kernels and initramfs images
+
+EFI_TYPE = "ef00"
+SWAP_TYPE = "8200"
+LINUX_TYPE = "8300"
+
+# Install target, and where the repo is copied inside it for the chroot steps
+MNT = "/mnt"
+CHROOT_REPO_DIR = Path("/opt")
+
+# EFISTUB boot entries, one per kernel; the first is the default
+ARCH_LABEL = "Arch Linux"
+KERNELS = (("Arch Linux", "linux"), ("Arch Linux LTS", "linux-lts"))
+KERNEL_OPTIONS = "rw quiet loglevel=3"
+
+# New system
+BASE_SERVICES = ("systemd-networkd", "systemd-resolved", "iwd", "sshd")
+USER_GROUPS = ("wheel", "lp")  # wheel: sudo access, lp: printer access
+USER_SHELL = "/usr/bin/zsh"
+PROJECTS_DIR = "projects"  # under the user's home; the install repo is cloned here
 
 
 class ConfigError(ValueError):
@@ -32,12 +59,12 @@ class Config:
 
     @property
     def efi(self) -> str:
-        return self.partition(1)
+        return self.partition(EFI_PARTITION)
 
     @property
     def swap(self) -> str:
-        return self.partition(2)
+        return self.partition(SWAP_PARTITION)
 
     @property
     def root(self) -> str:
-        return self.partition(3)
+        return self.partition(ROOT_PARTITION)

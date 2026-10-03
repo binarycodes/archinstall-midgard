@@ -1,12 +1,12 @@
 from pathlib import Path
 
 from installer import manifest
-from installer.config import Config
+from installer.config import PROJECTS_DIR, Config
 from installer.shell import echo, run
 
 
 def user_projects(cfg: Config, data: dict) -> None:
-    projects_dir = Path.home() / "projects"
+    projects_dir = Path.home() / PROJECTS_DIR
     projects_dir.mkdir(parents=True, exist_ok=True)
 
     for repo in manifest.section(data, "git_repos"):

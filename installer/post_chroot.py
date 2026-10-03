@@ -1,10 +1,8 @@
 from pathlib import Path
 
 from installer import manifest, paths
-from installer.config import Config
+from installer.config import BASE_SERVICES, USER_GROUPS, USER_SHELL, Config
 from installer.shell import echo, run, write_file
-
-BASE_SERVICES = ("systemd-networkd", "systemd-resolved", "iwd", "sshd")
 
 
 def copy_configs() -> None:
@@ -45,8 +43,7 @@ def enable_services() -> None:
 def create_user(cfg: Config) -> None:
     echo("set password for root")
     run("passwd")
-    # wheel: sudo access, lp: printer access
-    run("useradd", "-m", "-G", "wheel,lp", "-s", "/usr/bin/zsh", cfg.username)
+    run("useradd", "-m", "-G", ",".join(USER_GROUPS), "-s", USER_SHELL, cfg.username)
     echo(f"set password for - {cfg.username}")
     run("passwd", cfg.username)
 

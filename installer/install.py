@@ -2,16 +2,14 @@ import os
 from pathlib import Path
 
 from installer import paths
-from installer.config import Config
+from installer.config import CHROOT_REPO_DIR, MNT, Config
 from installer.pacstrap import pacstrap
 from installer.partitions import create_partitions
 from installer.shell import echo, run
 
-MNT = "/mnt"
-
 
 def install(cfg: Config, data: dict) -> None:
-    chroot_repo = Path("/opt") / cfg.install_repo
+    chroot_repo = CHROOT_REPO_DIR / cfg.install_repo
     target = Path(MNT + str(chroot_repo))
     uv = ("uv", "--directory", str(chroot_repo))
     # the outer `uv run` exports VIRTUAL_ENV, which the inner uv would warn about

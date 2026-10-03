@@ -2,11 +2,9 @@ import re
 from pathlib import Path
 
 from installer import cpu
-from installer.config import Config
+from installer.config import ARCH_LABEL, EFI_PARTITION, KERNEL_OPTIONS, KERNELS, Config
 from installer.shell import echo, output, run
 
-ARCH_LABEL = "Arch Linux"
-KERNELS = (("Arch Linux", "linux"), ("Arch Linux LTS", "linux-lts"))
 ENTRY = re.compile(r"^Boot([0-9A-F]{4})\*?\s+(.*)$")
 
 
@@ -32,7 +30,7 @@ def boot_order(entries: list[tuple[str, str]]) -> list[str]:
 
 def kernel_options(ucode: str | None, kernel: str, root_uuid: str) -> str:
     initrds = ([f"initrd=\\{ucode}.img"] if ucode else []) + [f"initrd=\\initramfs-{kernel}.img"]
-    return " ".join(initrds) + f" root=UUID={root_uuid} rw quiet loglevel=3"
+    return " ".join(initrds) + f" root=UUID={root_uuid} {KERNEL_OPTIONS}"
 
 
 def boot_files(ucode: str | None) -> list[str]:
@@ -57,7 +55,7 @@ def create_boot_entries(cfg: Config) -> None:
             "--disk",
             cfg.disk,
             "--part",
-            "1",
+            str(EFI_PARTITION),
             "--label",
             label,
             "--loader",
