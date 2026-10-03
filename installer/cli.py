@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from rich.markup import escape
 
-from installer import cpu, manifest, memory, paths
+from installer import cpu, disk, manifest, memory, paths
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
 from installer.cleanup import cleanup
@@ -16,7 +17,7 @@ from installer.install import install
 from installer.packages import packages
 from installer.post_chroot import post_chroot
 from installer.projects import user_projects
-from installer.shell import require_root, require_user
+from installer.shell import console, err_console, require_root, require_user
 from installer.validate import check_aur_packages, check_repo_packages, skipped_checks, validate
 
 app = typer.Typer(
@@ -129,7 +130,8 @@ def post_chroot_cmd() -> None:
 
 @command("boot-entries", "install step: EFI boot entries (root, in chroot)", root=True)
 def boot_entries_cmd() -> None:
-    create_boot_entries(load()[0])
+    load()
+    create_boot_entries()
 
 
 @command("user-projects", "install step: clone repos and stow dotfiles", root=False)
@@ -151,15 +153,32 @@ def check_cmd(
     swap: Annotated[
         bool, typer.Option("-s", "--swap", help="swap size for the detected RAM, in GiB")
     ] = False,
+    select_disk: Annotated[
+        bool,
+        typer.Option(
+            "-d", "--disk", help="dry run of the install's disk selection; changes nothing"
+        ),
+    ] = False,
 ) -> None:
-    if not (ucode or ram or swap):
-        raise typer.BadParameter("pass at least one check, e.g. -u, -r or -s")
+    if not (ucode or ram or swap or select_disk):
+        raise typer.BadParameter("pass at least one check, e.g. -u, -r, -s or -d")
     if ucode:
         typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
     if ram:
         typer.echo(f"{memory.total_gib():.1f} GiB")
     if swap:
         typer.echo(f"{memory.swap_gib(memory.total_gib())} GiB")
+    if select_disk:
+        swap_gib = memory.swap_gib(memory.total_gib())
+        try:
+            chosen = disk.select_disk(swap_gib)
+        except disk.DiskError as e:
+            err_console.print(f"\n[bold red]Disk selection aborted:[/] {escape(str(e))}")
+            raise typer.Exit(1) from None
+        console.print(
+            f"\n[bold green]Dry run:[/] install would erase {chosen.path} as shown above. "
+            "Nothing was changed."
+        )
 
 
 def main() -> None:

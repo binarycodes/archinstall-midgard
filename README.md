@@ -4,7 +4,7 @@ Custom Arch Linux installation scripts for a ThinkPad setup. Uses EFISTUB (no bo
 
 ## Structure
 
-- `manifest.yml` -- single source of truth: system settings (disk, username, locale, etc.) and all packages
+- `manifest.yml` -- single source of truth: system settings (username, locale, etc.) and all packages
 - `installer/` -- the installer and maintenance tool, a Python package run with `uv`
 - `config/` -- system config files mirroring the filesystem layout (copied to `/` during install)
 - `dotfiles/` -- user dotfiles, stowed into `$HOME` after install
@@ -26,9 +26,9 @@ Edit the settings at the top of `manifest.yml` to match your system, then run th
 uv run installer install
 ```
 
-This will partition the disk, install the base system, copy the repository into the new system, and from a chroot configure the system, create boot entries, install all packages, clone your projects and stow the dotfiles. You will be prompted to set passwords for root and your user during the process.
+It first checks that the machine booted in UEFI mode and is online, then lists the disks and asks which one to install to. It shows what is on the chosen disk and the new layout, and erases it only after you type the disk name to confirm. It will then partition the disk, install the base system, copy the repository into the new system, and from a chroot configure the system, create boot entries, install all packages, clone your projects and stow the dotfiles. You will be prompted to set passwords for root and your user during the process.
 
-The `disk` setting takes the whole device, for example `/dev/nvme0n1` or `/dev/sda`; partition names are derived from it.
+The disk is always chosen this way; it can't be set in the manifest or on the command line. To walk through the selection without changing anything, run `uv run installer check -d`.
 
 ## Maintenance
 

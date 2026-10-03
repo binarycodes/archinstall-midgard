@@ -4,6 +4,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+from rich.console import Console
+
+# rich output for interactive steps; resolves sys.stdout/stderr when printing
+console = Console(highlight=False)
+err_console = Console(stderr=True, highlight=False)
+
 
 def echo(message: str) -> None:
     print(message, flush=True)

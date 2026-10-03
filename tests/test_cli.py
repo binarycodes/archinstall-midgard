@@ -139,3 +139,30 @@ def test_steps_stop_on_an_invalid_manifest(monkeypatch, tmp_path):
     result = CliRunner().invoke(cli.app, ["cleanup"])
     assert result.exit_code == 1
     assert "hostname: missing" in result.output
+
+
+def test_check_d_is_a_dry_run(monkeypatch):
+    from installer import disk
+
+    calls = []
+    target = disk.Disk("sda", "/dev/sda", 500 * 1024**3, "Disk", "SN", "sata")
+    monkeypatch.setattr(cli.memory, "total_gib", lambda: 16.0)
+    monkeypatch.setattr(disk, "candidates", lambda: [target])
+    monkeypatch.setattr(disk, "output", lambda *args, **kwargs: calls.append(args))
+    monkeypatch.setattr("installer.shell.subprocess.run", lambda *a, **k: calls.append(a))
+    result = CliRunner().invoke(cli.app, ["check", "-d"], input="1\nsda\n")
+    assert result.exit_code == 0, result.output
+    assert "Dry run: install would erase /dev/sda as shown above." in result.output
+    assert "/dev/sda2" in result.output
+    assert calls == []
+
+
+def test_check_d_reports_abort(monkeypatch):
+    from installer import disk
+
+    target = disk.Disk("sda", "/dev/sda", 500 * 1024**3, "Disk", "SN", "sata")
+    monkeypatch.setattr(cli.memory, "total_gib", lambda: 16.0)
+    monkeypatch.setattr(disk, "candidates", lambda: [target])
+    result = CliRunner().invoke(cli.app, ["check", "--disk"], input="1\nno\n")
+    assert result.exit_code == 1
+    assert "Disk selection aborted: not confirmed" in result.output

@@ -5,7 +5,6 @@ timezone: Europe/Helsinki
 locale: en_US.UTF-8
 keymap: us
 install_repo: archinstall-midgard
-disk: /dev/nvme0n1
 
 pacstrap:
   - base # Minimal package set to define a basic Arch Linux installation

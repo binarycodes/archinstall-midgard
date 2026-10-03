@@ -12,7 +12,6 @@ VALID = {
     "locale": "en_US.UTF-8",
     "keymap": "us",
     "install_repo": "dots",
-    "disk": "/dev/sda",
     "pacstrap": ["base", "git"],
     "post_chroot": ["sudo"],
     "packages": ["foot", "lib32-gcc-libs", "python-pyyaml", "gtk+3", "libc++"],
@@ -49,6 +48,10 @@ def test_repo_manifest_is_valid():
 
 def test_unknown_top_level_key():
     assert validate.validate(with_(system_service=["x"])) == ["system_service: unknown key"]
+
+
+def test_disk_is_not_a_manifest_key():
+    assert validate.validate(with_(disk="/dev/sda")) == ["disk: unknown key"]
 
 
 def test_every_problem_is_reported():

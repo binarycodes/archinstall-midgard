@@ -1,14 +1,55 @@
 import os
+import socket
+import sys
 from pathlib import Path
 
-from installer import paths
-from installer.config import CHROOT_REPO_DIR, MNT, Config
+from rich.markup import escape
+
+from installer import memory, paths
+from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK, Config
+from installer.disk import DiskError, select_disk
 from installer.pacstrap import pacstrap
 from installer.partitions import create_partitions
-from installer.shell import echo, run
+from installer.shell import echo, err_console, run
+
+EFI_VARS = Path("/sys/firmware/efi")
+
+
+def network_reachable() -> bool:
+    try:
+        socket.create_connection(NETWORK_CHECK, timeout=5).close()
+    except OSError:
+        return False
+    return True
+
+
+def preflight() -> list[str]:
+    """Reasons the install can't start; checked before a disk is even offered."""
+    problems = []
+    if not EFI_VARS.is_dir():
+        problems.append("not booted in UEFI mode; boot entries are created with EFISTUB")
+    if not network_reachable():
+        host, port = NETWORK_CHECK
+        problems.append(f"no network: cannot reach {host}:{port}, which pacstrap needs")
+    return problems
 
 
 def install(cfg: Config, data: dict) -> None:
+    # the manifest was validated when it was loaded
+    problems = preflight()
+    if problems:
+        err_console.print("[bold red]Cannot install:[/]")
+        for problem in problems:
+            err_console.print(f"  {escape(problem)}")
+        sys.exit(1)
+
+    swap_gib = memory.swap_gib(memory.total_gib())
+    try:
+        disk = select_disk(swap_gib)
+    except DiskError as e:
+        err_console.print(f"\n[bold red]Install aborted:[/] {escape(str(e))}")
+        sys.exit(1)
+
     chroot_repo = CHROOT_REPO_DIR / cfg.install_repo
     target = Path(MNT + str(chroot_repo))
     uv = ("uv", "--directory", str(chroot_repo))
@@ -31,7 +72,7 @@ def install(cfg: Config, data: dict) -> None:
         )
 
     echo("==> Creating partitions...")
-    create_partitions(cfg)
+    create_partitions(disk, swap_gib)
 
     echo("==> Installing base system...")
     pacstrap(cfg, data)

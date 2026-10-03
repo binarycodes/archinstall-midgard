@@ -2,7 +2,8 @@ import re
 from pathlib import Path
 
 from installer import cpu
-from installer.config import ARCH_LABEL, EFI_PARTITION, KERNEL_OPTIONS, KERNELS, Config
+from installer.config import ARCH_LABEL, KERNEL_OPTIONS, KERNELS
+from installer.disk import boot_partition
 from installer.shell import echo, output, run
 
 ENTRY = re.compile(r"^Boot([0-9A-F]{4})\*?\s+(.*)$")
@@ -41,8 +42,9 @@ def boot_files(ucode: str | None) -> list[str]:
     return files
 
 
-def create_boot_entries(cfg: Config) -> None:
-    root_uuid = output("blkid", cfg.root, "-s", "UUID", "-o", "value").strip()
+def create_boot_entries() -> None:
+    disk, efi_partition = boot_partition()
+    root_uuid = output("findmnt", "-n", "-o", "UUID", "/").strip()
     ucode = cpu.ucode()
 
     for num in arch_entries(parse_entries(output("efibootmgr"))):
@@ -53,9 +55,9 @@ def create_boot_entries(cfg: Config) -> None:
             "efibootmgr",
             "--create",
             "--disk",
-            cfg.disk,
+            disk,
             "--part",
-            str(EFI_PARTITION),
+            str(efi_partition),
             "--label",
             label,
             "--loader",
