@@ -5,7 +5,9 @@ from installer.config import Config
 from installer.disk import DiskError
 from installer.machine import Machine
 
-MACHINE = Machine("gaming", ["gaming"], Config("u", "UTC", "en_US.UTF-8", "us", "repo"), {})
+MACHINE = Machine(
+    "gaming", ["gaming"], ["wifi"], Config("u", "UTC", "en_US.UTF-8", "us", "repo"), {}
+)
 
 
 @pytest.fixture
@@ -17,7 +19,8 @@ def ready(monkeypatch, tmp_path):
 @pytest.fixture
 def loads(monkeypatch):
     monkeypatch.setattr(install, "preflight", lambda hostname, profile: [])
-    monkeypatch.setattr(install.machine, "load", lambda profile, path: MACHINE)
+    monkeypatch.setattr(install.machine, "load", lambda profile, path, features: MACHINE)
+    monkeypatch.setattr(install.hardware, "detect_features", lambda: ["wifi"])
     monkeypatch.setattr(install.memory, "total_gib", lambda: 16.0)
 
 
@@ -119,10 +122,21 @@ def test_preflight_checks_the_profile(ready, monkeypatch, tmp_path):
 
 
 def test_install_shows_the_profile_chain(steps, monkeypatch, capsys):
-    chained = Machine("a", ["b", "a"], MACHINE.cfg, {})
-    monkeypatch.setattr(install.machine, "load", lambda profile, path: chained)
+    chained = Machine("a", ["b", "a"], ["battery", "wifi"], MACHINE.cfg, {})
+    monkeypatch.setattr(install.machine, "load", lambda profile, path, features: chained)
     install.install("midgard", "a")
-    assert "Installing as midgard with profile a (base → b → a)" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "Installing as midgard with profile a (base → b → a)\n" in out
+    assert "Detected features: battery, wifi\n" in out
+
+
+def test_install_merges_the_detected_features(steps, monkeypatch):
+    seen = []
+    monkeypatch.setattr(
+        install.machine, "load", lambda profile, path, features: seen.append(features) or MACHINE
+    )
+    install.install("midgard", "gaming")
+    assert seen == [["wifi"]]
 
 
 def test_install_saves_the_profile_after_pacstrap_before_the_chroot(steps):

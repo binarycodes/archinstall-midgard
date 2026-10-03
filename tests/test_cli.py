@@ -22,8 +22,8 @@ def test_every_command_declares_a_guard():
 
 def test_command_runs_guard_before_step(monkeypatch):
     order = []
-    loaded = Machine("p", ["p"], "cfg", {})
-    monkeypatch.setattr(cli.machine, "load_saved", lambda path, saved: loaded)
+    loaded = Machine("p", ["p"], [], "cfg", {})
+    monkeypatch.setattr(cli.machine, "load_saved", lambda path, saved, features: loaded)
     monkeypatch.setattr(cli, "cleanup", lambda data: order.append(("cleanup", data)))
     monkeypatch.setattr(cli.cleanup_cmd, "guard", lambda: order.append("guard"))
 
@@ -43,7 +43,7 @@ def test_h_is_short_for_help():
 def test_annotate_takes_an_optional_manifest_path(monkeypatch, tmp_path):
     seen = []
     monkeypatch.setattr(cli, "annotate", seen.append)
-    monkeypatch.setattr(cli, "check_files", lambda path: Files("m", {}, None, {}, {}, []))
+    monkeypatch.setattr(cli, "check_files", lambda path: Files("m", {}, None, {}, {}, [], {}, {}))
     monkeypatch.setattr(cli.annotate_cmd, "guard", lambda: None)
 
     CliRunner().invoke(cli.app, ["annotate"])
@@ -127,7 +127,9 @@ def test_validate_ok_for_repo_manifest(monkeypatch):
     result = CliRunner().invoke(cli.app, ["validate"])
     assert result.exit_code == 0, result.output
     assert result.output == (
-        "manifest.yml: ok\ngaming (base → gaming): ok\nworkstation (base → workstation): ok\n"
+        "manifest.yml: ok\n"
+        "gaming (base → features → gaming): ok\n"
+        "workstation (base → features → workstation): ok\n"
     )
 
 
@@ -154,8 +156,9 @@ def test_validate_checks_the_merged_result(tmp_path):
     path = write_manifest(tmp_path, VALID + "packages: [foot]\n", p="post_chroot: [foot]\n")
     result = CliRunner().invoke(cli.app, ["validate", str(path)])
     assert result.exit_code == 1
-    assert "  p (base → p): packages[0]: 'foot' is already listed at post_chroot[0]\n" in (
-        result.output
+    assert (
+        "  p (base → features → p): packages[0]: 'foot' is already listed at post_chroot[0]\n"
+        in (result.output)
     )
 
 
@@ -171,7 +174,7 @@ def test_validate_profile_checks_just_that_one(monkeypatch, tmp_path):
     path = write_manifest(tmp_path, VALID, a="extends: b\n", b="", c="bogus: 1\n")
     result = CliRunner().invoke(cli.app, ["validate", str(path), "--profile", "a"])
     assert result.exit_code == 0, result.output
-    assert result.output == "m.yml: ok\na (base → b → a): ok\n"
+    assert result.output == "m.yml: ok\na (base → features → b → a): ok\n"
 
 
 def test_validate_unknown_profile(tmp_path):
@@ -197,6 +200,7 @@ def saved(monkeypatch, tmp_path):
     """The saved profile file; cleanup runs with its guard off and records its data."""
     path = tmp_path / "saved"
     monkeypatch.setattr(cli, "SAVED_PROFILE", path)
+    monkeypatch.setattr(cli.hardware, "detect_features", list)
     monkeypatch.setattr(cli.cleanup_cmd, "guard", lambda: None)
     return path
 
@@ -334,3 +338,32 @@ def test_post_chroot_rejects_invalid_hostname(monkeypatch):
     result = CliRunner().invoke(cli.app, ["post-chroot", "--hostname", "Bad_Name"])
     assert result.exit_code == 2
     assert "is not valid" in result.output
+
+
+def test_check_f_lists_every_feature(monkeypatch):
+    monkeypatch.setattr(cli.hardware, "detect_features", lambda: ["wifi", "gpu_amd"])
+    result = CliRunner().invoke(cli.app, ["check", "-f"])
+    assert result.exit_code == 0, result.output
+    assert result.output == (
+        "battery: no\nbacklight: no\nkbd_backlight: no\ntouchpad: no\nlid: no\n"
+        "wifi: yes\nbluetooth: no\ngpu_intel: no\ngpu_amd: yes\n"
+    )
+
+
+def test_check_f_needs_no_profile(monkeypatch):
+    monkeypatch.setattr(cli.hardware, "detect_features", list)
+    monkeypatch.setattr(cli.machine, "read", lambda *a: pytest.fail("read the manifest"))
+    monkeypatch.setattr(cli.machine, "load_saved", lambda *a: pytest.fail("read saved profile"))
+    assert CliRunner().invoke(cli.app, ["check", "--features"]).exit_code == 0
+
+
+def test_annotate_includes_feature_files(monkeypatch, tmp_path):
+    seen = []
+    path = write_manifest(tmp_path, VALID, a="")
+    (tmp_path / "features").mkdir()
+    (tmp_path / "features" / "wifi.yml").write_text("")
+    monkeypatch.setattr(cli, "annotate", seen.append)
+    monkeypatch.setattr(cli.annotate_cmd, "guard", lambda: None)
+    result = CliRunner().invoke(cli.app, ["annotate", str(path)])
+    assert result.exit_code == 0, result.output
+    assert seen == [[path, tmp_path / "profiles" / "a.yml", tmp_path / "features" / "wifi.yml"]]

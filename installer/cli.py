@@ -6,7 +6,7 @@ from typing import Annotated
 import typer
 from rich.markup import escape
 
-from installer import cpu, disk, machine, memory, paths, profiles
+from installer import cpu, disk, hardware, machine, memory, paths, profiles
 from installer import hostname as hostnames
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
@@ -71,7 +71,7 @@ def check_files(path: Path, profile: str | None = None) -> machine.Files:
 def load() -> tuple[Config, dict]:
     """The manifest for the profile this system was installed with, or exit."""
     try:
-        loaded = machine.load_saved(paths.MANIFEST, SAVED_PROFILE)
+        loaded = machine.load_saved(paths.MANIFEST, SAVED_PROFILE, hardware.detect_features())
     except machine.MachineError as e:
         fail(e.problems)
     return loaded.cfg, loaded.data
@@ -107,10 +107,17 @@ def cleanup_cmd() -> None:
 def annotate_cmd(manifest: Annotated[Path, typer.Argument()] = paths.MANIFEST) -> None:
     files = check_files(manifest)
     directory = profiles.directory(manifest)
-    annotate([manifest, *(directory / f"{name}.yml" for name in files.available)])
+    features = manifest.parent / machine.FEATURES_DIR
+    annotate(
+        [
+            manifest,
+            *(directory / f"{name}.yml" for name in files.available),
+            *(features / f"{name}.yml" for name in files.features),
+        ]
+    )
 
 
-@command("validate", "check the manifest and every profile for mistakes", root=None)
+@command("validate", "check the manifest, every profile and feature file for mistakes", root=None)
 def validate_cmd(
     manifest: Annotated[Path, typer.Argument()] = paths.MANIFEST,
     profile: Annotated[
@@ -131,14 +138,14 @@ def validate_cmd(
     names = machine.targets(files, profile)
     chains = {name: profiles.chain(name, files.profiles) for name in names}
     if packages:
-        # every package any of these profiles can install, looked up once
-        data = machine.merged(files, machine.reachable(files, names))
+        # every package any of these profiles can install on any machine, looked up once
+        data = machine.merged(files, machine.reachable(files, names), list(hardware.FEATURES))
         problems = check_repo_packages(data) + check_aur_packages(data)
         if problems:
             fail(problems)
     typer.echo(f"{files.base_label}: ok")
     for name, chain in chains.items():
-        typer.echo(f"{machine.label(name, chain)}: ok")
+        typer.echo(f"{machine.checked_label(name, chain)}: ok")
 
 
 @command("post-chroot", "install step: system configuration (root, in chroot)", root=True)
@@ -173,6 +180,9 @@ def check_cmd(
     swap: Annotated[
         bool, typer.Option("-s", "--swap", help="swap size for the detected RAM, in GiB")
     ] = False,
+    features: Annotated[
+        bool, typer.Option("-f", "--features", help="every known hardware feature, detected or not")
+    ] = False,
     select_disk: Annotated[
         bool,
         typer.Option(
@@ -186,14 +196,18 @@ def check_cmd(
         ),
     ] = None,
 ) -> None:
-    if not (ucode or ram or swap or select_disk or chain):
-        raise typer.BadParameter("pass at least one check, e.g. -u, -r, -s, -d or -c PROFILE")
+    if not (ucode or ram or swap or features or select_disk or chain):
+        raise typer.BadParameter("pass at least one check, e.g. -u, -r, -s, -f, -d or -c PROFILE")
     if ucode:
         typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
     if ram:
         typer.echo(f"{memory.total_gib():.1f} GiB")
     if swap:
         typer.echo(f"{memory.swap_gib(memory.total_gib())} GiB")
+    if features:
+        detected = hardware.detect_features()
+        for name in hardware.FEATURES:
+            typer.echo(f"{name}: {'yes' if name in detected else 'no'}")
     if select_disk:
         swap_gib = memory.swap_gib(memory.total_gib())
         try:

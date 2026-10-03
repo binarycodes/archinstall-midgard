@@ -30,7 +30,7 @@ KERNELS = (("Arch Linux", "linux"), ("Arch Linux LTS", "linux-lts"))
 KERNEL_OPTIONS = "rw quiet loglevel=3"
 
 # New system
-BASE_SERVICES = ("systemd-networkd", "systemd-resolved", "iwd", "sshd")
+BASE_SERVICES = ("systemd-networkd", "systemd-resolved", "sshd")
 USER_GROUPS = ("wheel", "lp")  # wheel: sudo access, lp: printer access
 USER_SHELL = "/usr/bin/zsh"
 PROJECTS_DIR = "projects"  # under the user's home; the install repo is cloned here

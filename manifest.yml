@@ -23,7 +23,6 @@ pacstrap:
 
 post_chroot:
   - efibootmgr # Linux user-space application to modify the EFI Boot Manager
-  - iwd # Internet Wireless Daemon
   - linux-lts # The LTS Linux kernel and modules
   - linux-lts-headers # Headers and scripts for building modules for the LTS Linux kernel
   - openssh # SSH protocol implementation for remote login, command execution and file transfer
@@ -40,9 +39,6 @@ packages:
   - awww # An Answer to your Wayland Wallpaper Woes
   - bash-language-server # Bash language server implementation based on Tree Sitter and its grammar for Bash
   - bitwarden # A secure and free password manager for all of your devices
-  - bluez # Daemons for the bluetooth protocol stack
-  - bluez-utils # Development and debugging utilities for the bluetooth protocol stack
-  - brightnessctl # Lightweight brightness control tool
   - btop # A monitor of system resources, bpytop ported to C++
   - cmake # A cross-platform open-source make system
   - cups # OpenPrinting CUPS - daemon package
@@ -158,10 +154,8 @@ aur_packages:
 
 system_services:
   - avahi-daemon
-  - bluetooth
   - greetd
   - iptables
-  - iwd
   - reflector
   - rtkit-daemon
 

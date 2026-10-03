@@ -9,6 +9,7 @@ from pathlib import Path
 from installer import manifest, profiles
 from installer.annotate import describe
 from installer.config import Config
+from installer.hardware import FEATURES
 from installer.manifest import AUR_SECTIONS, PACKAGE_SECTIONS, REPO_SECTIONS
 
 CONFIG_KEYS = tuple(f.name for f in fields(Config))
@@ -47,6 +48,15 @@ def validate_profile(data: dict, available: list[str]) -> list[str]:
     """
     problems = unknown_keys(data, PROFILE_KEYS)
     problems += check_extends(data, available)
+    return problems + check_sections(data, complete=False)
+
+
+def validate_feature(name: str, data: dict) -> list[str]:
+    """Every problem in one feature file: a profile with no extends, named after a feature."""
+    problems = []
+    if name not in FEATURES:
+        problems.append(f"unknown feature {name!r}; known features: {', '.join(FEATURES)}")
+    problems += unknown_keys(data, KNOWN_KEYS)
     return problems + check_sections(data, complete=False)
 
 

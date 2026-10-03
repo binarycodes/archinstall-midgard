@@ -5,8 +5,8 @@ from pathlib import Path
 
 from rich.markup import escape
 
+from installer import hardware, machine, memory, paths, profiles
 from installer import hostname as hostnames
-from installer import machine, memory, paths, profiles
 from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK
 from installer.disk import DiskError, select_disk
 from installer.pacstrap import pacstrap
@@ -47,11 +47,12 @@ def install(hostname: str, profile: str) -> None:
             err_console.print(f"  {escape(problem)}")
         sys.exit(1)
 
-    loaded = machine.load(profile, paths.MANIFEST)
+    loaded = machine.load(profile, paths.MANIFEST, hardware.detect_features())
     cfg, data = loaded.cfg, loaded.data
     console.print(
-        f"Installing as [bold]{hostname}[/] with profile [bold]{escape(loaded.describe())}[/]\n"
+        f"Installing as [bold]{hostname}[/] with profile [bold]{escape(loaded.describe())}[/]"
     )
+    console.print(f"Detected features: {', '.join(loaded.features) or 'none'}\n")
     swap_gib = memory.swap_gib(memory.total_gib())
     try:
         disk = select_disk(swap_gib)

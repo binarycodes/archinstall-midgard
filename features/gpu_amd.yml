@@ -1,0 +1,4 @@
+---
+# VA-API video decode for AMD is part of mesa
+packages:
+  - vulkan-radeon # Open-source Vulkan driver for AMD GPUs

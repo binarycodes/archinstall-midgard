@@ -1,0 +1,6 @@
+---
+packages:
+  - power-profiles-daemon # Makes power profiles handling available over D-Bus
+
+system_services:
+  - power-profiles-daemon

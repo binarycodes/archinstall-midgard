@@ -1,0 +1,7 @@
+---
+# installed in the chroot so the network works on first boot
+post_chroot:
+  - iwd # Internet Wireless Daemon
+
+system_services:
+  - iwd
