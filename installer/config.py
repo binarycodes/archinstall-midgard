@@ -39,7 +39,6 @@ PROJECTS_DIR = "projects"  # under the user's home; the install repo is cloned h
 @dataclass(frozen=True)
 class Config:
     username: str
-    hostname: str
     timezone: str
     locale: str
     keymap: str

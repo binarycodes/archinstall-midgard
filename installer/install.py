@@ -5,12 +5,13 @@ from pathlib import Path
 
 from rich.markup import escape
 
+from installer import hostname as hostnames
 from installer import memory, paths
 from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK, Config
 from installer.disk import DiskError, select_disk
 from installer.pacstrap import pacstrap
 from installer.partitions import create_partitions
-from installer.shell import echo, err_console, run
+from installer.shell import console, echo, err_console, run
 
 EFI_VARS = Path("/sys/firmware/efi")
 
@@ -23,9 +24,11 @@ def network_reachable() -> bool:
     return True
 
 
-def preflight() -> list[str]:
+def preflight(hostname: str) -> list[str]:
     """Reasons the install can't start; checked before a disk is even offered."""
     problems = []
+    if problem := hostnames.problem(hostname):
+        problems.append(problem)
     if not EFI_VARS.is_dir():
         problems.append("not booted in UEFI mode; boot entries are created with EFISTUB")
     if not network_reachable():
@@ -34,15 +37,16 @@ def preflight() -> list[str]:
     return problems
 
 
-def install(cfg: Config, data: dict) -> None:
+def install(cfg: Config, data: dict, hostname: str) -> None:
     # the manifest was validated when it was loaded
-    problems = preflight()
+    problems = preflight(hostname)
     if problems:
         err_console.print("[bold red]Cannot install:[/]")
         for problem in problems:
             err_console.print(f"  {escape(problem)}")
         sys.exit(1)
 
+    console.print(f"Installing as [bold]{hostname}[/]\n")
     swap_gib = memory.swap_gib(memory.total_gib())
     try:
         disk = select_disk(swap_gib)
@@ -56,7 +60,7 @@ def install(cfg: Config, data: dict) -> None:
     # the outer `uv run` exports VIRTUAL_ENV, which the inner uv would warn about
     env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
 
-    def chroot(step: str, user: str | None = None) -> None:
+    def chroot(step: str, *args: str, user: str | None = None) -> None:
         as_user = ("runuser", "-u", user, "--") if user else ()
         run(
             "arch-chroot",
@@ -68,6 +72,7 @@ def install(cfg: Config, data: dict) -> None:
             "--no-sync",
             "installer",
             step,
+            *args,
             env=env,
         )
 
@@ -84,7 +89,7 @@ def install(cfg: Config, data: dict) -> None:
     run("arch-chroot", MNT, *uv, "sync", "--frozen", env=env)
 
     echo("==> Running post-chroot setup...")
-    chroot("post-chroot")
+    chroot("post-chroot", "--hostname", hostname)
 
     echo("==> Creating boot entries...")
     chroot("boot-entries")

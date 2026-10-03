@@ -26,8 +26,8 @@ def configure_locale(cfg: Config) -> None:
     write_file("/etc/vconsole.conf", f"KEYMAP={cfg.keymap}\n")
 
 
-def configure_system(cfg: Config) -> None:
-    write_file("/etc/hostname", f"{cfg.hostname}\n")
+def configure_hostname(hostname: str) -> None:
+    write_file("/etc/hostname", f"{hostname}\n")
 
 
 def install_packages(data: dict) -> None:
@@ -48,11 +48,11 @@ def create_user(cfg: Config) -> None:
     run("passwd", cfg.username)
 
 
-def post_chroot(cfg: Config, data: dict) -> None:
+def post_chroot(cfg: Config, data: dict, hostname: str) -> None:
     copy_configs()
     configure_time(cfg)
     configure_locale(cfg)
-    configure_system(cfg)
+    configure_hostname(hostname)
     install_packages(data)
     enable_services()
     create_user(cfg)

@@ -7,7 +7,6 @@ from installer.validate import check_aur_packages, supported_locales
 
 VALID = {
     "username": "u",
-    "hostname": "h",
     "timezone": "Europe/Helsinki",
     "locale": "en_US.UTF-8",
     "keymap": "us",
@@ -54,6 +53,10 @@ def test_disk_is_not_a_manifest_key():
     assert validate.validate(with_(disk="/dev/sda")) == ["disk: unknown key"]
 
 
+def test_hostname_is_not_a_manifest_key():
+    assert validate.validate(with_(hostname="midgard")) == ["hostname: unknown key"]
+
+
 def test_every_problem_is_reported():
     data = with_(username=None, packages=["Bad"], gsettings=[])
     assert len(validate.validate(data)) == 3
@@ -61,12 +64,12 @@ def test_every_problem_is_reported():
 
 @pytest.mark.parametrize(
     ("value", "problem"),
-    [(None, "hostname: missing"), ("", "hostname: must be a non-empty string")],
+    [(None, "username: missing"), ("", "username: must be a non-empty string")],
 )
 def test_config_keys_required(value, problem):
-    data = with_(hostname=value)
+    data = with_(username=value)
     if value is None:
-        del data["hostname"]
+        del data["username"]
     assert validate.validate(data) == [problem]
 
 

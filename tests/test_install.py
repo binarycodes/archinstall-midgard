@@ -12,17 +12,19 @@ def ready(monkeypatch, tmp_path):
 
 
 def test_preflight_passes(ready):
-    assert install.preflight() == []
+    assert install.preflight("midgard") == []
 
 
 def test_preflight_needs_uefi(ready, monkeypatch, tmp_path):
     monkeypatch.setattr(install, "EFI_VARS", tmp_path / "missing")
-    assert install.preflight() == ["not booted in UEFI mode; boot entries are created with EFISTUB"]
+    assert install.preflight("midgard") == [
+        "not booted in UEFI mode; boot entries are created with EFISTUB"
+    ]
 
 
 def test_preflight_needs_network(ready, monkeypatch):
     monkeypatch.setattr(install, "network_reachable", lambda: False)
-    assert install.preflight() == [
+    assert install.preflight("midgard") == [
         "no network: cannot reach archlinux.org:443, which pacstrap needs"
     ]
 
@@ -36,10 +38,10 @@ def test_network_reachable_handles_errors(monkeypatch):
 
 
 def test_install_stops_before_disk_selection_when_preflight_fails(monkeypatch, capsys):
-    monkeypatch.setattr(install, "preflight", lambda: ["no network"])
+    monkeypatch.setattr(install, "preflight", lambda hostname: ["no network"])
     monkeypatch.setattr(install, "select_disk", lambda swap: pytest.fail("disk offered"))
     with pytest.raises(SystemExit) as exit:
-        install.install(None, {})
+        install.install(None, {}, "midgard")
     assert exit.value.code == 1
     assert capsys.readouterr().err == "Cannot install:\n  no network\n"
 
@@ -48,19 +50,19 @@ def test_install_stops_when_disk_selection_aborts(monkeypatch, capsys):
     def abort(swap):
         raise DiskError("not confirmed")
 
-    monkeypatch.setattr(install, "preflight", list)
+    monkeypatch.setattr(install, "preflight", lambda hostname: [])
     monkeypatch.setattr(install.memory, "total_gib", lambda: 16.0)
     monkeypatch.setattr(install, "select_disk", abort)
     monkeypatch.setattr(install, "create_partitions", lambda *a: pytest.fail("partitioned"))
     with pytest.raises(SystemExit) as exit:
-        install.install(None, {})
+        install.install(None, {}, "midgard")
     assert exit.value.code == 1
     assert capsys.readouterr().err == "\nInstall aborted: not confirmed\n"
 
 
 def test_install_partitions_the_selected_disk(monkeypatch):
     seen = []
-    monkeypatch.setattr(install, "preflight", list)
+    monkeypatch.setattr(install, "preflight", lambda hostname: [])
     monkeypatch.setattr(install.memory, "total_gib", lambda: 16.0)
     monkeypatch.setattr(install, "select_disk", lambda swap: ("disk", swap))
     monkeypatch.setattr(install, "create_partitions", lambda *args: seen.append(args))
@@ -72,7 +74,27 @@ def test_install_partitions_the_selected_disk(monkeypatch):
         raise Stop
 
     monkeypatch.setattr(install, "pacstrap", stop)
-    cfg = Config("u", "h", "UTC", "en_US.UTF-8", "us", "repo")
+    cfg = Config("u", "UTC", "en_US.UTF-8", "us", "repo")
     with pytest.raises(Stop):
-        install.install(cfg, {})
+        install.install(cfg, {}, "midgard")
     assert seen == [(("disk", 17), 17)]
+
+
+def test_preflight_checks_hostname(ready):
+    [problem] = install.preflight("Midgard")
+    assert problem.startswith("hostname 'Midgard' is not valid")
+
+
+def test_install_shows_hostname_and_passes_it_to_post_chroot(monkeypatch, capsys):
+    runs = []
+    monkeypatch.setattr(install, "preflight", lambda hostname: [])
+    monkeypatch.setattr(install.memory, "total_gib", lambda: 16.0)
+    monkeypatch.setattr(install, "select_disk", lambda swap: "disk")
+    monkeypatch.setattr(install, "create_partitions", lambda *args: None)
+    monkeypatch.setattr(install, "pacstrap", lambda *args: None)
+    monkeypatch.setattr(install, "run", lambda *args, **kwargs: runs.append(args))
+    cfg = Config("u", "UTC", "en_US.UTF-8", "us", "repo")
+    install.install(cfg, {}, "midgard")
+    assert "Installing as midgard" in capsys.readouterr().out
+    post_chroot = next(r for r in runs if "post-chroot" in r)
+    assert post_chroot[-3:] == ("post-chroot", "--hostname", "midgard")

@@ -110,7 +110,7 @@ def test_validate_lists_every_problem(tmp_path):
     result = CliRunner().invoke(cli.app, ["validate", str(path)])
     assert result.exit_code == 1
     assert "bogus: unknown key" in result.output
-    assert "hostname: missing" in result.output
+    assert "timezone: missing" in result.output
 
 
 def test_validate_reports_load_errors(tmp_path):
@@ -138,7 +138,7 @@ def test_steps_stop_on_an_invalid_manifest(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "cleanup", lambda data: pytest.fail("ran on an invalid manifest"))
     result = CliRunner().invoke(cli.app, ["cleanup"])
     assert result.exit_code == 1
-    assert "hostname: missing" in result.output
+    assert "timezone: missing" in result.output
 
 
 def test_check_d_is_a_dry_run(monkeypatch):
@@ -166,3 +166,29 @@ def test_check_d_reports_abort(monkeypatch):
     result = CliRunner().invoke(cli.app, ["check", "--disk"], input="1\nno\n")
     assert result.exit_code == 1
     assert "Disk selection aborted: not confirmed" in result.output
+
+
+@pytest.mark.parametrize("step", ["install", "post-chroot"])
+def test_hostname_is_required(monkeypatch, step):
+    monkeypatch.setattr(cli, "install", lambda *a: pytest.fail("ran"))
+    monkeypatch.setattr(cli, "post_chroot", lambda *a: pytest.fail("ran"))
+    result = CliRunner().invoke(cli.app, [step])
+    assert result.exit_code == 2
+    assert "--hostname" in result.output
+
+
+def test_install_passes_hostname(monkeypatch):
+    seen = []
+    monkeypatch.setattr(cli.install_cmd, "guard", lambda: None)
+    monkeypatch.setattr(cli, "install", lambda cfg, data, name: seen.append(name))
+    result = CliRunner().invoke(cli.app, ["install", "--hostname", "midgard"])
+    assert result.exit_code == 0, result.output
+    assert seen == ["midgard"]
+
+
+def test_post_chroot_rejects_invalid_hostname(monkeypatch):
+    monkeypatch.setattr(cli.post_chroot_cmd, "guard", lambda: None)
+    monkeypatch.setattr(cli, "post_chroot", lambda *a: pytest.fail("ran"))
+    result = CliRunner().invoke(cli.app, ["post-chroot", "--hostname", "Bad_Name"])
+    assert result.exit_code == 2
+    assert "is not valid" in result.output

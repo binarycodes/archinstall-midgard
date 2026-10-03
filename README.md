@@ -23,10 +23,12 @@ cd /root/archinstall-midgard
 Edit the settings at the top of `manifest.yml` to match your system, then run the installer as root:
 
 ```bash
-uv run installer install
+uv run installer install --hostname <name>
 ```
 
-It first checks that the machine booted in UEFI mode and is online, then lists the disks and asks which one to install to. It shows what is on the chosen disk and the new layout, and erases it only after you type the disk name to confirm. It will then partition the disk, install the base system, copy the repository into the new system, and from a chroot configure the system, create boot entries, install all packages, clone your projects and stow the dotfiles. You will be prompted to set passwords for root and your user during the process.
+The hostname is required and has no default: lowercase letters, digits and hyphens, not starting or ending with a hyphen, at most 63 characters.
+
+It first checks the hostname and that the machine booted in UEFI mode and is online, then lists the disks and asks which one to install to. It shows what is on the chosen disk and the new layout, and erases it only after you type the disk name to confirm. It will then partition the disk, install the base system, copy the repository into the new system, and from a chroot configure the system, create boot entries, install all packages, clone your projects and stow the dotfiles. You will be prompted to set passwords for root and your user during the process.
 
 The disk is always chosen this way; it can't be set in the manifest or on the command line. To walk through the selection without changing anything, run `uv run installer check -d`.
 

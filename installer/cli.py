@@ -7,6 +7,7 @@ import typer
 from rich.markup import escape
 
 from installer import cpu, disk, manifest, memory, paths
+from installer import hostname as hostnames
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
 from installer.cleanup import cleanup
@@ -75,9 +76,12 @@ def load() -> tuple[Config, dict]:
     return Config.from_manifest(data), data
 
 
+HostnameOption = Annotated[str, typer.Option("--hostname", help="hostname of the new system")]
+
+
 @command("install", "full install from the live ISO (root)", root=True)
-def install_cmd() -> None:
-    install(*load())
+def install_cmd(hostname: HostnameOption) -> None:
+    install(*load(), hostname)
 
 
 @command("packages", "install packages, restore configs, enable services", root=False)
@@ -124,8 +128,10 @@ def validate_cmd(
 
 
 @command("post-chroot", "install step: system configuration (root, in chroot)", root=True)
-def post_chroot_cmd() -> None:
-    post_chroot(*load())
+def post_chroot_cmd(hostname: HostnameOption) -> None:
+    if problem := hostnames.problem(hostname):
+        raise typer.BadParameter(problem, param_hint="--hostname")
+    post_chroot(*load(), hostname)
 
 
 @command("boot-entries", "install step: EFI boot entries (root, in chroot)", root=True)
