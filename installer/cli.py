@@ -5,7 +5,7 @@ from typing import Annotated
 
 import typer
 
-from installer import cpu, manifest, paths
+from installer import cpu, manifest, memory, paths
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
 from installer.cleanup import cleanup
@@ -104,10 +104,14 @@ def check_cmd(
     ucode: Annotated[
         bool, typer.Option("-u", "--ucode", help="detected microcode package")
     ] = False,
+    ram: Annotated[bool, typer.Option("-r", "--ram", help="detected RAM in GiB")] = False,
 ) -> None:
-    if not ucode:
-        raise typer.BadParameter("pass at least one check, e.g. -u")
-    typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
+    if not (ucode or ram):
+        raise typer.BadParameter("pass at least one check, e.g. -u or -r")
+    if ucode:
+        typer.echo(cpu.ucode() or "none (CPU vendor has no microcode package)")
+    if ram:
+        typer.echo(f"{memory.total_gib():.1f} GiB")
 
 
 def main() -> None:

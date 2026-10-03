@@ -66,3 +66,17 @@ def test_check_u_reports_no_ucode(monkeypatch):
 def test_check_without_options_fails():
     result = CliRunner().invoke(cli.app, ["check"])
     assert result.exit_code != 0
+
+
+def test_check_r_prints_ram(monkeypatch):
+    monkeypatch.setattr(cli.memory, "total_gib", lambda: 31.06)
+    result = CliRunner().invoke(cli.app, ["check", "-r"])
+    assert result.exit_code == 0, result.output
+    assert result.output == "31.1 GiB\n"
+
+
+def test_check_prints_each_requested_check_in_order(monkeypatch):
+    monkeypatch.setattr(cli.cpu, "ucode", lambda: "intel-ucode")
+    monkeypatch.setattr(cli.memory, "total_gib", lambda: 16.0)
+    result = CliRunner().invoke(cli.app, ["check", "-r", "-u"])
+    assert result.output == "intel-ucode\n16.0 GiB\n"
