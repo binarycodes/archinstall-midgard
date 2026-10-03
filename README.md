@@ -40,6 +40,7 @@ uv run installer packages   # install new packages, re-apply configs, enable ser
 uv run installer daily      # packages, then clone missing projects and re-stow dotfiles
 uv run installer cleanup    # show explicitly installed packages not in the manifest and offer to remove them
 uv run installer annotate   # refresh the package description comments in manifest.yml
+uv run installer validate   # check manifest.yml for mistakes; -p also looks every package up in the repos and AUR
 ```
 
 `uv run installer --help` lists every command, including the individual install steps.

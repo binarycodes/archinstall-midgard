@@ -58,7 +58,6 @@ packages:
   - fd # Simple, fast and user-friendly alternative to find
   - foot # Fast, lightweight, and minimalistic Wayland terminal emulator
   - freetype2 # Font rasterization library
-  - git # the fast distributed version control system
   - gnome-themes-extra # Extra GNOME themes (legacy HighContrast icon theme and index files for Adwaita)
   - go # Core compiler tools for the Go programming language
   - go-task # A task runner written in Go
@@ -83,7 +82,6 @@ packages:
   - nfs-utils # Support programs for Network File Systems
   - noto-fonts # Google Noto TTF fonts
   - openbsd-netcat # TCP/IP swiss army knife. OpenBSD variant
-  - openssh # SSH protocol implementation for remote login, command execution and file transfer
   - opentofu # Lets you declaratively manage your cloud infrastructure
   - otf-libertinus # Fonts based on Linux Libertine/Biolinum, with extended math support
   - otf-overpass # Open source web font family (Open Type Font)
@@ -101,7 +99,6 @@ packages:
   - qutebrowser # A keyboard-driven, vim-like browser based on Python and Qt
   - reflector # A Python 3 module and script to retrieve and filter the latest Pacman mirror list
   - ripgrep # A search tool that combines the usability of ag with the raw speed of grep
-  - rsync # A fast and versatile file copying tool for remote and local files
   - rtkit # Realtime Policy and Watchdog Daemon
   - shellcheck # Shell script analysis tool
   - slurp # Select a region in a Wayland compositor
@@ -121,7 +118,6 @@ packages:
   - ttf-caladea # A serif font family metric-compatible with Cambria font family
   - ttf-carlito # Google's Carlito font
   - ttf-dejavu # Font family based on the Bitstream Vera Fonts with a wider range of characters
-  - ttf-freefont
   - ttf-jetbrains-mono # Typeface for developers, by JetBrains
   - ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
   - ttf-liberation # Font family which aims at metric compatibility with Arial, Times New Roman, and Courier New
@@ -132,7 +128,6 @@ packages:
   - ttf-ubuntu-font-family # Ubuntu font family
   - unzip # For extracting and viewing files in .zip archives
   - usbutils # A collection of USB tools to query connected USB devices
-  - vim # Vi Improved, a highly configurable, improved version of the vi text editor
   - waybar # Highly customizable Wayland bar for Sway and Wlroots based compositors
   - wayland # A computer display server protocol
   - wev # A tool for debugging wayland events on a Wayland window, analagous to the X11 tool xev
@@ -143,7 +138,6 @@ packages:
   - xorg-xwayland # run X clients under wayland
   - yq # Command-line YAML, XML, TOML processor - jq wrapper for YAML/XML/TOML documents
   - yt-dlp # A youtube-dl fork with additional features and fixes
-  - zsh # A very advanced and programmable command interpreter (shell) for UNIX
   - zsh-autosuggestions # Fish-like autosuggestions for zsh
 
 pacman_keys:

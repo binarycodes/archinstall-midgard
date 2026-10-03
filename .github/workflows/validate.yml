@@ -40,5 +40,8 @@ jobs:
       - name: lint
         run: uv run ruff check
 
+      - name: validate manifest
+        run: uv run installer validate
+
       - name: test
         run: uv run pytest

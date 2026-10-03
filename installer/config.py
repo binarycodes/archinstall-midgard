@@ -29,10 +29,6 @@ USER_SHELL = "/usr/bin/zsh"
 PROJECTS_DIR = "projects"  # under the user's home; the install repo is cloned here
 
 
-class ConfigError(ValueError):
-    pass
-
-
 @dataclass(frozen=True)
 class Config:
     username: str
@@ -45,11 +41,8 @@ class Config:
 
     @classmethod
     def from_manifest(cls, data: dict) -> "Config":
-        names = [f.name for f in fields(cls)]
-        missing = [name for name in names if not data.get(name)]
-        if missing:
-            raise ConfigError("manifest is missing config keys: " + ", ".join(missing))
-        return cls(**{name: str(data[name]) for name in names})
+        # the manifest is validated on load, so every field is present
+        return cls(**{f.name: str(data[f.name]) for f in fields(cls)})
 
     def partition(self, number: int) -> str:
         # The kernel inserts "p" only when the disk name ends in a digit

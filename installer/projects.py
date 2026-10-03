@@ -10,7 +10,7 @@ def user_projects(cfg: Config, data: dict) -> None:
     projects_dir.mkdir(parents=True, exist_ok=True)
 
     for repo in manifest.section(data, "git_repos"):
-        name = repo.rsplit("/", 1)[-1].removesuffix(".git")
+        name = manifest.repo_name(repo)
         if (projects_dir / name).is_dir():
             echo(f"Skipping {name} (already exists)")
             continue

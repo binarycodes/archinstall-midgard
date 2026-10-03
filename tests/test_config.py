@@ -1,21 +1,7 @@
 import pytest
 
 from installer import manifest, paths
-from installer.config import Config, ConfigError
-
-
-def test_missing_keys_are_named():
-    with pytest.raises(ConfigError, match="disk"):
-        Config.from_manifest(
-            {
-                "username": "u",
-                "hostname": "h",
-                "timezone": "t",
-                "locale": "l",
-                "keymap": "k",
-                "install_repo": "r",
-            }
-        )
+from installer.config import Config
 
 
 def test_partitions_derive_from_disk():

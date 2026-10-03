@@ -40,10 +40,10 @@ def annotate_lines(lines: list[str], descriptions: dict[str, str]) -> list[str]:
     return result
 
 
-def describe(packages: list[str]) -> dict[str, str]:
+def describe(packages: list[str], flags: tuple[str, ...] = ("-Si", "-Qi")) -> dict[str, str]:
     env = {**os.environ, "LC_ALL": "C"}
     text = ""
-    for flag in ("-Si", "-Qi"):
+    for flag in flags:
         # the argument list is every package in the manifest, too long to be worth echoing
         text += output("pacman", flag, *packages, check=False, quiet=True, env=env)
     return parse_descriptions(text)

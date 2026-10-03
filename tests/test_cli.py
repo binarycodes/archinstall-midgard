@@ -1,10 +1,11 @@
+import pytest
 from typer.testing import CliRunner
 
 from installer import cli
 from installer.shell import require_root, require_user
 
 ROOT_COMMANDS = {"install", "post-chroot", "boot-entries"}
-ANY_USER_COMMANDS = {"check"}
+ANY_USER_COMMANDS = {"check", "validate"}
 
 
 def test_every_command_declares_a_guard():
@@ -21,6 +22,7 @@ def test_every_command_declares_a_guard():
 def test_command_runs_guard_before_step(monkeypatch):
     order = []
     monkeypatch.setattr(cli.manifest, "load", lambda path: {})
+    monkeypatch.setattr(cli, "validate", lambda data: [])
     monkeypatch.setattr(cli.Config, "from_manifest", classmethod(lambda cls, d: "cfg"))
     monkeypatch.setattr(cli, "cleanup", lambda data: order.append(("cleanup", data)))
     monkeypatch.setattr(cli.cleanup_cmd, "guard", lambda: order.append("guard"))
@@ -41,6 +43,7 @@ def test_h_is_short_for_help():
 def test_annotate_takes_an_optional_manifest_path(monkeypatch, tmp_path):
     seen = []
     monkeypatch.setattr(cli, "annotate", seen.append)
+    monkeypatch.setattr(cli, "load_manifest", lambda path: {})
     monkeypatch.setattr(cli.annotate_cmd, "guard", lambda: None)
 
     CliRunner().invoke(cli.app, ["annotate"])
@@ -87,3 +90,52 @@ def test_check_s_prints_swap_size(monkeypatch):
     result = CliRunner().invoke(cli.app, ["check", "-s"])
     assert result.exit_code == 0, result.output
     assert result.output == "33 GiB\n"
+
+
+def write_manifest(tmp_path, text: str):
+    path = tmp_path / "m.yml"
+    path.write_text(text)
+    return path
+
+
+def test_validate_ok_for_repo_manifest(monkeypatch):
+    monkeypatch.setattr(cli, "skipped_checks", list)
+    result = CliRunner().invoke(cli.app, ["validate"])
+    assert result.exit_code == 0, result.output
+    assert result.output == f"{cli.paths.MANIFEST}: ok\n"
+
+
+def test_validate_lists_every_problem(tmp_path):
+    path = write_manifest(tmp_path, "username: u\nbogus: 1\n")
+    result = CliRunner().invoke(cli.app, ["validate", str(path)])
+    assert result.exit_code == 1
+    assert "bogus: unknown key" in result.output
+    assert "hostname: missing" in result.output
+
+
+def test_validate_reports_load_errors(tmp_path):
+    path = write_manifest(tmp_path, "username: a\nusername: b\n")
+    result = CliRunner().invoke(cli.app, ["validate", str(path)])
+    assert result.exit_code == 1
+    assert "duplicate key 'username'" in result.output
+
+
+def test_validate_packages_runs_lookups(monkeypatch):
+    monkeypatch.setattr(cli, "skipped_checks", list)
+    monkeypatch.setattr(cli, "check_repo_packages", lambda data: ["packages: 'x' not found"])
+    monkeypatch.setattr(cli, "check_aur_packages", lambda data: [])
+    plain = CliRunner().invoke(cli.app, ["validate"])
+    checked = CliRunner().invoke(cli.app, ["validate", "-p"])
+    assert plain.exit_code == 0
+    assert checked.exit_code == 1
+    assert "packages: 'x' not found" in checked.output
+
+
+def test_steps_stop_on_an_invalid_manifest(monkeypatch, tmp_path):
+    path = write_manifest(tmp_path, "username: u\n")
+    monkeypatch.setattr(cli.paths, "MANIFEST", path)
+    monkeypatch.setattr(cli.cleanup_cmd, "guard", lambda: None)
+    monkeypatch.setattr(cli, "cleanup", lambda data: pytest.fail("ran on an invalid manifest"))
+    result = CliRunner().invoke(cli.app, ["cleanup"])
+    assert result.exit_code == 1
+    assert "hostname: missing" in result.output

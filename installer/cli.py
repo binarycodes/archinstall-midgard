@@ -17,6 +17,7 @@ from installer.packages import packages
 from installer.post_chroot import post_chroot
 from installer.projects import user_projects
 from installer.shell import require_root, require_user
+from installer.validate import check_aur_packages, check_repo_packages, skipped_checks, validate
 
 app = typer.Typer(
     name="installer",
@@ -49,8 +50,27 @@ def command(name: str, help: str, *, root: bool | None) -> Callable[[Callable], 
     return register
 
 
+def fail(path: Path, problems: list[str]) -> None:
+    typer.echo(f"{path}: {len(problems)} problem(s)", err=True)
+    for problem in problems:
+        typer.echo(f"  {problem}", err=True)
+    raise typer.Exit(1)
+
+
+def load_manifest(path: Path) -> dict:
+    """The manifest at path, or exit listing every problem with it."""
+    try:
+        data = manifest.load(path)
+    except manifest.ManifestError as e:
+        fail(path, [str(e)])
+    problems = validate(data)
+    if problems:
+        fail(path, problems)
+    return data
+
+
 def load() -> tuple[Config, dict]:
-    data = manifest.load(paths.MANIFEST)
+    data = load_manifest(paths.MANIFEST)
     return Config.from_manifest(data), data
 
 
@@ -76,7 +96,30 @@ def cleanup_cmd() -> None:
 
 @command("annotate", "rewrite package descriptions into the manifest", root=False)
 def annotate_cmd(manifest: Annotated[Path, typer.Argument()] = paths.MANIFEST) -> None:
+    load_manifest(manifest)
     annotate(manifest)
+
+
+@command("validate", "check the manifest for mistakes", root=None)
+def validate_cmd(
+    manifest: Annotated[Path, typer.Argument()] = paths.MANIFEST,
+    packages: Annotated[
+        bool,
+        typer.Option(
+            "-p",
+            "--packages",
+            help="also check every package exists in the repos or on the AUR (needs pacman, network)",
+        ),
+    ] = False,
+) -> None:
+    data = load_manifest(manifest)
+    for note in skipped_checks():
+        typer.echo(f"note: {note}", err=True)
+    if packages:
+        problems = check_repo_packages(data) + check_aur_packages(data)
+        if problems:
+            fail(manifest, problems)
+    typer.echo(f"{manifest}: ok")
 
 
 @command("post-chroot", "install step: system configuration (root, in chroot)", root=True)
