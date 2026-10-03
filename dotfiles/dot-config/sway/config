@@ -129,7 +129,7 @@ exec swayidle -w \
     resume 'swaymsg "output * power on"' \
     before-sleep "swaylock -f -i $HOME/wallpapers/current.jpg"
 # set keyboard backlight
-exec  brightnessctl -d tpacpi::kbd_backlight s 1
+exec brightnessctl -q -d '*::kbd_backlight' s 1
 # wallpaper
 exec awww-daemon
 
