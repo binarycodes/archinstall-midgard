@@ -6,6 +6,8 @@ set $browser $BROWSER
 set $menu "wofi -G --show run"
 set $term $TERMINAL
 set $editor $VISUAL
+set $wallpaper $HOME/wallpapers/archlinux-wallpaper-4k.png
+set $swaylock "swaylock -f -i $HOME/wallpapers/access-denied-matrix-4k.png"
 
 # appearance
 default_border pixel 2
@@ -43,7 +45,7 @@ bindsym $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaymsg exit
-bindsym $mod+Escape exec swaylock -c 282A36
+bindsym $mod+Escape exec $swaylock
 
 
 # focus
@@ -124,17 +126,21 @@ bar {
 # autostart
 exec mako
 exec swayidle -w \
-    timeout 300 "swaylock -f -i $HOME/wallpapers/current.jpg" \
+    timeout 300 "$swaylock" \
     timeout 600 'swaymsg "output * power off"' \
     resume 'swaymsg "output * power on"' \
-    before-sleep "swaylock -f -i $HOME/wallpapers/current.jpg"
+    before-sleep "$swaylock"
 # set keyboard backlight
 exec brightnessctl -q -d '*::kbd_backlight' s 1
 # wallpaper
 exec awww-daemon
+# fallback for a fresh install, when awww has nothing cached to restore
+exec sh -c 'until awww query >/dev/null 2>&1; do sleep 0.1; done; awww restore; awww query | grep -q "image:" || awww img $wallpaper'
 
 # window rules
 for_window {
   [app_id="emacs"] move to workspace 3, focus
+  [app_id="zen"] move to workspace 2, focus
   [app_id="org.qutebrowser.qutebrowser"] move to workspace 2, focus
+  [app_id="Bitwarden"] move to workspace 9, focus
 }

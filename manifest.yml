@@ -97,6 +97,7 @@ packages:
   - slurp # Select a region in a Wayland compositor
   - sof-firmware # Sound Open Firmware
   - solaar # Linux device manager for a wide range of Logitech devices
+  - sops # Editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats
   - stow # Manage installation of multiple softwares in the same directory tree
   - sway # Tiling Wayland compositor and replacement for the i3 window manager
   - swaybg # Wallpaper tool for Wayland compositors
