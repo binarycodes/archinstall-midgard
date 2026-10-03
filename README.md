@@ -8,7 +8,6 @@ Custom Arch Linux installation scripts for a ThinkPad setup. Uses EFISTUB (no bo
 - `installer/` -- the installer and maintenance tool, a Python package run with `uv`
 - `config/` -- system config files mirroring the filesystem layout (copied to `/` during install)
 - `dotfiles/` -- user dotfiles, stowed into `$HOME` after install
-- `scripts/` -- the original shell scripts, kept for reference
 
 ## Usage
 

@@ -2,6 +2,7 @@ version: '3'
 
 vars:
   NOTIFY_TITLE: System Maintenance
+  INSTALLER: uv run --directory $HOME/projects/archinstall-midgard installer
 
 tasks:
   default:
@@ -12,18 +13,18 @@ tasks:
       - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Update complete"
     silent: true
   daily:
-    desc: run daily maintenance script
+    desc: run daily maintenance
     cmds:
-      - $HOME/projects/archinstall-midgard/scripts/daily.sh
-      - $HOME/projects/archinstall-midgard/scripts/cleanup_packages.sh
+      - "{{.INSTALLER}} daily"
+      - "{{.INSTALLER}} cleanup"
       - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Daily maintenance complete"
     silent: true
   clean:
-    desc: run clean up scripts
+    desc: run package clean up
     cmds:
       - sudo paccache -ruk0
       - sudo paccache -rk1
-      - $HOME/projects/archinstall-midgard/scripts/cleanup_packages.sh
+      - "{{.INSTALLER}} cleanup"
       - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Package clean-up complete"
     silent: true
   check:
