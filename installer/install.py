@@ -155,6 +155,9 @@ def install(hostname: str, profile: str | None) -> None:
     echo("==> Running user customizations...")
     chroot("customize", user=cfg.username)
 
+    # gpg's dirmngr reads resolv.conf directly; arch-chroot bind-mounts over it, so link from outside
+    run("ln", "-sf", "../run/systemd/resolve/stub-resolv.conf", f"{MNT}/etc/resolv.conf")
+
     run("rm", "-rf", str(target))
 
     echo("==> Install complete. Reboot and enjoy.")

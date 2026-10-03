@@ -157,6 +157,13 @@ def test_user_chroot_steps_drop_roots_session(steps, monkeypatch):
             assert (name in step[-1]["env"]) is not as_user
 
 
+def test_install_points_resolv_conf_at_resolved_after_the_last_chroot_step(steps):
+    install.install("midgard", "gaming")
+    link = ("ln", "-sf", "../run/systemd/resolve/stub-resolv.conf", "/mnt/etc/resolv.conf", {})
+    last_chroot = max(i for i, s in enumerate(steps) if s[0] == "arch-chroot")
+    assert steps.index(link) > last_chroot
+
+
 def test_preflight_checks_packages_and_repos(ready, monkeypatch):
     monkeypatch.setattr(install, "check_repo_packages", lambda data: ["packages: 'x' missing"])
     monkeypatch.setattr(install, "check_aur_packages", lambda data: ["aur_packages: 'y' missing"])
