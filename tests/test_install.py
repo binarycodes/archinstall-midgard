@@ -146,6 +146,17 @@ def test_chroot_steps_never_wait_for_git(steps):
         assert step[-1]["env"]["GIT_SSH_COMMAND"] == "ssh -o BatchMode=yes"
 
 
+def test_user_chroot_steps_drop_roots_session(steps, monkeypatch):
+    monkeypatch.setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/0/bus")
+    monkeypatch.setenv("XDG_RUNTIME_DIR", "/run/user/0")
+    install.install("midgard", "gaming")
+    chroot_steps = [s for s in steps if s[0] == "arch-chroot" and "installer" in s]
+    for step in chroot_steps:
+        as_user = "runuser" in step
+        for name in install.ROOT_SESSION:
+            assert (name in step[-1]["env"]) is not as_user
+
+
 def test_preflight_checks_packages_and_repos(ready, monkeypatch):
     monkeypatch.setattr(install, "check_repo_packages", lambda data: ["packages: 'x' missing"])
     monkeypatch.setattr(install, "check_aur_packages", lambda data: ["aur_packages: 'y' missing"])
