@@ -10,6 +10,9 @@ from rich.console import Console
 console = Console(highlight=False)
 err_console = Console(stderr=True, highlight=False)
 
+# set from the CLI's --verbose; commands and file writes are echoed only then
+verbose = False
+
 
 def echo(message: str) -> None:
     print(message, flush=True)
@@ -18,7 +21,7 @@ def echo(message: str) -> None:
 def run(
     *args: str, check: bool = True, capture: bool = False, quiet: bool = False, **kwargs
 ) -> subprocess.CompletedProcess:
-    if not quiet:
+    if verbose and not quiet:
         print("+", shlex.join(args), file=sys.stderr, flush=True)
     return subprocess.run(args, check=check, text=True, capture_output=capture, **kwargs)
 
@@ -28,12 +31,14 @@ def output(*args: str, check: bool = True, quiet: bool = False, **kwargs) -> str
 
 
 def write_file(path: Path | str, text: str) -> None:
-    print("+ write", path, file=sys.stderr, flush=True)
+    if verbose:
+        print("+ write", path, file=sys.stderr, flush=True)
     Path(path).write_text(text)
 
 
 def append_file(path: Path | str, text: str) -> None:
-    print("+ append", path, file=sys.stderr, flush=True)
+    if verbose:
+        print("+ append", path, file=sys.stderr, flush=True)
     with open(path, "a") as f:
         f.write(text)
 

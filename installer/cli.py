@@ -6,7 +6,7 @@ from typing import Annotated
 import typer
 from rich.markup import escape
 
-from installer import cpu, disk, hardware, machine, memory, paths, profiles
+from installer import cpu, disk, hardware, machine, memory, paths, profiles, shell
 from installer import hostname as hostnames
 from installer.annotate import annotate
 from installer.boot import create_boot_entries
@@ -28,6 +28,15 @@ app = typer.Typer(
     add_completion=False,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
+
+
+@app.callback()
+def options(
+    verbose: Annotated[
+        bool, typer.Option("-v", "--verbose", help="print every command before running it")
+    ] = False,
+) -> None:
+    shell.verbose = verbose
 
 
 def allow_any() -> None:

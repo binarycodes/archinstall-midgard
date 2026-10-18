@@ -69,6 +69,15 @@ def test_check_u_prints_detected_ucode(monkeypatch):
     assert result.output == "amd-ucode\n"
 
 
+@pytest.mark.parametrize(("args", "expected"), [([], False), (["-v"], True), (["--verbose"], True)])
+def test_verbose_is_off_unless_asked(monkeypatch, args, expected):
+    monkeypatch.setattr(cli.shell, "verbose", not expected)
+    monkeypatch.setattr(cli.cpu, "ucode", lambda: "amd-ucode")
+    result = CliRunner().invoke(cli.app, [*args, "check", "-u"])
+    assert result.exit_code == 0, result.output
+    assert cli.shell.verbose is expected
+
+
 def test_check_u_reports_no_ucode(monkeypatch):
     monkeypatch.setattr(cli.cpu, "ucode", lambda: None)
     result = CliRunner().invoke(cli.app, ["check", "--ucode"])

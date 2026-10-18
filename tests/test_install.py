@@ -146,6 +146,16 @@ def test_chroot_steps_never_wait_for_git(steps):
         assert step[-1]["env"]["GIT_SSH_COMMAND"] == "ssh -o BatchMode=yes"
 
 
+@pytest.mark.parametrize("verbose", [False, True])
+def test_chroot_steps_inherit_verbose(steps, monkeypatch, verbose):
+    monkeypatch.setattr(install.shell, "verbose", verbose)
+    install.install("midgard", "gaming")
+    chroot_steps = [s for s in steps if s[0] == "arch-chroot" and "installer" in s]
+    assert chroot_steps
+    for step in chroot_steps:
+        assert ("--verbose" in step) is verbose
+
+
 def test_user_chroot_steps_drop_roots_session(steps, monkeypatch):
     monkeypatch.setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/0/bus")
     monkeypatch.setenv("XDG_RUNTIME_DIR", "/run/user/0")
