@@ -41,8 +41,18 @@ setopt HIST_SAVE_NO_DUPS
 setopt HIST_EXPIRE_DUPS_FIRST
 
 # set up prompt
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' unstagedstr ' ●'
+zstyle ':vcs_info:*' stagedstr ' +'
+zstyle ':vcs_info:git:*' formats       '%K{#5E81AC}%F{#ECEFF4}  %b%u%c '
+zstyle ':vcs_info:git:*' actionformats '%K{#BF616A}%F{#ECEFF4}  %b|%a%u%c ' # during rebase/merge
+precmd_functions+=(vcs_info) # refresh before each prompt
+setopt prompt_subst # expand ${vcs_info_msg_0_} in PROMPT
+
 NEWLINE=$'\n'
-PROMPT="%K{#2E3440}%F{#E5E9F0}%D{%H:%M} %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ %f%k ❯ "
+PROMPT='%K{#2E3440}%F{#E5E9F0}%D{%H:%M} %K{#3b4252}%F{#ECEFF4} %n %K{#4c566a} %~ ${vcs_info_msg_0_}%f%k ❯ '
 
 # autosuggestions - but not in tty sessions
 # requires zsh-autosuggestions
