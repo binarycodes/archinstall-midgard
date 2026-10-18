@@ -70,6 +70,8 @@ uv run installer install --hostname <name> [--profile <profile>]
 
 `--hostname` is required. `--profile` is optional; to list the available profiles, run `uv run installer check -p`.
 
+To print every command the installer runs, put `-v` before the subcommand, e.g. `uv run installer -v install ...`; it applies to every subcommand.
+
 
 ## Maintenance
 

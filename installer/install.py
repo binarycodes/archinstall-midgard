@@ -5,7 +5,7 @@ from pathlib import Path
 
 from rich.markup import escape
 
-from installer import hardware, machine, manifest, memory, metadata, paths
+from installer import hardware, machine, manifest, memory, metadata, paths, shell
 from installer import hostname as hostnames
 from installer.config import CHROOT_REPO_DIR, MNT, NETWORK_CHECK
 from installer.pacstrap import pacstrap
@@ -118,6 +118,7 @@ def install(hostname: str, profile: str | None) -> None:
             "--frozen",
             "--no-sync",
             "installer",
+            *(("--verbose",) if shell.verbose else ()),
             step,
             *args,
             env=step_env,
