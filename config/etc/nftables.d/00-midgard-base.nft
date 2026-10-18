@@ -1,0 +1,142 @@
+# Loaded by /etc/nftables.conf after it removed the previous copy of this table.
+# Holds every order-sensitive rule; other drop-ins only add set elements or
+# rules in the *-dropins chains, which always run at a fixed point.
+
+# A table groups chains and sets. "inet" means one table for both IPv4 and IPv6,
+# unlike OPNsense where every rule picks IPv4, IPv6 or both. The name is free;
+# "type filter" on each chain is what makes it filter packets.
+table inet midgard-filter {
+    # Comparable to an OPNsense port alias: rules match against the set, and you
+    # change its members without touching the rules.
+    # Covers host ports and published container ports alike.
+    set midgard-tcp-open {
+        # Members are port numbers.
+        type inet_service
+        # Allows ranges such as 27031-27036 as well as single ports.
+        flags interval
+    }
+
+    # Same as midgard-tcp-open, for UDP ports.
+    set midgard-udp-open {
+        # Members are port numbers.
+        type inet_service
+        # Allows ranges such as 27031-27036 as well as single ports.
+        flags interval
+    }
+
+    # Ports never reachable from outside, whatever listens on them: host
+    # services, rootless containers, rootful podman or Docker published ports.
+    # Wins over midgard-tcp-open.
+    set midgard-tcp-blocked {
+        # Members are port numbers.
+        type inet_service
+        # Allows ranges such as 27031-27036 as well as single ports.
+        flags interval
+    }
+
+    # Same as midgard-tcp-blocked, for UDP ports.
+    set midgard-udp-blocked {
+        # Members are port numbers.
+        type inet_service
+        # Allows ranges such as 27031-27036 as well as single ports.
+        flags interval
+    }
+
+    # Every incoming packet passes here first, before the kernel decides whether
+    # it goes to input (this machine) or forward (a container). Connections made
+    # from this machine itself (e.g. ssh localhost) take the output path instead.
+    chain midgard-prerouting {
+        # Priority raw (-300) runs before conntrack (-200) and DNAT (-100), so the
+        # drop is cheap and sees the original port before anything rewrites it.
+        # "policy accept" opens nothing: it only passes the packet on to input or
+        # forward, where their own drop policies still apply.
+        type filter hook prerouting priority raw; policy accept;
+
+        # Blocklisted TCP ports, dropped silently.
+        tcp dport @midgard-tcp-blocked drop
+        # Same for UDP.
+        udp dport @midgard-udp-blocked drop
+    }
+
+    # Traffic addressed to this machine itself. Like OPNsense's rules on an
+    # interface, evaluated top to bottom, the first accept or drop wins.
+    chain midgard-input {
+        # Attach to the kernel's input hook. "policy drop" is the default action
+        # when no rule matches: OPNsense's implicit "block all" at the bottom.
+        type filter hook input priority filter; policy drop;
+
+        # Packets the connection tracker cannot place in any valid connection.
+        ct state invalid drop
+        # Stateful pass: replies to connections this machine started, and helper
+        # flows tied to them. OPNsense does this implicitly for every pass rule.
+        ct state { established, related } accept
+        # Loopback: programs on this machine talking to each other via localhost.
+        iif lo accept
+
+        # Ping, "port unreachable", "packet too big" (path MTU) and, for IPv6,
+        # neighbour discovery and router adverts. IPv6 breaks without ICMPv6.
+        meta l4proto { icmp, ipv6-icmp } accept
+
+        # DHCPv6 replies. The request goes to a multicast address, so conntrack
+        # does not see the unicast reply as related and the stateful rule misses it.
+        ip6 saddr fe80::/10 udp sport 547 udp dport 546 accept
+        # mDNS (avahi, AirPlay speaker discovery) over IPv4. Answers go to the
+        # multicast group, again not seen as replies by conntrack.
+        udp dport 5353 ip daddr 224.0.0.251 accept
+        # mDNS over IPv6.
+        udp dport 5353 ip6 daddr ff02::fb accept
+
+        # Ports in the open sets above.
+        tcp dport @midgard-tcp-open accept
+        # Same for UDP.
+        udp dport @midgard-udp-open accept
+
+        # Rules from other drop-ins. Unmatched packets come back here.
+        jump midgard-input-dropins
+
+        # Answer unsolicited packets addressed to this machine with an error, so
+        # the sender fails fast (OPNsense "reject"). Rate-limited, so it cannot be
+        # used to make us flood errors; anything beyond the limit, plus broadcast
+        # and multicast, falls through to the silent drop policy (OPNsense "block").
+        pkttype host limit rate 5/second reject with icmpx type admin-prohibited
+    }
+
+    # Traffic passing through this machine to somewhere else, i.e. routed. On a
+    # workstation that is only container traffic. Rootful podman publishes a port
+    # like an OPNsense port forward: it rewrites the destination (DNAT) to the
+    # container, so those packets arrive here and never reach the input chain.
+    chain midgard-forward {
+        # Attach to the kernel's forward hook, blocking by default. A drop in any
+        # chain is final, so this also overrides podman's own accept rules.
+        type filter hook forward priority filter; policy drop;
+
+        # Packets conntrack cannot place in any valid connection.
+        ct state invalid drop
+        # Replies in both directions for connections already allowed.
+        ct state { established, related } accept
+        # Anything leaving a container: internet access and container-to-container.
+        # netavark names its bridges podman0, podman1, ...
+        iifname "podman*" accept
+
+        # Inbound to a published TCP container port: the packet leaves through a
+        # podman bridge, its destination was rewritten (DNAT), and the port it was
+        # originally sent to, before rewriting, is in midgard-tcp-open.
+        meta l4proto tcp oifname "podman*" ct status dnat ct original proto-dst @midgard-tcp-open accept
+        # Same for UDP.
+        meta l4proto udp oifname "podman*" ct status dnat ct original proto-dst @midgard-udp-open accept
+
+        # Rules from other drop-ins. Unmatched packets come back and hit the policy.
+        jump midgard-forward-dropins
+    }
+
+    # Regular chains: no hook, so the kernel never calls them directly; they run
+    # only through the jumps above, at a fixed point before the final reject or
+    # policy. Drop-ins append to them, so their file order cannot bypass the
+    # base rules.
+    chain midgard-input-dropins {
+    }
+
+    # Same for traffic to containers. Addresses here are already rewritten by DNAT.
+    chain midgard-forward-dropins {
+    }
+}
