@@ -4,6 +4,9 @@ vars:
   NOTIFY_TITLE: System Maintenance
   REPO: $HOME/projects/archinstall-midgard
   INSTALLER: uv run --directory {{.REPO}} installer
+  NFT_TABLE: inet midgard-filter
+  # per log chain, so a port scan cannot flood the journal
+  NFT_LOG_RATE: 10/second
 
 tasks:
   default:
@@ -27,6 +30,32 @@ tasks:
       - sudo rsync -a --delete --no-owner --no-group {{.REPO}}/config/etc/nftables.d/ /etc/nftables.d/
       - sudo systemctl reload-or-restart nftables
       - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Firewall reloaded"
+    silent: true
+  firewall-log-on:
+    desc: log dropped packets to the kernel log until the next firewall reload or reboot
+    cmds:
+      # flushing first keeps a second run from adding duplicate log rules
+      - |
+        sudo nft '
+          flush chain {{.NFT_TABLE}} midgard-log-input;
+          flush chain {{.NFT_TABLE}} midgard-log-forward;
+          flush chain {{.NFT_TABLE}} midgard-log-blocked;
+          add rule {{.NFT_TABLE}} midgard-log-input pkttype host limit rate {{.NFT_LOG_RATE}} log prefix "midgard-input-drop: " level info;
+          add rule {{.NFT_TABLE}} midgard-log-forward limit rate {{.NFT_LOG_RATE}} log prefix "midgard-forward-drop: " level info;
+          add rule {{.NFT_TABLE}} midgard-log-blocked limit rate {{.NFT_LOG_RATE}} log prefix "midgard-blocked-drop: " level info
+        '
+      - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Firewall logging on"
+    silent: true
+  firewall-log-off:
+    desc: stop logging dropped packets
+    cmds:
+      - |
+        sudo nft '
+          flush chain {{.NFT_TABLE}} midgard-log-input;
+          flush chain {{.NFT_TABLE}} midgard-log-forward;
+          flush chain {{.NFT_TABLE}} midgard-log-blocked
+        '
+      - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Firewall logging off"
     silent: true
   clean:
     desc: run package clean up
