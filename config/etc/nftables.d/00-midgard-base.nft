@@ -52,10 +52,15 @@ table inet midgard-filter {
         # forward, where their own drop policies still apply.
         type filter hook prerouting priority raw; policy accept;
 
-        # Blocklisted TCP ports, dropped silently.
-        tcp dport @midgard-tcp-blocked drop
+        # Blocklisted ports pass the logging chain first. A jump comes back,
+        # so the drop below still follows.
+        tcp dport @midgard-tcp-blocked jump midgard-log-blocked
         # Same for UDP.
-        udp dport @midgard-udp-blocked drop
+        udp dport @midgard-udp-blocked jump midgard-log-blocked
+        # Blocklisted TCP ports, counted and dropped silently.
+        tcp dport @midgard-tcp-blocked counter drop
+        # Same for UDP.
+        udp dport @midgard-udp-blocked counter drop
     }
 
     # Traffic addressed to this machine itself. Like OPNsense's rules on an
@@ -66,7 +71,9 @@ table inet midgard-filter {
         type filter hook input priority filter; policy drop;
 
         # Packets the connection tracker cannot place in any valid connection.
-        ct state invalid drop
+        # "counter" keeps a running packet and byte count, shown by
+        # `nft list table inet midgard-filter`.
+        ct state invalid counter drop
         # Stateful pass: replies to connections this machine started, and helper
         # flows tied to them. OPNsense does this implicitly for every pass rule.
         ct state { established, related } accept
@@ -94,11 +101,16 @@ table inet midgard-filter {
         # Rules from other drop-ins. Unmatched packets come back here.
         jump midgard-input-dropins
 
+        # Everything from here on is blocked; log it while logging is on.
+        jump midgard-log-input
+
         # Answer unsolicited packets addressed to this machine with an error, so
         # the sender fails fast (OPNsense "reject"). Rate-limited, so it cannot be
         # used to make us flood errors; anything beyond the limit, plus broadcast
         # and multicast, falls through to the silent drop policy (OPNsense "block").
-        pkttype host limit rate 5/second reject with icmpx type admin-prohibited
+        pkttype host limit rate 5/second counter reject with icmpx type admin-prohibited
+        # Counts what falls through to the drop policy, which has no counter of its own.
+        counter
     }
 
     # Traffic passing through this machine to somewhere else, i.e. routed. On a
@@ -111,7 +123,7 @@ table inet midgard-filter {
         type filter hook forward priority filter; policy drop;
 
         # Packets conntrack cannot place in any valid connection.
-        ct state invalid drop
+        ct state invalid counter drop
         # Replies in both directions for connections already allowed.
         ct state { established, related } accept
         # Anything leaving a container: internet access and container-to-container.
@@ -127,6 +139,11 @@ table inet midgard-filter {
 
         # Rules from other drop-ins. Unmatched packets come back and hit the policy.
         jump midgard-forward-dropins
+
+        # Everything from here on is blocked; log it while logging is on.
+        jump midgard-log-forward
+        # Counts what falls through to the drop policy.
+        counter
     }
 
     # Regular chains: no hook, so the kernel never calls them directly; they run
@@ -138,5 +155,19 @@ table inet midgard-filter {
 
     # Same for traffic to containers. Addresses here are already rewritten by DNAT.
     chain midgard-forward-dropins {
+    }
+
+    # Logging switches, jumped to just before each drop. Empty means logging is
+    # off and the jump costs next to nothing. The firewall-log-on task fills them
+    # at runtime; any reload or reboot empties them again.
+    chain midgard-log-input {
+    }
+
+    # Same for traffic to containers.
+    chain midgard-log-forward {
+    }
+
+    # Same for blocklisted ports.
+    chain midgard-log-blocked {
     }
 }
