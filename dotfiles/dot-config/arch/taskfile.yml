@@ -2,7 +2,8 @@ version: '3'
 
 vars:
   NOTIFY_TITLE: System Maintenance
-  INSTALLER: uv run --directory $HOME/projects/archinstall-midgard installer
+  REPO: $HOME/projects/archinstall-midgard
+  INSTALLER: uv run --directory {{.REPO}} installer
 
 tasks:
   default:
@@ -17,7 +18,15 @@ tasks:
     cmds:
       - "{{.INSTALLER}} daily"
       - "{{.INSTALLER}} cleanup"
+      - task: firewall
       - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Daily maintenance complete"
+    silent: true
+  firewall:
+    desc: sync nftables drop-ins and reload the firewall
+    cmds:
+      - sudo rsync -a --delete --no-owner --no-group {{.REPO}}/config/etc/nftables.d/ /etc/nftables.d/
+      - sudo systemctl reload-or-restart nftables
+      - notify-send -t 5000 "{{.NOTIFY_TITLE}}" "Firewall reloaded"
     silent: true
   clean:
     desc: run package clean up

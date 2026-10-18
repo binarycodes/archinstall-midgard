@@ -154,7 +154,7 @@ aur_packages:
 system_services:
   - avahi-daemon
   - greetd
-  - iptables
+  - nftables
   - reflector
   - rtkit-daemon
 
