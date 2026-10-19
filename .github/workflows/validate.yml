@@ -8,6 +8,8 @@ on:
       - "manifest.yml"
       - "profiles/**"
       - "features/**"
+      - "config/etc/nftables.conf"
+      - "config/etc/nftables.d/**"
       - "pyproject.toml"
       - "uv.lock"
       - ".github/workflows/validate.yml"
@@ -34,11 +36,31 @@ jobs:
       - name: test
         run: uv run pytest
 
+  nftables:
+    runs-on: ubuntu-latest
+    # arch's nft, so the parser matches the target; NET_ADMIN because `nft -c` dry-runs against the kernel
+    container:
+      image: archlinux:latest
+      options: --cap-add=NET_ADMIN
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: install
+        run: pacman -Syu --noconfirm nftables
+
+      # nftables.conf includes /etc/nftables.d by absolute path
+      - name: check ruleset
+        run: |
+          cp config/etc/nftables.conf /etc/nftables.conf
+          mkdir -p /etc/nftables.d
+          cp config/etc/nftables.d/*.nft /etc/nftables.d/
+          nft -c -f /etc/nftables.conf
+
   # the single required status check for PRs; add every new job to `needs`
   gate:
     name: all checks passed
     if: always()
-    needs: [python]
+    needs: [python, nftables]
     runs-on: ubuntu-latest
     steps:
       - name: fail if any job failed, was cancelled or skipped
