@@ -39,8 +39,11 @@ table inet midgard-filter {
     chain midgard-input {
         type filter hook input priority filter; policy drop;
 
-        ct state invalid counter drop
-        ct state { established, related } accept
+        ct state vmap {
+            invalid : drop,
+            established : accept,
+            related : accept
+        }
         iif lo accept
 
         meta l4proto { icmp, ipv6-icmp } accept
@@ -69,8 +72,11 @@ table inet midgard-filter {
         # A drop is final across chains, so this also overrides netavark's accepts.
         type filter hook forward priority filter; policy drop;
 
-        ct state invalid counter drop
-        ct state { established, related } accept
+        ct state vmap {
+            invalid : drop,
+            established : accept,
+            related : accept
+        }
         iifname "podman*" accept
 
         # Match the port as originally addressed, before DNAT rewrote it.
