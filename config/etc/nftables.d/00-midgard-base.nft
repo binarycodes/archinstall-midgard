@@ -3,24 +3,15 @@
 
 table inet midgard-filter {
     # Matched for host ports and published container ports alike.
-    set midgard-tcp-open {
-        type inet_service
+    # Elements look like `tcp . 22` or `udp . 27031-27036`.
+    set midgard-open {
+        type inet_proto . inet_service
         flags interval
     }
 
-    set midgard-udp-open {
-        type inet_service
-        flags interval
-    }
-
-    # Wins over the open sets, for host and container ports.
-    set midgard-tcp-blocked {
-        type inet_service
-        flags interval
-    }
-
-    set midgard-udp-blocked {
-        type inet_service
+    # Wins over midgard-open, for host and container ports.
+    set midgard-blocked {
+        type inet_proto . inet_service
         flags interval
     }
 
@@ -29,11 +20,8 @@ table inet midgard-filter {
         # traffic too, and cuts established connections.
         type filter hook prerouting priority raw; policy accept;
 
-        tcp dport @midgard-tcp-blocked jump midgard-log-blocked
-        udp dport @midgard-udp-blocked jump midgard-log-blocked
-
-        tcp dport @midgard-tcp-blocked counter drop
-        udp dport @midgard-udp-blocked counter drop
+        meta l4proto . th dport @midgard-blocked jump midgard-log-blocked
+        meta l4proto . th dport @midgard-blocked counter drop
     }
 
     chain midgard-input {
@@ -53,11 +41,9 @@ table inet midgard-filter {
         udp dport 5353 ip daddr 224.0.0.251 accept
         udp dport 5353 ip6 daddr ff02::fb accept
 
-        tcp dport @midgard-tcp-open accept
-        udp dport @midgard-udp-open accept
+        meta l4proto . th dport @midgard-open accept
 
         jump midgard-input-dropins
-
         jump midgard-log-input
 
         # Rate-limited so we cannot be used to flood errors; the rest, plus
@@ -80,12 +66,11 @@ table inet midgard-filter {
         iifname "podman*" accept
 
         # Match the port as originally addressed, before DNAT rewrote it.
-        meta l4proto tcp oifname "podman*" ct status dnat ct original proto-dst @midgard-tcp-open accept
-        meta l4proto udp oifname "podman*" ct status dnat ct original proto-dst @midgard-udp-open accept
+        oifname "podman*" ct status dnat meta l4proto . ct original proto-dst @midgard-open accept
 
         jump midgard-forward-dropins
-
         jump midgard-log-forward
+
         counter
     }
 
