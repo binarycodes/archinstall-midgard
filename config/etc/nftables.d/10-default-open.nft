@@ -1,0 +1,3 @@
+add element inet midgard-filter midgard-open {
+    tcp . 22,
+}
